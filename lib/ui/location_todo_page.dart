@@ -25,6 +25,7 @@ class _LocationTodoState extends State<LocationTodo> {
       appBar: AppBar(
         title: Text('LTD Inbox'),
       ),
+      //리스트 초기화 임시버튼
       floatingActionButton: FloatingActionButton(
         onPressed:(){
          setState(() {
@@ -47,17 +48,19 @@ class _LocationTodoState extends State<LocationTodo> {
               children: tasks
                   .map((e) => Card(
                     child: CheckboxListTile(
+                      //체크박스 타일 위치 바꾸기
                           controlAffinity: ListTileControlAffinity.leading,
-                          // secondary: e.favorite == false ?Icon(Icons.star_border) :Icon(Icons.star),
                           secondary: IconButton(
+                            //즐겨찾기 기능구현
                             onPressed: (){
                               setState(() {
                                 e.favorite = !e.favorite;
                               });
                             },
+                            //3항 연산을 활용한 즐겨찾기 아이콘 변경
                             icon: e.favorite == false
                                 ? Icon(Icons.star_border)
-                                : Icon(Icons.star),
+                                : Icon(Icons.star,color: Colors.red,),
                           ),
                           title: Text(e.name),
                           value: e.ischecked,
