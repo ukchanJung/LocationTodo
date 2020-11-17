@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app_location_todo/ui/location_image_page.dart';
 
-class LocationTodo extends StatelessWidget {
+class LocationTodo extends StatefulWidget {
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('LTD'),
-      ),
-      body: Column(
-        children: [
-          Image.asset('images/a_dot_burr.jpeg')
-        ],
-      ),
-    );
-  }
+  _LocationTodoState createState() => _LocationTodoState();
 }
 
+
+
+class Task {
+  String name;
+  DateTime start;
+  DateTime end;
+  String memo;
+
+  Task({this.name = '메모', this.start, this.end, this.memo});
+}
 
