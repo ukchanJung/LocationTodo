@@ -9,7 +9,7 @@ class LocationImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Card(child: Image.asset('asset/photos/A01-001.png')),
+      child: Card(child: Image.asset('asset/Plan2.png')),
     );
   }
 }
