@@ -63,15 +63,16 @@ class _LocationTodoState extends State<LocationTodo> {
                                 : Icon(Icons.star,color: Colors.red,),
                           ),
                           title: Text(e.name),
+                          //체크박스 기능 구현
                           value: e.ischecked,
                           onChanged: (bool value){
-                    setState(() {
-                      e.ischecked = value;
-                    });
-                          },
-                        ),
-                  ))
-                  .toList(),
+                            setState(() {
+                              e.ischecked = value;
+                            });
+                                  },
+                                ),
+                    ),
+                  ) .toList(),
             ),
           )
         ],
@@ -100,6 +101,7 @@ class _LocationTodoState extends State<LocationTodo> {
                   //메서드?를 UI에서분리해야될것 같음
                   setState(() {
                     tasks.add(Task(name: _textEditingController.text));
+                    // 등록 버튼 클릭시 필드 초기화
                     _textEditingController.text = '';
                   });
                 },
