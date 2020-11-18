@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
@@ -28,7 +27,7 @@ class _LocationTodoState extends State<LocationTodo> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        title: Text('LTD Inbox'),
+        title: Text('LTD Inbox ${tasks.where((e) => e.ischecked == false).length}/${tasks.length}'),
         actions: [
           Card(
             child: Container(
@@ -68,7 +67,10 @@ class _LocationTodoState extends State<LocationTodo> {
             padding: const EdgeInsets.all(8.0),
             child: buildTodoAddUI(),
           ) ,
-          buildTodoList(),
+          //Task가 모두 처리됬을때 알려줌
+          tasks.where((element) => element.ischecked == false).length < 1
+              ? Expanded(child: Center(child: Text('할일이 없습니다',textScaleFactor: 2,)))
+              : buildTodoList(),
           Divider(color: Colors.grey,),
           ToggleButtons(
             children: [
@@ -103,8 +105,9 @@ class _LocationTodoState extends State<LocationTodo> {
     return Expanded(
           child: ListView(
             children: tasks
+            // 검색시 띄어쓰기 및 소문자 대문자 무시
                 .where((search) => search.name.replaceAll(' ', '').toLowerCase()
-                .contains(_searchText.replaceAll(' ', '').toLowerCase()))
+                  .contains(_searchText.replaceAll(' ', '').toLowerCase()))
                 .where((element) => element.ischecked == false)
                 .map((e) => Card(
                   child: CheckboxListTile(
@@ -153,6 +156,7 @@ class _LocationTodoState extends State<LocationTodo> {
     return Expanded(
           child: ListView(
             children: tasks
+            // 검색시 띄어쓰기 및 소문자 대문자 무시
                 .where((search) => search.name.replaceAll(' ', '').toLowerCase()
                   .contains(_searchText.replaceAll(' ', '').toLowerCase()))
                 .where((element) => element.ischecked==true)
