@@ -13,10 +13,9 @@ class LocationTodo extends StatefulWidget {
 class _LocationTodoState extends State<LocationTodo> {
   List<Task> tasks =[];
   TextEditingController _textEditingController = TextEditingController();
-  bool _ischecked =false;
+  String _searchText = '';
   DateTime now = DateTime.now();
   DateFormat formatter = DateFormat('yy.MM.dd');
-  bool _doneListOpen = false;
   List<bool> togleSelect = [false];
   @override
   void dispose() {
@@ -28,9 +27,27 @@ class _LocationTodoState extends State<LocationTodo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: false,
         title: Text('LTD Inbox'),
         actions: [
-          Container(width:72,child: TextField(),),
+          Card(
+            child: Container(
+              width: 200,
+              child: TextField(
+                onChanged: (String value){
+                  setState(() {
+                  _searchText = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  border: UnderlineInputBorder(),
+                  isDense: true,
+                  labelText: 'Search',
+                ),
+              ),
+            ),
+          ),
         ],
       ),
       //리스트 초기화 임시버튼
@@ -60,7 +77,8 @@ class _LocationTodoState extends State<LocationTodo> {
                 child: Container(
                   width: 144,
                   child: Center(
-                    child: Text('완료한 Task',textScaleFactor: 1.2,),
+                    // 완료된 Task 숫자 표현
+                    child: Text('완료한 Task ${tasks.where((e) => e.ischecked).length} 개',textScaleFactor: 1.2,),
                   ),
                 ),
               ),
@@ -84,7 +102,10 @@ class _LocationTodoState extends State<LocationTodo> {
   Widget buildTodoList() {  
     return Expanded(
           child: ListView(
-            children: tasks.where((element) => element.ischecked == false)
+            children: tasks
+                .where((search) => search.name.replaceAll(' ', '').toLowerCase()
+                .contains(_searchText.replaceAll(' ', '').toLowerCase()))
+                .where((element) => element.ischecked == false)
                 .map((e) => Card(
                   child: CheckboxListTile(
                     //체크박스 타일 위치 바꾸기
@@ -131,7 +152,10 @@ class _LocationTodoState extends State<LocationTodo> {
   Widget buildDoneList() {  
     return Expanded(
           child: ListView(
-            children: tasks.where((element) => element.ischecked==true)
+            children: tasks
+                .where((search) => search.name.replaceAll(' ', '').toLowerCase()
+                  .contains(_searchText.replaceAll(' ', '').toLowerCase()))
+                .where((element) => element.ischecked==true)
                 .map((e) => Card(
                   child: CheckboxListTile(
                     //체크박스 타일 위치 바꾸기
