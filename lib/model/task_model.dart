@@ -6,6 +6,8 @@ class Task {
   String memo;
   bool ischecked = false;
   bool favorite = false;
+  double x;
+  double y;
 
   Task(this.writeTime,{this.name = '메모', this.start, this.end, this.memo});
 }
