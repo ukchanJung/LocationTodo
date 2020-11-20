@@ -63,7 +63,7 @@ class _LocationTodoState extends State<LocationTodo> {
       body: Column(
         children: [
           //위치 표현 이미지 위젯
-          LocationImage(),
+          LocationImage(tasks),
           // AspectRatio활용하여 이미지 사이즈 변경 기능 추가예정
           Divider(
             thickness: 3,
@@ -133,6 +133,10 @@ class _LocationTodoState extends State<LocationTodo> {
               (e) => Card(
                 child: GestureDetector(
                   onLongPress: (){
+                    setState(() {
+                    e.x = 30;
+                    e.y = 50;
+                    });
                     print('롱프레스');
                   },
                   child: CheckboxListTile(
