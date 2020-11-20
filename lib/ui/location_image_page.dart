@@ -43,14 +43,16 @@ class _LocationImageState extends State<LocationImage> {
                         opacity: 0.8,
                         child: Transform.scale(
                           scale: 2,
-                          child: Icon(Icons.pin_drop),
+                          //Task class favorite을 활용한 위치확인 기능 구현
+                          child: e.favorite == true ? Icon(Icons.pin_drop,color: Colors.red,) : Icon(Icons.pin_drop),
                         ),
                       ),
                       child: Opacity(
                         opacity: 0.8,
                         child: Transform.scale(
                           scale: 2,
-                          child: Icon(Icons.pin_drop),
+                          //Task class favorite을 활용한 위치확인 기능 구현
+                          child: e.favorite == true ? Icon(Icons.pin_drop,color: Colors.red,) : Icon(Icons.pin_drop),
                         ),
                       ),
                     ),

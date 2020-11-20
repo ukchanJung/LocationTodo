@@ -181,6 +181,7 @@ class _LocationTodoState extends State<LocationTodo> {
                         ),
                       ],
                     ),
+                    subtitle: Text('${e.x},${e.y}'),
                     //체크박스 기능 구현
                     value: e.ischecked,
                     onChanged: (bool value) {
