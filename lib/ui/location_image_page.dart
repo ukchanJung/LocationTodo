@@ -11,6 +11,9 @@ class LocationImage extends StatefulWidget {
 }
 
 class _LocationImageState extends State<LocationImage> {
+  double a = 100;
+  double b = 100;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -28,16 +31,21 @@ class _LocationImageState extends State<LocationImage> {
                   return Positioned(
                     left: e.x,
                     top: e.y,
-                    child: GestureDetector(
-                      onLongPress: () {
-                        print('아이콘 롱프레스');
-                      },
-                      onHorizontalDragUpdate: (DragUpdateDetails details) {
+                    child: Draggable(
+                      onDragEnd: (details){
                         setState(() {
-                          e.x = details.localPosition.dx;
-                          e.y = details.localPosition.dy;
+                          e.x = details.offset.dx-10;
+                          e.y = details.offset.dy-80;
                         });
                       },
+                      childWhenDragging: Container(),
+                      feedback: Opacity(
+                        opacity: 0.8,
+                        child: Transform.scale(
+                          scale: 2,
+                          child: Icon(Icons.pin_drop),
+                        ),
+                      ),
                       child: Opacity(
                         opacity: 0.8,
                         child: Transform.scale(
