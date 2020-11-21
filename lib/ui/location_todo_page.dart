@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
@@ -19,7 +20,6 @@ class _LocationTodoState extends State<LocationTodo> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _textEditingController.dispose();
   }
@@ -132,10 +132,34 @@ class _LocationTodoState extends State<LocationTodo> {
             .map(
               (e) => Card(
                 child: GestureDetector(
-                  onLongPress: (){
+                  onLongPress: () {
                     setState(() {
-                    e.x = 30;
-                    e.y = 50;
+                      e.x = 30;
+                      e.y = 50;
+                      //메모 상세페이지
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text(e.name),
+                            content: Column(
+                              children: [
+                                //TODO 프로바이더 활용하여 이미지 처리
+                                Image.asset('asset/Plan2.png'),
+                                Container(
+                                  height: 200,
+                                  child: CupertinoDatePicker(
+                                    mode: CupertinoDatePickerMode.date,
+                                    onDateTimeChanged: (value) {
+
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
                     });
                     print('롱프레스');
                   },
@@ -170,7 +194,8 @@ class _LocationTodoState extends State<LocationTodo> {
                                 color: Colors.grey[500],
                                 fontSize: 12,
                               ),
-                            ),Text(
+                            ),
+                            Text(
                               formatter2.format(e.writeTime),
                               style: TextStyle(
                                 color: Colors.grey[500],
