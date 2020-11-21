@@ -57,65 +57,17 @@ class _LocationImageState extends State<LocationImage> {
                               return Positioned(
                                 left: e.x,
                                 top: e.y,
-                                child: Draggable(
-                                  onDragStarted: (){
-                                   setState(() {
-                                     e.px = e.x;
-                                     e.py = e.y;
-                                   });
-                                  },
-                                  onDragEnd: snapshot.data.scale == 1
-                                      ?(details) {
-                                    double _mx = details.offset.dx;
-                                    double _my = details.offset.dy;
-                                    setState(() {
-                                      print('1. ${e.x},${e.y}');
-                                      e.x = _mx-12;
-                                      e.y = _my-92;
-                                      print('2. ${e.x},${e.y}');
-                                      // e.x = (details.offset.dx - 10);
-                                      // e.y = (details.offset.dy - 80);
-                                    });
-                                  }
-                                      :(details) {
-                                    double _mx = details.offset.dx;
-                                    double _my = details.offset.dy;
-                                    double _scale = snapshot.data.scale;
-                                    setState(() {
-                                      print('1. ${e.x},${e.y}');
-                                      e.x = e.px+((_mx)/_scale);
-                                      e.y = e.py+((_my-92)/_scale);
-                                      print('2. ${e.x},${e.y}');
-                                      // e.x = (details.offset.dx - 10);
-                                      // e.y = (details.offset.dy - 80);
-                                    });
-                                  },
-                                  childWhenDragging: Container(),
-                                  feedback: Opacity(
-                                    opacity: 0.8,
-                                    child: Transform.scale(
-                                      scale: 2,
-                                      //Task class favorite을 활용한 위치확인 기능 구현
-                                      child: e.favorite == true
-                                          ? Icon(
-                                        Icons.pin_drop,
-                                        color: Colors.red,
-                                      )
-                                          : Icon(Icons.pin_drop),
-                                    ),
-                                  ),
-                                  child: Opacity(
-                                    opacity: 0.8,
-                                    child: Transform.scale(
-                                      scale: (1/snapshot.data.scale)*2,
-                                      //Task class favorite을 활용한 위치확인 기능 구현
-                                      child: e.favorite == true
-                                          ? Icon(
-                                        Icons.pin_drop,
-                                        color: Colors.red,
-                                      )
-                                          : Icon(Icons.pin_drop),
-                                    ),
+                                child: Opacity(
+                                  opacity: 0.8,
+                                  child: Transform.scale(
+                                    scale: (1/snapshot.data.scale)*2,
+                                    //Task class favorite을 활용한 위치확인 기능 구현
+                                    child: e.favorite == true
+                                        ? Icon(
+                                      Icons.pin_drop,
+                                      color: Colors.red,
+                                    )
+                                        : Icon(Icons.pin_drop),
                                   ),
                                 ),
                               );
