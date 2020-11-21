@@ -1,8 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
+import 'package:flutter_app_location_todo/ui/calendar.dart';
+import 'package:flutter_app_location_todo/ui/calendar_page.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
 import 'package:intl/intl.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class LocationTodo extends StatefulWidget {
   @override
@@ -32,6 +36,15 @@ class _LocationTodoState extends State<LocationTodo> {
         centerTitle: false,
         title: Text('LTD Inbox ${tasks.where((e) => e.ischecked == false).length}/${tasks.length}'),
         actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Calendar2()),
+              );
+            },
+          ),
           Card(
             child: Container(
               width: 200,
@@ -142,20 +155,78 @@ class _LocationTodoState extends State<LocationTodo> {
                         builder: (context) {
                           return AlertDialog(
                             title: Text(e.name),
-                            content: Column(
-                              children: [
-                                //TODO 프로바이더 활용하여 이미지 처리
-                                Image.asset('asset/Plan2.png'),
-                                Container(
-                                  height: 200,
-                                  child: CupertinoDatePicker(
-                                    mode: CupertinoDatePickerMode.date,
-                                    onDateTimeChanged: (value) {
-
-                                    },
+                            actions: [
+                              ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      var _wTime = DateTime.now();
+                                      e.memo = _textEditingController.text;
+                                      // 등록 버튼 클릭시 필드 초기화
+                                      _textEditingController.text = '';
+                                    });
+                                  },
+                                  child: Text('저장'))
+                            ],
+                            content: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  //TODO 프로바이더 활용하여 이미지 처리
+                                  Image.asset('asset/Plan2.png'),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Text('일정 : '),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: ElevatedButton(
+                                              onPressed: () async {
+                                                e.start = await showDatePicker(
+                                                    context: context,
+                                                    initialDate: DateTime.now(),
+                                                    firstDate: DateTime(2018),
+                                                    lastDate: DateTime(2021),
+                                                    builder: (context, Widget child) {
+                                                      return Theme(data: ThemeData.dark(), child: child);
+                                                    });
+                                              },
+                                              child: e.start == null ? Text('시작일 선택') : Text('시작일 : ${formatter.format(e.start)}')),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: ElevatedButton(
+                                              onPressed: () async {
+                                                e.end = await showDatePicker(
+                                                    context: context,
+                                                    initialDate: DateTime.now(),
+                                                    firstDate: DateTime(2018),
+                                                    lastDate: DateTime(2021),
+                                                    builder: (context, Widget child) {
+                                                      return Theme(data: ThemeData.dark(), child: child);
+                                                    });
+                                              },
+                                              child: e.end == null ? Text('종료일 선택') : Text('종료일 : ${formatter.format(e.end)}')),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: TextField(
+                                      controller: _textEditingController,
+                                      decoration: InputDecoration(
+                                        fillColor: Colors.white,
+                                        border: OutlineInputBorder(),
+                                        isDense: true,
+                                        labelText: '메모입력',
+                                      ),
+                                    ),
+                                  ),
+                                  e.memo == null ? Text('메모를 추가하세요') : Text(e.memo),
+                                ],
+                              ),
                             ),
                           );
                         },

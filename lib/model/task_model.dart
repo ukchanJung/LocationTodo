@@ -7,7 +7,9 @@ class Task {
   bool ischecked = false;
   bool favorite = false;
   double x;
+  double px;
   double y;
+  double py;
 
   Task(this.writeTime,{this.name = '메모', this.start, this.end, this.memo});
 }
