@@ -44,6 +44,7 @@ class _TodoDetailState extends State<TodoDetail> {
         e.lines.forEach((t) {
           print( t.elements );
           print(t.boundingBox.topLeft);
+          print('safety');
         });
       });
     });
