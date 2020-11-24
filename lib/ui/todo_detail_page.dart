@@ -1,12 +1,16 @@
-import 'dart:async';
+
 import 'dart:io';
 
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:positioned_tap_detector/positioned_tap_detector.dart';
-import 'dart:ui' as ui;
+import 'package:provider/provider.dart';
 
 class TodoDetail extends StatefulWidget {
   final Task task;
@@ -24,10 +28,25 @@ class _TodoDetailState extends State<TodoDetail> {
   DateFormat formatter = DateFormat('yy.MM.dd.');
   DateFormat formatter2 = DateFormat('HH:mm:ss');
 
+  final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+
+  VisionText visionText;
+  ByteData bytes;
+  String tempPath;
+  File file;
+
   @override
   void initState() {
     super.initState();
     _photoViewController = PhotoViewController();
+    ocr().then((value) {
+      value.blocks.forEach((e) {
+        e.lines.forEach((t) {
+          print( t.elements );
+          print(t.boundingBox.topLeft);
+        });
+      });
+    });
   }
 
   @override
@@ -37,6 +56,18 @@ class _TodoDetailState extends State<TodoDetail> {
     _textEditingController.dispose();
   }
 
+  Future<VisionText> ocr()async{
+
+    ByteData bytes = await rootBundle.load(Provider.of<DrawingPath>(context, listen: false).getPath());
+    String tempPath = (await getTemporaryDirectory()).path;
+    file = File('$tempPath/${Provider.of<DrawingPath>(context, listen: false).getName()}.png');
+    await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+
+    FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+
+    visionText = await textRecognizer.processImage(vIa);
+    return visionText;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,6 +79,11 @@ class _TodoDetailState extends State<TodoDetail> {
             onPressed: () {},
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (){
+          print(visionText.text);
+        },
       ),
       body: Column(
         children: [
@@ -68,7 +104,7 @@ class _TodoDetailState extends State<TodoDetail> {
                   },
                   child: Stack(
                     children: [
-                      Image.asset('asset/Plan2.png'),
+                      Image.asset(Provider.of<DrawingPath>(context, listen: true).getPath(),),
                       StreamBuilder<PhotoViewControllerValue>(
                           stream: _photoViewController.outputStateStream,
                           builder: (context, snapshot) {
@@ -178,7 +214,6 @@ class _TodoDetailState extends State<TodoDetail> {
                         child: ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                var _wTime = DateTime.now();
                                 widget.task.memo = _textEditingController.text;
                                 // 등록 버튼 클릭시 필드 초기화
                                 _textEditingController.text = '';

@@ -1,13 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
-import 'package:flutter_app_location_todo/ui/calendar.dart';
 import 'package:flutter_app_location_todo/ui/calendar_page.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
 import 'package:flutter_app_location_todo/ui/todo_detail_page.dart';
 import 'package:intl/intl.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class LocationTodo extends StatefulWidget {
   @override
@@ -26,7 +25,29 @@ class _LocationTodoState extends State<LocationTodo> {
   @override
   void initState() {
     super.initState();
-    setState(() {});
+    setState(() {
+      tasks = [
+        Task(DateTime.now(),name: '메모1'),
+        Task(DateTime.now(),name: '메모2'),
+        Task(DateTime.now(),name: '메모3'),
+        Task(DateTime.now(),name: '메모4'),
+        Task(DateTime.now(),name: '메모5'),
+        Task(DateTime.now(),name: '메모6'),
+        Task(DateTime.now(),name: '메모7'),
+        Task(DateTime.now(),name: '메모8'),
+        Task(DateTime.now(),name: '메모9'),
+        Task(DateTime.now(),name: '메모10'),
+        Task(DateTime.now(),name: '메모11'),
+        Task(DateTime.now(),name: '메모12'),
+        Task(DateTime.now(),name: '메모13'),
+        Task(DateTime.now(),name: '메모14'),
+      ];
+      for (int i = 0; i< tasks.length; i++){
+        tasks[i].x = Random().nextInt(400).toDouble();
+        tasks[i].y = Random().nextInt(280).toDouble();
+      }
+      
+    });
   }
 
   void dispose() {
@@ -158,7 +179,6 @@ class _LocationTodoState extends State<LocationTodo> {
                     );
                     setState(() {
                       //메모 상세페이지
-                      ;
                     });
                     print('롱프레스');
                   },
