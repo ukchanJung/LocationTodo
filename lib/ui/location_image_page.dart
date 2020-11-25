@@ -64,6 +64,10 @@ class _LocationImageState extends State<LocationImage> {
                     //     return Row(children: List.generate(pController.scale.ceil(), (index) => Expanded(child: Container(color: cList[index],))));
                     //   }),
                     // ),
+                    // Rect.fromPoints(a, b),
+                    Opacity(opacity:0.5,child: Container(child: CustomPaint(painter: MyPainter(Offset(50,50),Offset(200,200)),),)),
+                    Container(child: CustomPaint(painter: MyPainter2(Offset(50,50),Offset(200,200)),),),
+                    Container(child: CustomPaint(painter: MyPainter2(Offset(200,200),Offset(100,100)),),),
                     StreamBuilder<PhotoViewControllerValue>(
                         stream: pController.outputStateStream,
                         builder: (BuildContext context, AsyncSnapshot<PhotoViewControllerValue> snapshot) {
@@ -204,5 +208,78 @@ class _LocationImageState extends State<LocationImage> {
         ),
       ),
     );
+  }
+}
+
+class MyPainter extends CustomPainter{
+  Offset p1;
+  Offset p2;
+
+  MyPainter(this.p1, this.p2);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint =Paint()
+    ..color = Colors.red
+    ..strokeCap = StrokeCap.round
+    ..strokeWidth = 4.0;
+
+    canvas.drawRect(Rect.fromPoints(p1, p2), paint);
+  }
+
+
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    // TODO: implement shouldRepaint
+    // throw UnimplementedError();
+    return false;
+  }
+}
+class GirdMaker extends CustomPainter{
+  List<Line> lines = [];
+  GirdMaker(this.lines);
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint =Paint()
+    ..strokeCap = StrokeCap.round
+    ..strokeWidth = 4.0;
+
+    lines.map((e) => canvas.drawLine(e.p1, e.p2, paint));
+
+  }
+
+
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    // TODO: implement shouldRepaint
+    // throw UnimplementedError();
+    return false;
+  }
+}
+class MyPainter2 extends CustomPainter{
+  Offset p1;
+  Offset p2;
+
+  MyPainter2(this.p1, this.p2);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint =Paint()
+    ..color = Colors.blueAccent
+    ..strokeCap = StrokeCap.round
+    ..strokeWidth = 4.0;
+
+    canvas.drawCircle(p1, 10, paint);
+  }
+
+
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    // TODO: implement shouldRepaint
+    // throw UnimplementedError();
+    return false;
   }
 }
