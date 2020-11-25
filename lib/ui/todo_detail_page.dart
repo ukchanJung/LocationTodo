@@ -39,15 +39,16 @@ class _TodoDetailState extends State<TodoDetail> {
   void initState() {
     super.initState();
     _photoViewController = PhotoViewController();
-    ocr().then((value) {
-      value.blocks.forEach((e) {
-        e.lines.forEach((t) {
-          print( t.elements );
-          print(t.boundingBox.topLeft);
-          print('safety');
-        });
-      });
-    });
+    ocr().then((value) => print(value.text));
+    // ocr().then((value) {
+    //   value.blocks.forEach((e) {
+    //     e.lines.forEach((t) {
+    //       print( t.elements );
+    //       print(t.boundingBox.topLeft);
+    //       print('safety');
+    //     });
+    //   });
+    // });
   }
 
   @override

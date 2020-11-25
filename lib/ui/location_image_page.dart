@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_location_todo/model/line_model.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:photo_view/photo_view.dart';
 
