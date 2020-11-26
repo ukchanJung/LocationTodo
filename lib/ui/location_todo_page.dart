@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/calendar_page.dart';
+import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
 import 'package:flutter_app_location_todo/ui/todo_detail_page.dart';
 import 'package:intl/intl.dart';
@@ -59,6 +60,23 @@ class _LocationTodoState extends State<LocationTodo> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      drawer: Drawer(
+        child: Column(
+          children: [
+            UserAccountsDrawerHeader(accountName: Text('정욱찬'), accountEmail: null),
+            Expanded(
+              child: ListView(children: [
+                ListTile(title: Text('그리드 버튼 구현'),onTap: (){
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => GridButton()),
+                    );
+                },),
+              ],),
+            )
+          ],
+        ),
+      ),
       appBar: AppBar(
         centerTitle: false,
         title: Text('LTD Inbox ${tasks.where((e) => e.ischecked == false).length}/${tasks.length}'),

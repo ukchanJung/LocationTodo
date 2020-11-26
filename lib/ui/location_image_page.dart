@@ -237,28 +237,8 @@ class MyPainter extends CustomPainter{
     return false;
   }
 }
-class GirdMaker extends CustomPainter{
-  List<Line> lines = [];
-  GirdMaker(this.lines);
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint paint =Paint()
-    ..strokeCap = StrokeCap.round
-    ..strokeWidth = 4.0;
-
-    lines.map((e) => canvas.drawLine(e.p1, e.p2, paint));
-
-  }
 
 
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    // TODO: implement shouldRepaint
-    // throw UnimplementedError();
-    return false;
-  }
-}
 class MyPainter2 extends CustomPainter{
   Offset p1;
   Offset p2;
