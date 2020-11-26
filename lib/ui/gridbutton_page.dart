@@ -50,9 +50,18 @@ class _GridButtonState extends State<GridButton> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: grids.map((e) => Text('${e.name}은''${e.x}''${e.y}')).toList()
+              Container(
+                width: 300,
+                height: 300,
+                child: CustomPaint(
+                  painter: GridMaker(grids),
+                ),
+              ),
+              Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: grids.map((e) => Text('${e.name}은''${e.x}''${e.y}')).toList()
+              ),
             ),
               Card(
                 elevation: 4,
