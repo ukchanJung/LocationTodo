@@ -39,7 +39,10 @@ class _GridButtonState extends State<GridButton> {
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           setState(() {
-              grids.add(Grid(_nameControl.text, origin: _origin, x: select.name.contains('X') ? select.x + int.parse(_distanceControl.text) : select.y + int.parse(_distanceControl.text)));
+            select.name.contains('X')
+                ?grids.add(Grid(_nameControl.text, origin: _origin, x: select.x + int.parse(_distanceControl.text)))
+                :grids.add(Grid(_nameControl.text, origin: _origin, y: select.y + int.parse(_distanceControl.text)));
+            select = grids.last;
             });
         },
       ),
@@ -56,10 +59,13 @@ class _GridButtonState extends State<GridButton> {
                 child: ListTile(
                   title: select == null ? Text('그리드를 선택해주세요') : Text(select.toString()),
                   onTap: ()async{
-                    select = await Navigator.push(
+                    Grid _select;
+                    _select =  await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => GridList(grids)),
-                      );
+                        MaterialPageRoute(builder: (context) => GridList(grids)),);
+                    setState(() {
+                      select = _select;
+                    });
                   },
                 ),
               ),
