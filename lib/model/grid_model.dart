@@ -15,4 +15,9 @@ class Grid{
   Grid.nestX(this.origin, this.name, this.nestGrid, this.nestSize);
 
   Grid(this.name, {this.origin, this.x, this.y,} );
+
+  @override
+  String toString() {
+    return 'Grid{name: $name, x: $x, y: $y}';
+  }
 }

@@ -15,6 +15,7 @@ class _GridButtonState extends State<GridButton> {
   TextEditingController _nameControl = TextEditingController();
   TextEditingController _distanceControl = TextEditingController();
   String dropdownValue = 'One';
+  Grid select;
   @override
   void initState() {
     super.initState();
@@ -38,8 +39,8 @@ class _GridButtonState extends State<GridButton> {
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           setState(() {
-            grids.add(Grid('X2',origin: _origin,x: 500));
-          });
+              grids.add(Grid(_nameControl.text, origin: _origin, x: select.name.contains('X') ? select.x + int.parse(_distanceControl.text) : select.y + int.parse(_distanceControl.text)));
+            });
         },
       ),
       body: SafeArea(
@@ -53,11 +54,11 @@ class _GridButtonState extends State<GridButton> {
               Card(
                 elevation: 4,
                 child: ListTile(
-                  title: Text('그리드를 선택해주세요'),
-                  onTap: (){
-                    Navigator.push(
+                  title: select == null ? Text('그리드를 선택해주세요') : Text(select.toString()),
+                  onTap: ()async{
+                    select = await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => GridList()),
+                        MaterialPageRoute(builder: (context) => GridList(grids)),
                       );
                   },
                 ),
