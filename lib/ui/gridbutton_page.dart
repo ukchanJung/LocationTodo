@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/grid_model.dart';
 import 'package:flutter_app_location_todo/ui/gridlist_page.dart';
 import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
+import 'package:photo_view/photo_view.dart';
 
 class GridButton extends StatefulWidget {
   @override
@@ -50,16 +51,23 @@ class _GridButtonState extends State<GridButton> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-              Container(
-                width: 300,
-                height: 300,
-                child: CustomPaint(
-                  painter: GridMaker(grids),
+              AspectRatio(
+                aspectRatio: 421/297,
+                child: ClipRect(
+                  child: PhotoView.customChild(
+                    backgroundDecoration: BoxDecoration(color: Colors.white),
+                    child: Container(
+                      width: 400,
+                      height: 300,
+                      child: CustomPaint(
+                        painter: GridMaker(grids),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+              child: ListView(
                 children: grids.map((e) => Text('${e.name}은''${e.x}''${e.y}')).toList()
               ),
             ),

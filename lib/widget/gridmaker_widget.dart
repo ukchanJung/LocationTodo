@@ -12,8 +12,8 @@ class GridMaker extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.square
+      ..strokeWidth = 1.0
       ..color = Colors.red;
 
 
