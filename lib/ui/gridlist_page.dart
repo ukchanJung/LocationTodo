@@ -25,7 +25,7 @@ class _GridListState extends State<GridList> {
         child: Column(
           children: [
             Expanded(
-              child: Column(
+              child: ListView(
                   children: widget._grid
                       .map(
                         (e) {
