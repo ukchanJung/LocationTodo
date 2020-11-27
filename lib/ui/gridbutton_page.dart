@@ -1,9 +1,29 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/grid_model.dart';
 import 'package:flutter_app_location_todo/ui/gridlist_page.dart';
 import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
 import 'package:photo_view/photo_view.dart';
+
+void reading()async{
+  FirebaseFirestore _db = FirebaseFirestore.instance;
+  // QuerySnapshot read = await _db.collection('gridList').get();
+  CollectionReference dbGrid = await _db.collection('gridList');
+  dbGrid.doc('test').set({
+    'name' : 'X1',
+    'X' : 7500.0,
+  });
+}
+void update()async{
+  FirebaseFirestore _db = FirebaseFirestore.instance;
+  // QuerySnapshot read = await _db.collection('gridList').get();
+  CollectionReference dbGrid = _db.collection('gridList');
+  dbGrid.doc('test').update({
+    'name' : 'X2',
+    'X' : 8500.0,
+  });
+}
 
 class GridButton extends StatefulWidget {
   @override
@@ -16,12 +36,14 @@ class _GridButtonState extends State<GridButton> {
   TextEditingController _distanceControl = TextEditingController();
   String dropdownValue = 'One';
   Grid select;
+  // FirebaseFirestore _db = FirebaseFirestore.instance;
+  // QuerySnapshot read;
   @override
   void initState() {
     super.initState();
     grids.addAll([
-      Grid('X1',origin: _origin,x: 0),
-      Grid('Y0',origin: _origin,y: 0),
+      Grid('X1',x: 0),
+      Grid('Y0',y: 0),
     ]
     );
   }
@@ -35,13 +57,19 @@ class _GridButtonState extends State<GridButton> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('그리드 버튼'),),
-      floatingActionButton: FloatingActionButton(
+        appBar: AppBar(
+          title: Text('그리드 버튼'),
+          actions: [
+            IconButton(icon: Icon(Icons.add), onPressed:reading),
+            IconButton(icon: Icon(Icons.update), onPressed:update),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
         onPressed: (){
           setState(() {
             select.name.contains('X')
-                ?grids.add(Grid(_nameControl.text, origin: _origin, x: select.x + int.parse(_distanceControl.text)))
-                :grids.add(Grid(_nameControl.text, origin: _origin, y: select.y + int.parse(_distanceControl.text)));
+                ?grids.add(Grid(_nameControl.text,  x: select.x + int.parse(_distanceControl.text)))
+                :grids.add(Grid(_nameControl.text,  y: select.y + int.parse(_distanceControl.text)));
             select = grids.last;
             });
         },
@@ -56,7 +84,7 @@ class _GridButtonState extends State<GridButton> {
                   width: 400,
                   height: 300,
                   child: CustomPaint(
-                    painter: GridMaker(grids, 10),
+                    painter: GridMaker(grids, 100),
                   ),
                 ),
               ),
