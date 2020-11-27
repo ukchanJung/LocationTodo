@@ -9,7 +9,6 @@ class GridButton extends StatefulWidget {
   @override
   _GridButtonState createState() => _GridButtonState();
 }
-
 class _GridButtonState extends State<GridButton> {
   List<Grid> grids = [];
   Offset _origin = Offset(50, 50);
@@ -51,18 +50,13 @@ class _GridButtonState extends State<GridButton> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-              AspectRatio(
-                aspectRatio: 421/297,
-                child: ClipRect(
-                  child: PhotoView.customChild(
-                    backgroundDecoration: BoxDecoration(color: Colors.white),
-                    child: Container(
-                      width: 400,
-                      height: 300,
-                      child: CustomPaint(
-                        painter: GridMaker(grids),
-                      ),
-                    ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  width: 400,
+                  height: 300,
+                  child: CustomPaint(
+                    painter: GridMaker(grids, 10),
                   ),
                 ),
               ),
