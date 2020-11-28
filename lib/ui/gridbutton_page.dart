@@ -5,6 +5,7 @@ import 'package:flutter_app_location_todo/model/grid_model.dart';
 import 'package:flutter_app_location_todo/ui/gridlist_page.dart';
 import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:positioned_tap_detector/positioned_tap_detector.dart';
 
 void write()async{
   FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -52,7 +53,7 @@ class GridButton extends StatefulWidget {
 }
 class _GridButtonState extends State<GridButton> {
   List<Grid> grids = [];
-  Offset _origin = Offset(50, 50);
+  Offset _origin ;
   TextEditingController _nameControl = TextEditingController();
   TextEditingController _distanceControl = TextEditingController();
   String dropdownValue = 'One';
@@ -99,12 +100,25 @@ class _GridButtonState extends State<GridButton> {
               children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      width: 400,
-                      height: 300,
-                      child: CustomPaint(
-                        painter: GridMaker(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList(), 250),
-                      ),
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 400,
+                          height: 300,
+                          child: PositionedTapDetector(
+                            onLongPress: (m){
+                              print(m.relative.toString());
+                              setState(() {
+                              _origin =Offset(m.relative.dx, m.relative.dy);
+                              });
+                            },
+                            child: CustomPaint(
+                              painter: GridMaker(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList(), 250,_origin),
+                            ),
+                          ),
+                        ),
+                        // RawMaterialButton(onPressed: (){},child: Rect.,)
+                      ],
                     ),
                   ),
                   Expanded(
