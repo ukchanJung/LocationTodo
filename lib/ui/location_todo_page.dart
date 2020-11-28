@@ -90,9 +90,14 @@ class _LocationTodoState extends State<LocationTodo> {
               );
             },
           ),
+          IconButton(
+            icon: Icon(Icons.print),
+            onPressed: () {
+            },
+          ),
           Card(
             child: Container(
-              width: 200,
+              width: 100,
               child: TextField(
                 onChanged: (String value) {
                   setState(() {

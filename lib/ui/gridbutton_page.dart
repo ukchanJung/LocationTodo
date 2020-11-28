@@ -2,6 +2,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/grid_model.dart';
+import 'package:flutter_app_location_todo/model/intersection_model.dart';
+import 'package:flutter_app_location_todo/model/line_model.dart';
 import 'package:flutter_app_location_todo/ui/gridlist_page.dart';
 import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
 import 'package:photo_view/photo_view.dart';
@@ -58,6 +60,7 @@ class _GridButtonState extends State<GridButton> {
   TextEditingController _distanceControl = TextEditingController();
   String dropdownValue = 'One';
   Grid select;
+  List<Offset> _iPs;
   // FirebaseFirestore _db = FirebaseFirestore.instance;
   // QuerySnapshot read;
   @override
@@ -88,6 +91,25 @@ class _GridButtonState extends State<GridButton> {
     return Scaffold(
         appBar: AppBar(
           title: Text('그리드 버튼'),
+          actions: [
+            ElevatedButton.icon(onPressed: (){
+                List<Line> lines=[];
+                double _scale = 250;
+                double _width = 400;
+                double _height = 300;
+              grids.forEach((e) {
+                if (e.name.contains('X')) {
+                  lines.add(Line(Offset(e.x.toDouble()/_scale, 0), Offset(e.x.toDouble()/_scale,_height)));
+                } else if (e.name.contains('Y')) {
+                  lines.add(Line(Offset(0, e.y.toDouble()/_scale), Offset(_width, e.y.toDouble()/_scale)));
+                }
+              });
+                 _iPs = IntersectPoint().Intersections(lines).toSet().toList();
+                
+                print(lines.length);
+                print(_iPs.length);
+            }, icon: Icon(Icons.add), label: Text('서버업로드'))
+          ],
         ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('gridList').snapshots(),
@@ -103,34 +125,28 @@ class _GridButtonState extends State<GridButton> {
                     child: Stack(
                       children: [
                         Container(
-                          width: 400,
+                          width: 359,
                           height: 300,
                           child: PositionedTapDetector(
-                            onLongPress: (m){
+                            onTap: (m){
                               print(m.relative.toString());
                               setState(() {
                               _origin =Offset(m.relative.dx, m.relative.dy);
                               });
                             },
-                            child: Stack(
-                              children: [
-                                Container(
-                                  width: 400,
-                                  height: 300,
-                                  child: CustomPaint(
-                                    painter: GridMaker(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList(), 250,_origin),
-                                  ),
-                                ),
-                                Container(
-                                  width: 400,
-                                  height: 300,
-                                  child: CustomPaint(),
-                                )
-                              ],
+                            child: Container(
+                              width: 400,
+                              height: 300,
+                              child: CustomPaint(
+                                painter: GridMaker(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList(), 250,_origin,pointList: _iPs),
+                              ),
                             ),
                           ),
                         ),
-                        // RawMaterialButton(onPressed: (){},child: Rect.,)
+                        Positioned.fromRect(
+                          rect: Rect.fromPoints(Offset(100,100), Offset(200,150)),
+                          child: ElevatedButton(onPressed: (){}, child: null)
+                        ),
                       ],
                     ),
                   ),
