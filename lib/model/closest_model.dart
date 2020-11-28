@@ -1,14 +1,20 @@
 import 'dart:math';
 
-class Closet{
-  Point _p;
-  List<Point> _pointList;
+import 'package:flutter/gestures.dart';
 
-  Closet(this._p, this._pointList);
-  Point min(){
-   return _pointList.reduce((v, e) => _p.distanceTo(v)>_p.distanceTo(e)?e:v);
+class Closet {
+  Point<double> selectPoint;
+  Offset selectOffset;
+  List<Point<double>> pointList;
+  List<Offset> offsetList;
+
+  Closet({this.selectPoint, this.selectOffset, this.pointList, this.offsetList});
+
+  Point min() {
+      return pointList.reduce((v, e) => selectPoint.distanceTo(v) > selectPoint.distanceTo(e) ? e : v);
   }
-  Point max(){
-   return _pointList.reduce((v, e) => _p.distanceTo(v)>_p.distanceTo(e)?v:e);
+
+  Point max() {
+    return pointList.reduce((v, e) => selectPoint.distanceTo(v) > selectPoint.distanceTo(e) ? v : e);
   }
 }
