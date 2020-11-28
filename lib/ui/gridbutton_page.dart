@@ -112,8 +112,21 @@ class _GridButtonState extends State<GridButton> {
                               _origin =Offset(m.relative.dx, m.relative.dy);
                               });
                             },
-                            child: CustomPaint(
-                              painter: GridMaker(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList(), 250,_origin),
+                            child: Stack(
+                              children: [
+                                Container(
+                                  width: 400,
+                                  height: 300,
+                                  child: CustomPaint(
+                                    painter: GridMaker(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList(), 250,_origin),
+                                  ),
+                                ),
+                                Container(
+                                  width: 400,
+                                  height: 300,
+                                  child: CustomPaint(),
+                                )
+                              ],
                             ),
                           ),
                         ),
