@@ -179,7 +179,7 @@ class _GridButtonState extends State<GridButton> {
                       setState(() {
                         select = snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList().firstWhere((e) => e.name.contains(_nameControl.text));
                       });
-                    }, child: Text('수정하기')),
+                    }, child: Text('수정하기'),style: ElevatedButton.styleFrom(primary: Colors.redAccent),),
                     ElevatedButton(onPressed: (){
                       writeX(_nameControl.text,int.parse(_distanceControl.text));
                       setState(() {

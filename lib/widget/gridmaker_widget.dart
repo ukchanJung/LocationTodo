@@ -54,9 +54,25 @@ class GridMaker extends CustomPainter {
     canvas.drawPoints(PointMode.points, IntersectPoint().Intersections(lines), paint2);
 
     List<Offset> _iPs = IntersectPoint().Intersections(lines);
+    print(Point(100, 100).distanceTo(Point(200, 200)));
+    Point tp = Point(80, 80);
+    List<Point> plist =[
+      Point(50, 50),
+      Point(100, 100),
+      Point(200, 200),
+      Point(200, 200),
+    ];
+    var fp =plist.reduce((v, e) => tp.distanceTo(v)>tp.distanceTo(e)?e:v);
+    print('${fp.x},${fp.y}');
 
 
-    Offset pp =_iPs.reduce((a, b) => max(Point(a.dx, a.dy).distanceTo(Point(_inputP.dx,_inputP.dx)), Point(b.dx, b.dy).distanceTo(Point(_inputP.dx,_inputP.dx))));
+    // Offset pp =_iPs.reduce((a, b) => min(Point(a.dx, a.dy).distanceTo(Point(_inputP.dx,_inputP.dx)), Point(b.dx, b.dy).distanceTo(Point(_inputP.dx,_inputP.dx))));
+    // Offset pp = _iPs.reduce(
+    //   (a, b) => Point(a.dx, a.dy).distanceTo(Point(_inputP.dx, _inputP.dx))>Point(b.dx, b.dy).distanceTo( Point(_inputP.dx, _inputP.dx)? b:a
+    //       Point(a.dx, a.dy).distanceTo(Point(_inputP.dx, _inputP.dx)),
+    //       Point(b.dx, b.dy).distanceTo( Point(_inputP.dx, _inputP.dx),
+    //       )
+    // );
 
     canvas.drawPoints(PointMode.points, [_inputP], paint3);
     // canvas.drawCircle(pp, 10, paint3);
@@ -68,3 +84,4 @@ class GridMaker extends CustomPainter {
     return false;
   }
 }
+
