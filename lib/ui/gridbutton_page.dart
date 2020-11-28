@@ -1,6 +1,10 @@
 
+
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_location_todo/model/closest_model.dart';
 import 'package:flutter_app_location_todo/model/grid_model.dart';
 import 'package:flutter_app_location_todo/model/intersection_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
@@ -55,14 +59,14 @@ class GridButton extends StatefulWidget {
 }
 class _GridButtonState extends State<GridButton> {
   List<Grid> grids = [];
-  Offset _origin ;
+  Offset _origin =Offset(0,0);
   TextEditingController _nameControl = TextEditingController();
   TextEditingController _distanceControl = TextEditingController();
   String dropdownValue = 'One';
   Grid select;
   List<Offset> _iPs;
-  // FirebaseFirestore _db = FirebaseFirestore.instance;
-  // QuerySnapshot read;
+  List<Point> rectPoint = [];
+  QuerySnapshot read;
   @override
   void initState() {
     super.initState();
@@ -105,7 +109,7 @@ class _GridButtonState extends State<GridButton> {
                 }
               });
                  _iPs = IntersectPoint().Intersections(lines).toSet().toList();
-                
+
                 print(lines.length);
                 print(_iPs.length);
             }, icon: Icon(Icons.add), label: Text('서버업로드'))
@@ -130,8 +134,12 @@ class _GridButtonState extends State<GridButton> {
                           child: PositionedTapDetector(
                             onTap: (m){
                               print(m.relative.toString());
+                              List<Point<double>> parseList = _iPs.map((e) => Point(e.dx,e.dy)).toList();
                               setState(() {
                               _origin =Offset(m.relative.dx, m.relative.dy);
+                              rectPoint = Closet(selectPoint:Point(_origin.dx, _origin.dy),pointList: parseList).minRect(Point(_origin.dx, _origin.dy));
+                              print(rectPoint.first);
+                              print(rectPoint.last);
                               });
                             },
                             child: Container(
@@ -144,7 +152,7 @@ class _GridButtonState extends State<GridButton> {
                           ),
                         ),
                         Positioned.fromRect(
-                          rect: Rect.fromPoints(Offset(100,100), Offset(200,150)),
+                          rect: Rect.fromPoints(Offset(rectPoint.first.x,rectPoint.first.y),Offset(rectPoint.last.x,rectPoint.last.y)),
                           child: ElevatedButton(onPressed: (){}, child: null)
                         ),
                       ],

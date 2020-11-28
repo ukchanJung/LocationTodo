@@ -52,11 +52,15 @@ class GridMaker extends CustomPainter {
     List<Point<double>> parseList =pointList.map((e) => Point(e.dx, e.dy)).toList();
     Point<double> parsePoint = Point(_inputP.dx, _inputP.dy);
     Point cp = Closet(selectPoint: parsePoint, pointList: parseList).min();
+    List<Point> cpl = Closet(selectPoint: parsePoint, pointList: parseList).minRect(parsePoint);
     Offset pp = Offset(cp.x, cp.y);
 
     canvas.drawPoints(PointMode.points, [_inputP], paint4);
-    canvas.drawCircle(pp, 10, paint3);
+    // canvas.drawCircle(pp, 10, paint3);
 
+    cpl.forEach((e) {
+      canvas.drawCircle(Offset(e.x, e.y), 10, paint3);
+    });
 
     canvas.drawPoints(PointMode.points, pointList, paint2);
   }
