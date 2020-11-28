@@ -103,7 +103,7 @@ class _GridButtonState extends State<GridButton> {
                       width: 400,
                       height: 300,
                       child: CustomPaint(
-                        painter: GridMaker(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList(), 100),
+                        painter: GridMaker(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList(), 250),
                       ),
                     ),
                   ),
