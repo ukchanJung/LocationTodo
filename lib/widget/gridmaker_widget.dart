@@ -5,13 +5,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/closest_model.dart';
 import 'package:flutter_app_location_todo/model/grid_model.dart';
+import 'package:flutter_app_location_todo/model/gridtest_model.dart';
 import 'package:flutter_app_location_todo/model/intersection_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
 
 class GridMaker extends CustomPainter {
   double gScale;
 
-  List<Grid> grids = [];
+  List<Gridtestmodel> grids = [];
   List<Line> lines = [];
   List<Offset> pointList;
   Offset _inputP;
@@ -22,31 +23,33 @@ class GridMaker extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
       ..strokeCap = StrokeCap.square
-      ..strokeWidth = 1.0
+      ..strokeWidth = 300.0/gScale
       ..color = Colors.red;
+    Paint stroke = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 1000.0 /gScale
+      ..style = PaintingStyle.stroke
+      ..color = Colors.blueAccent;
     Paint paint2 = Paint()
       ..color = Colors.blue
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.0;
+      ..strokeWidth = 1000.0/gScale;
     Paint paint3 = Paint()
       ..color = Colors.lightBlue
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
+
     Paint paint4 = Paint()
-      ..color = Colors.lime
+      ..color = Colors.purpleAccent
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 5.0;
+      ..strokeWidth = 1000.0/gScale;
 
 
     grids.forEach((e) {
-      if (e.name.contains('X')) {
-        canvas.drawLine(Offset(e.x.toDouble() / gScale, 0), Offset(e.x.toDouble() / gScale, size.height), paint);
-      } else if (e.name.contains('Y')) {
-        canvas.drawLine(Offset(0, e.y.toDouble() / gScale), Offset(size.width, e.y.toDouble() / gScale), paint);
-      }
+      canvas.drawLine(Offset(e.startX.toDouble(), -e.startY.toDouble())/gScale, Offset(e.endX.toDouble(), -e.endY.toDouble())/gScale, paint);
     });
 
     List<Point<double>> parseList =pointList.map((e) => Point(e.dx, e.dy)).toList();
@@ -55,13 +58,13 @@ class GridMaker extends CustomPainter {
     List<Point> cpl = Closet(selectPoint: parsePoint, pointList: parseList).minRect(parsePoint);
     Offset pp = Offset(cp.x, cp.y);
 
+
     canvas.drawPoints(PointMode.points, [_inputP], paint4);
     // canvas.drawCircle(pp, 10, paint3);
 
-    cpl.forEach((e) {
-      canvas.drawCircle(Offset(e.x, e.y), 10, paint3);
-    });
+    // cpl.forEach((e) { canvas.drawCircle(Offset(e.x, e.y), 10, paint3); });
 
+    canvas.drawRect(Rect.fromPoints(Offset(cpl.first.x,cpl.first.y), Offset(cpl.last.x, cpl.last.y)), stroke);
     canvas.drawPoints(PointMode.points, pointList, paint2);
   }
 
