@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
 import 'package:flutter_app_location_todo/model/closest_model.dart';
 import 'package:flutter_app_location_todo/model/grid_model.dart';
 import 'package:flutter_app_location_todo/model/gridtest_model.dart';
@@ -126,7 +127,8 @@ class _GridButtonState extends State<GridButton> {
                   testgrids.forEach((e) {
                     lines.add(Line(Offset(e.startX.toDouble(),-e.startY.toDouble())/gridScale, Offset(e.endX.toDouble(),-e.endY.toDouble())/gridScale));
                   });
-                  _iPs = IntersectPoint().Intersections(lines).toSet().toList();
+                  // _iPs = IntersectPoint().Intersections(lines).toSet().toList();
+                  _iPs = Intesection().ComputeLines(lines).toSet().toList();
 
                   print(lines.length);
                   print(_iPs.length);
@@ -184,7 +186,7 @@ class _GridButtonState extends State<GridButton> {
                                       ...tasks.map((e) =>  Positioned.fromRect(
                                         rect: e.boundary,
                                         child: Opacity(
-                                            opacity: 0.5,
+                                            opacity: 0.8,
                                             child: ElevatedButton(onPressed: () {
                                               print(e.writeTime.toString());
                                             }, child: null)), ),

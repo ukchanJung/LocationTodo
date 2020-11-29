@@ -29,7 +29,7 @@ class GridMaker extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 1000.0 /gScale
       ..style = PaintingStyle.stroke
-      ..color = Colors.blueAccent;
+      ..color = Colors.amber;
     Paint paint2 = Paint()
       ..color = Colors.blue
       ..strokeCap = StrokeCap.round

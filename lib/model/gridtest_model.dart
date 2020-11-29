@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_app_location_todo/model/line_model.dart';
 
 class Gridtestmodel {
   String name;
   String type;
   String index;
-  int startX;
-  int startY;
-  int endX;
-  int endY;
+  num startX;
+  num startY;
+  num endX;
+  num endY;
 
   Gridtestmodel({
       this.name, 
@@ -17,6 +18,7 @@ class Gridtestmodel {
       this.startY, 
       this.endX, 
       this.endY});
+
 
   Gridtestmodel.fromJson(Map<String, dynamic> json,{DocumentReference reference}) {
     name = json["name"];

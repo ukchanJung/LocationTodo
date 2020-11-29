@@ -3,6 +3,7 @@ import 'package:flutter_app_location_todo/model/line_model.dart';
 
 class IntersectPoint{
   List<Line> lines;
+
   Offset IntersectTwoLine(Line line1, Line line2) {
     Offset p1 = line1.p1;
     Offset p2 = line1.p2;
@@ -10,6 +11,19 @@ class IntersectPoint{
     Offset p4 = line2.p2;
     double x1,x2,y1,y2,x3,x4,y3,y4;
     double m1,m2;
+
+    // let sign1 = (p2.x-p1.x)*(p3.y-p1.y) - (p3.x-p1.x)*(p2.y-p1.y);
+    //
+    // let sign2 = (p2.x-p1.x)*(p4.y-p1.y) - (p4.x-p1.x)*(p2.y-p1.y);
+    //
+    //
+    //
+    // let sign3 = (p4.x-p3.x)*(p1.y-p3.y) - (p1.x-p3.x)*(p4.y-p3.y);
+    //
+    // let sign4 = (p4.x-p3.x)*(p2.y-p3.y) - (p2.x-p3.x)*(p4.y-p3.y);
+    //
+
+
     x1=p1.dx;
     y1=p1.dy;
     x2=p2.dx;
@@ -35,8 +49,6 @@ class IntersectPoint{
     else  {
       m1=(e*d-b*f)/(a*d-b*c);
       m2=(a*f-e*c)/(a*d-b*c);
-      // print("ua$ua");
-      // print("ub$ub");
       if (m1<0 && m2>0) {
         m1=(-1)*m1;
       }
