@@ -78,13 +78,16 @@ class _TodoDetailState extends State<TodoDetail> {
         actions: [
           IconButton(
             icon: Icon(Icons.details),
-            onPressed: () {},
+            onPressed: () {
+              print(_photoViewController.position);
+            },
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
-          print(visionText.text);
+          // print(visionText.text);
+          _photoViewController.position = Offset(200,-100);
         },
       ),
       body: Column(

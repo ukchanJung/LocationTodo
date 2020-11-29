@@ -23,31 +23,31 @@ class _LocationTodoState extends State<LocationTodo> {
   DateFormat formatter2 = DateFormat('HH:mm:ss');
   List<bool> togleSelect = [true];
 
+
   @override
   void initState() {
     super.initState();
     setState(() {
       tasks = [
-        Task(DateTime.now(),name: '메모1'),
-        Task(DateTime.now(),name: '메모2'),
-        Task(DateTime.now(),name: '메모3'),
-        Task(DateTime.now(),name: '메모4'),
-        Task(DateTime.now(),name: '메모5'),
-        Task(DateTime.now(),name: '메모6'),
-        Task(DateTime.now(),name: '메모7'),
-        Task(DateTime.now(),name: '메모8'),
-        Task(DateTime.now(),name: '메모9'),
-        Task(DateTime.now(),name: '메모10'),
-        Task(DateTime.now(),name: '메모11'),
-        Task(DateTime.now(),name: '메모12'),
-        Task(DateTime.now(),name: '메모13'),
-        Task(DateTime.now(),name: '메모14'),
+        Task(DateTime.now(), name: '메모1'),
+        Task(DateTime.now(), name: '메모2'),
+        Task(DateTime.now(), name: '메모3'),
+        Task(DateTime.now(), name: '메모4'),
+        Task(DateTime.now(), name: '메모5'),
+        Task(DateTime.now(), name: '메모6'),
+        Task(DateTime.now(), name: '메모7'),
+        Task(DateTime.now(), name: '메모8'),
+        Task(DateTime.now(), name: '메모9'),
+        Task(DateTime.now(), name: '메모10'),
+        Task(DateTime.now(), name: '메모11'),
+        Task(DateTime.now(), name: '메모12'),
+        Task(DateTime.now(), name: '메모13'),
+        Task(DateTime.now(), name: '메모14'),
       ];
-      for (int i = 0; i< tasks.length; i++){
+      for (int i = 0; i < tasks.length; i++) {
         tasks[i].x = Random().nextInt(400).toDouble();
         tasks[i].y = Random().nextInt(280).toDouble();
       }
-      
     });
   }
 
@@ -90,9 +90,14 @@ class _LocationTodoState extends State<LocationTodo> {
               );
             },
           ),
+          IconButton(
+            icon: Icon(Icons.print),
+            onPressed: () {
+            },
+          ),
           Card(
             child: Container(
-              width: 200,
+              width: 100,
               child: TextField(
                 onChanged: (String value) {
                   setState(() {
@@ -122,7 +127,7 @@ class _LocationTodoState extends State<LocationTodo> {
         children: [
           //위치 표현 이미지 위젯
           LocationImage(tasks),
-          // AspectRatio활용하여 이미지 사이즈 변경 기능 추가예정
+          // AspectRatio 활용하여 이미지 사이즈 변경 기능 추가예정
           Divider(
             thickness: 3,
           ),
