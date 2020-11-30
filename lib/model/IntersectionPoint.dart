@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/gridtest_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
 
-class Intesection {
+class Intersection {
   Point point;
   List<Gridtestmodel> gridList;
   num A, B, E;

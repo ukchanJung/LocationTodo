@@ -62,8 +62,8 @@ class _GridButtonState extends State<GridButton> {
   List<Grid> grids = [];
   List<Gridtestmodel> testgrids = [];
   Offset _origin = Offset(0, 0);
-  // double gridScale = 421*500/1024;
-  double gScale = 421.0*500;
+  //TODO 도면의 스케일 값을 지정해줘야됨
+  double gScale = 421.0*200;
   TextEditingController _nameControl = TextEditingController();
   TextEditingController _distanceControl = TextEditingController();
   String dropdownValue = 'One';
@@ -78,6 +78,7 @@ class _GridButtonState extends State<GridButton> {
 
   String path = 'asset/Plan2.png';
   Offset corinatePoint = Offset(0,0);
+  Offset selectIntersect = Offset(0,0);
 
   @override
   void initState() {
@@ -92,7 +93,7 @@ class _GridButtonState extends State<GridButton> {
       testgrids.forEach((e) {
         lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble())/gScale, Offset(e.endX.toDouble(), -e.endY.toDouble())/gScale ));
       });
-      _iPs = Intesection().computeLines(lines).toSet().toList();
+      _iPs = Intersection().computeLines(lines).toSet().toList();
       _iPs.forEach((element) {print(element.toString());});
 
     }
@@ -155,12 +156,13 @@ class _GridButtonState extends State<GridButton> {
                                   PositionedTapDetector(
                                     onLongPress: (m){
                                       setState(() {
-                                        corinatePoint = Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale;
-                                        print(corinatePoint);
+                                        corinatePoint = Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale -selectIntersect;
+                                        // print(corinatePoint);
+                                        print(m.relative/_photoViewController.scale);
                                       });
                                     },
                                     onTap: (m) {
-                                      List<Point<double>> parseList = _iPs.map((e) => Point(e.dx, e.dy)*deviceWidth).toList();
+                                      List<Point<double>> parseList = _iPs.map((e) => Point(e.dx, e.dy)*deviceWidth+Point(corinatePoint.dx, corinatePoint.dy)).toList();
                                       setState(() {
                                         _origin = Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale;
                                         rectPoint = Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList).minRect(Point(_origin.dx, _origin.dy));
@@ -253,6 +255,7 @@ class _GridButtonState extends State<GridButton> {
                         ),
                       ],
                     ),
+                    Text('선택 교점$selectIntersect',textScaleFactor: 2,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -262,6 +265,12 @@ class _GridButtonState extends State<GridButton> {
                             child: ElevatedButton(
                               onPressed: () {
                                 setState(() {
+
+                                  testgrids.where((e) => e.name=='X-1'||e.name=='Y-11').forEach((element) {print(element.name);});
+                                  var selectGrid = testgrids.where((e) => e.name=='X-1'||e.name=='Y-11').toList();
+                                  Line i = Line(Offset(selectGrid.first.startX.toDouble(),-selectGrid.first.startY.toDouble()),Offset(selectGrid.first.endX.toDouble(),-selectGrid.first.endY.toDouble()));
+                                  Line j = Line(Offset(selectGrid.last.startX.toDouble(),-selectGrid.last.startY.toDouble()),Offset(selectGrid.last.endX.toDouble(),-selectGrid.last.endY.toDouble()));
+                                  selectIntersect=Intersection().compute(i,j)/gScale*deviceWidth;
                                 });
                               },
                               child: Text('원점지정'),
