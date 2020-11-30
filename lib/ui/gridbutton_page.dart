@@ -62,7 +62,8 @@ class _GridButtonState extends State<GridButton> {
   List<Grid> grids = [];
   List<Gridtestmodel> testgrids = [];
   Offset _origin = Offset(0, 0);
-  double gridScale = 500;
+  // double gridScale = 421*500/1024;
+  double gScale = 421.0*500;
   TextEditingController _nameControl = TextEditingController();
   TextEditingController _distanceControl = TextEditingController();
   String dropdownValue = 'One';
@@ -75,6 +76,9 @@ class _GridButtonState extends State<GridButton> {
   final GlobalKey _key = GlobalKey();
   double deviceWidth;
 
+  String path = 'asset/Plan2.png';
+  Offset corinatePoint = Offset(0,0);
+
   @override
   void initState() {
     super.initState();
@@ -86,7 +90,7 @@ class _GridButtonState extends State<GridButton> {
       //그리드를 통한 교차점 확인
       List<Line> lines = [];
       testgrids.forEach((e) {
-        lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble())/gridScale, Offset(e.endX.toDouble(), -e.endY.toDouble())/gridScale ));
+        lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble())/gScale, Offset(e.endX.toDouble(), -e.endY.toDouble())/gScale ));
       });
       _iPs = Intesection().computeLines(lines).toSet().toList();
       _iPs.forEach((element) {print(element.toString());});
@@ -109,9 +113,9 @@ class _GridButtonState extends State<GridButton> {
 
   @override
   Widget build(BuildContext context) {
-    // setState(() {
-    // deviceWidth = MediaQuery.of(context).size.width;
-    // });
+    setState(() {
+    deviceWidth = MediaQuery.of(context).size.width;
+    });
     return Scaffold(
         appBar: AppBar(
           title: Text('그리드 버튼'),
@@ -149,8 +153,14 @@ class _GridButtonState extends State<GridButton> {
                               child: Stack(
                                 children: [
                                   PositionedTapDetector(
+                                    onLongPress: (m){
+                                      setState(() {
+                                        corinatePoint = Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale;
+                                        print(corinatePoint);
+                                      });
+                                    },
                                     onTap: (m) {
-                                      List<Point<double>> parseList = _iPs.map((e) => Point(e.dx, e.dy)).toList();
+                                      List<Point<double>> parseList = _iPs.map((e) => Point(e.dx, e.dy)*deviceWidth).toList();
                                       setState(() {
                                         _origin = Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale;
                                         rectPoint = Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList).minRect(Point(_origin.dx, _origin.dy));
@@ -158,10 +168,10 @@ class _GridButtonState extends State<GridButton> {
                                     },
                                     child: Stack(
                                       children: [
-                                        Image.asset('asset/Plan2.png'),
+                                        Image.asset(path),
                                         Container(
                                           child: CustomPaint(
-                                            painter: GridMaker(snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(), gridScale, _origin, pointList: _iPs ,deviceWidth: deviceWidth),
+                                            painter: GridMaker(snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(), gScale, _origin, pointList: _iPs ,deviceWidth: deviceWidth,cordinate: corinatePoint),
                                           ),
                                         ),
                                       ],
@@ -193,17 +203,6 @@ class _GridButtonState extends State<GridButton> {
                         ),
                       ],
                     ),
-                    // Slider(
-                    //     value: gridScale/deviceWidth,
-                    //     min:0,
-                    //     max:2000 ,
-                    //     divisions: 2000,
-                    //     label: (gridScale/deviceWidth).round().toString(),
-                    //     onChanged: (double value) {
-                    //       setState(() {
-                    //         gridScale = value *deviceWidth;
-                    //       });
-                    //     }),
                     // Expanded(
                     //   child: ListView(children: snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList().map((e) => Text('${e.name}은' '${e.startX}' '${e.endY}')).toList()
                     //       // children: grids.map((e) => Text('${e.name}은''${e.x}''${e.y}')).toList()
@@ -254,36 +253,60 @@ class _GridButtonState extends State<GridButton> {
                         ),
                       ],
                     ),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    //   children: [
-                    //     ElevatedButton(
-                    //       onPressed: () {
-                    //         updateX(_nameControl.text, select.x + int.parse(_distanceControl.text));
-                    //         setState(() {
-                    //           select = snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList().firstWhere((e) => e.name.contains(_nameControl.text));
-                    //         });
-                    //       },
-                    //       child: Text('수정하기'),
-                    //     ),
-                    //     ElevatedButton(
-                    //         onPressed: () {
-                    //           writeX(_nameControl.text, int.parse(_distanceControl.text));
-                    //           setState(() {
-                    //             select = snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList().firstWhere((e) => e.name.contains(_nameControl.text));
-                    //           });
-                    //         },
-                    //         child: Text('추가하기')),
-                    //     ElevatedButton(
-                    //         onPressed: () {
-                    //           writeY(_nameControl.text, int.parse(_distanceControl.text));
-                    //           setState(() {
-                    //             select = snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList().firstWhere((e) => e.name.contains(_nameControl.text));
-                    //           });
-                    //         },
-                    //         child: Text('Y 추가하기')),
-                    //   ],
-                    // ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                });
+                              },
+                              child: Text('원점지정'),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  path = 'asset/Plan2.png';
+                                });
+                              },
+                              child: Text('1층 평면도'),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    path = 'asset/photos/A31-109.png';
+                                  });
+                                },
+                                child: Text('1층 확대 평면도')),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    path = 'asset/photos/A12-004.png';
+                                  });
+                                },
+                                child: Text('단면도')),
+                          ),
+                        ),
+                      ],
+                    ),
                     Row(
                       children: [
                         Expanded(
