@@ -63,7 +63,8 @@ class _GridButtonState extends State<GridButton> {
   List<Gridtestmodel> testgrids = [];
   Offset _origin = Offset(0, 0);
   //TODO 도면의 스케일 값을 지정해줘야됨
-  double gScale = 421.0*200;
+  double gScale = 421.0*500;
+  double docScale = 500;
   TextEditingController _nameControl = TextEditingController();
   TextEditingController _distanceControl = TextEditingController();
   String dropdownValue = 'One';
@@ -124,6 +125,12 @@ class _GridButtonState extends State<GridButton> {
             IconButton(
                 icon: Icon(Icons.add),
                 onPressed: () {
+                  List<Line> lines = [];
+                  testgrids.forEach((e) {
+                    lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble())/gScale, Offset(e.endX.toDouble(), -e.endY.toDouble())/gScale ));
+                  });
+                  _iPs = Intersection().computeLines(lines).toSet().toList();
+                  _iPs.forEach((element) {print(element.toString());});
                   // RenderBox _containerBox = _key.currentContext.findRenderObject();
                   // Size containerSize = _containerBox.size;
                   // print(containerSize);
@@ -284,6 +291,8 @@ class _GridButtonState extends State<GridButton> {
                               onPressed: () {
                                 setState(() {
                                   path = 'asset/Plan2.png';
+                                  docScale = 500;
+                                  gScale = 421*docScale;
                                 });
                               },
                               child: Text('1층 평면도'),
@@ -297,6 +306,8 @@ class _GridButtonState extends State<GridButton> {
                                 onPressed: () {
                                   setState(() {
                                     path = 'asset/photos/A31-109.png';
+                                    docScale = 200;
+                                    gScale = 421*docScale;
                                   });
                                 },
                                 child: Text('1층 확대 평면도')),
