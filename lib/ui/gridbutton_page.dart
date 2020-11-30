@@ -6,7 +6,6 @@ import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
 import 'package:flutter_app_location_todo/model/closest_model.dart';
 import 'package:flutter_app_location_todo/model/grid_model.dart';
 import 'package:flutter_app_location_todo/model/gridtest_model.dart';
-import 'package:flutter_app_location_todo/model/intersection_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/gridlist_page.dart';
@@ -63,7 +62,7 @@ class _GridButtonState extends State<GridButton> {
   List<Grid> grids = [];
   List<Gridtestmodel> testgrids = [];
   Offset _origin = Offset(0, 0);
-  double gridScale =585;
+  double gridScale = 500;
   TextEditingController _nameControl = TextEditingController();
   TextEditingController _distanceControl = TextEditingController();
   String dropdownValue = 'One';
@@ -72,31 +71,33 @@ class _GridButtonState extends State<GridButton> {
   List<Point> rectPoint = [];
   QuerySnapshot read;
   List<Task> tasks = [];
-  PhotoViewController _photoViewController =PhotoViewController();
+  PhotoViewController _photoViewController = PhotoViewController();
+  final GlobalKey _key = GlobalKey();
+  double deviceWidth;
 
   @override
   void initState() {
     super.initState();
-    // grids.addAll([
-    //   Grid('X1',x: 0),
-    //   Grid('Y0',y: 0),
-    // ]
-    // );
-    void reading() async {
-      FirebaseFirestore _db = FirebaseFirestore.instance;
-      QuerySnapshot read = await _db.collection('gridList').get();
-      grids = read.docs.map((e) => Grid.fromSnapshot(e)).toList();
-    }
-    void readinggrid() async {
+
+    void readingGrid() async {
       FirebaseFirestore _db = FirebaseFirestore.instance;
       QuerySnapshot read = await _db.collection('gridTest').get();
       testgrids = read.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList();
+      //그리드를 통한 교차점 확인
+      List<Line> lines = [];
+      testgrids.forEach((e) {
+        lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble())/gridScale, Offset(e.endX.toDouble(), -e.endY.toDouble())/gridScale ));
+      });
+      _iPs = Intesection().computeLines(lines).toSet().toList();
+      _iPs.forEach((element) {print(element.toString());});
+
     }
 
-    reading();
-    readinggrid();
-    print(grids);
-    print(testgrids.length);
+    readingGrid();
+  }
+  @override
+  void didChangeDependencies() async{
+    super.didChangeDependencies();
   }
 
   void dispose() {
@@ -108,33 +109,22 @@ class _GridButtonState extends State<GridButton> {
 
   @override
   Widget build(BuildContext context) {
+    // setState(() {
+    // deviceWidth = MediaQuery.of(context).size.width;
+    // });
     return Scaffold(
         appBar: AppBar(
           title: Text('그리드 버튼'),
           actions: [
-            ElevatedButton.icon(
-                onPressed: () {
-                  List<Line> lines = [];
-                  double _width = 500;
-                  double _height = 300;
-                  // grids.forEach((e) {
-                  //   if (e.name.contains('X')) {
-                  //     lines.add(Line(Offset(e.x.toDouble() / _scale, 0), Offset(e.x.toDouble() / _scale, _height)));
-                  //   } else if (e.name.contains('Y')) {
-                  //     lines.add(Line(Offset(0, e.y.toDouble() / _scale), Offset(_width, e.y.toDouble() / _scale)));
-                  //   }
-                  // });
-                  testgrids.forEach((e) {
-                    lines.add(Line(Offset(e.startX.toDouble(),-e.startY.toDouble())/gridScale, Offset(e.endX.toDouble(),-e.endY.toDouble())/gridScale));
-                  });
-                  // _iPs = IntersectPoint().Intersections(lines).toSet().toList();
-                  _iPs = Intesection().ComputeLines(lines).toSet().toList();
-
-                  print(lines.length);
-                  print(_iPs.length);
-                },
+            IconButton(
                 icon: Icon(Icons.add),
-                label: Text('서버업로드'))
+                onPressed: () {
+                  // RenderBox _containerBox = _key.currentContext.findRenderObject();
+                  // Size containerSize = _containerBox.size;
+                  // print(containerSize);
+                  // print(MediaQuery.of(context).size);
+                  // print(MediaQuery.of(context).devicePixelRatio);
+                }),
           ],
         ),
         body: StreamBuilder<QuerySnapshot>(
@@ -145,82 +135,96 @@ class _GridButtonState extends State<GridButton> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: 500,
-                            height: 300,
-                            child: AspectRatio(
-                              aspectRatio: 500/300,
-                              child: ClipRect(
-                                child: PhotoView.customChild(
-                                  // minScale: 1.0,
-                                  initialScale: 2.0,
-                                  controller: _photoViewController,
-                                  backgroundDecoration: BoxDecoration(color: Colors.transparent),
-                                  child: Stack(
-                                    children: [
-                                      PositionedTapDetector(
-                                        onLongPress: (m) {
-                                          List<Point<double>> parseList = _iPs.map((e) => Point(e.dx, e.dy)).toList();
-                                          setState(() {
-                                            _origin = Offset(m.relative.dx, m.relative.dy)/_photoViewController.scale;
-                                            rectPoint = Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList).minRect(Point(_origin.dx, _origin.dy));
-                                          });
-                                        },
-                                        child: Stack(
-                                          children: [
-                                            Image.asset('asset/Plan2.png'),
-                                            Container(
-                                              width: 500,
-                                              height: 300,
-                                              child: CustomPaint(
-                                                painter: GridMaker(snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(), gridScale, _origin, pointList: _iPs),
-                                              ),
+                    Stack(
+                      children: [
+                        AspectRatio(
+                          key: _key,
+                          aspectRatio: 1,
+                          child: ClipRect(
+                            child: PhotoView.customChild(
+                              minScale: 1.0,
+                              initialScale: 1.0,
+                              controller: _photoViewController,
+                              backgroundDecoration: BoxDecoration(color: Colors.transparent),
+                              child: Stack(
+                                children: [
+                                  PositionedTapDetector(
+                                    onTap: (m) {
+                                      List<Point<double>> parseList = _iPs.map((e) => Point(e.dx, e.dy)).toList();
+                                      setState(() {
+                                        _origin = Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale;
+                                        rectPoint = Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList).minRect(Point(_origin.dx, _origin.dy));
+                                      });
+                                    },
+                                    child: Stack(
+                                      children: [
+                                        Image.asset('asset/Plan2.png'),
+                                        Container(
+                                          child: CustomPaint(
+                                            painter: GridMaker(snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(), gridScale, _origin, pointList: _iPs ,deviceWidth: deviceWidth),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  ...tasks.map(
+                                    (e) => Positioned.fromRect(
+                                      rect: e.boundary,
+                                      child: Opacity(
+                                        opacity: 0.8,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            print(e.writeTime.toString());
+                                          },
+                                          child: null,
+                                          style: ElevatedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(0.0),
                                             ),
-                                          ],
+                                          ),
                                         ),
                                       ),
-                                      ...tasks.map((e) =>  Positioned.fromRect(
-                                        rect: e.boundary,
-                                        child: Opacity(
-                                            opacity: 0.8,
-                                            child: ElevatedButton(onPressed: () {
-                                              print(e.writeTime.toString());
-                                            }, child: null)), ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Expanded(
-                      child: ListView(children: snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList().map((e) => Text('${e.name}은' '${e.startX}' '${e.endY}')).toList()
-                          // children: grids.map((e) => Text('${e.name}은''${e.x}''${e.y}')).toList()
-                          ),
-                    ),
-                    Card(
-                      elevation: 4,
-                      child: ListTile(
-                        title: select == null ? Text('그리드를 선택해주세요') : Text(select.toString()),
-                        onTap: () async {
-                          Grid _select;
-                          _select = await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => GridList(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList())),
-                          );
-                          setState(() {
-                            select = _select;
-                          });
-                        },
-                      ),
-                    ),
+                    // Slider(
+                    //     value: gridScale/deviceWidth,
+                    //     min:0,
+                    //     max:2000 ,
+                    //     divisions: 2000,
+                    //     label: (gridScale/deviceWidth).round().toString(),
+                    //     onChanged: (double value) {
+                    //       setState(() {
+                    //         gridScale = value *deviceWidth;
+                    //       });
+                    //     }),
+                    // Expanded(
+                    //   child: ListView(children: snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList().map((e) => Text('${e.name}은' '${e.startX}' '${e.endY}')).toList()
+                    //       // children: grids.map((e) => Text('${e.name}은''${e.x}''${e.y}')).toList()
+                    //       ),
+                    // ),
+                    // Card(
+                    //   elevation: 4,
+                    //   child: ListTile(
+                    //     title: select == null ? Text('그리드를 선택해주세요') : Text(select.toString()),
+                    //     onTap: () async {
+                    //       Grid _select;
+                    //       _select = await Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(builder: (context) => GridList(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList())),
+                    //       );
+                    //       setState(() {
+                    //         select = _select;
+                    //       });
+                    //     },
+                    //   ),
+                    // ),
                     Row(
                       children: [
                         Expanded(
@@ -286,10 +290,11 @@ class _GridButtonState extends State<GridButton> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: ElevatedButton(
-                              onPressed: () {setState(() {
-                                var _wTime = DateTime.now();
-                                tasks.add(Task(_wTime,boundary: Rect.fromPoints(Offset(rectPoint.first.x,rectPoint.first.y), Offset(rectPoint.last.x,rectPoint.last.y))));
-                              });
+                              onPressed: () {
+                                setState(() {
+                                  var _wTime = DateTime.now();
+                                  tasks.add(Task(_wTime, boundary: Rect.fromPoints(Offset(rectPoint.first.x, rectPoint.first.y), Offset(rectPoint.last.x, rectPoint.last.y))));
+                                });
                               },
                               child: Text('Task 추가'),
                             ),
