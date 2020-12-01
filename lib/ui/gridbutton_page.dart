@@ -65,8 +65,8 @@ class _GridButtonState extends State<GridButton> {
   //TODO 도면의 스케일 값을 지정해줘야됨
   double gScale = 421.0*500;
   double docScale = 500;
-  TextEditingController _nameControl = TextEditingController();
-  TextEditingController _distanceControl = TextEditingController();
+  TextEditingController _gridX = TextEditingController();
+  TextEditingController _gridY = TextEditingController();
   String dropdownValue = 'One';
   Grid select;
   List<Offset> _iPs;
@@ -109,8 +109,8 @@ class _GridButtonState extends State<GridButton> {
   void dispose() {
     super.dispose();
     _photoViewController.dispose();
-    _nameControl.dispose();
-    _distanceControl.dispose();
+    _gridX.dispose();
+    _gridY.dispose();
   }
 
   @override
@@ -239,10 +239,10 @@ class _GridButtonState extends State<GridButton> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextField(
-                              controller: _nameControl,
+                              controller: _gridX,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
-                                labelText: '그리드 이름',
+                                labelText: 'X그리드',
                               ),
                             ),
                           ),
@@ -251,11 +251,10 @@ class _GridButtonState extends State<GridButton> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: TextField(
-                              controller: _distanceControl,
-                              keyboardType: TextInputType.number,
+                              controller: _gridY,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
-                                labelText: '거리',
+                                labelText: 'Y그리드',
                               ),
                             ),
                           ),
@@ -272,9 +271,8 @@ class _GridButtonState extends State<GridButton> {
                             child: ElevatedButton(
                               onPressed: () {
                                 setState(() {
-
-                                  testgrids.where((e) => e.name=='X-1'||e.name=='Y-11').forEach((element) {print(element.name);});
-                                  var selectGrid = testgrids.where((e) => e.name=='X-1'||e.name=='Y-11').toList();
+                                  testgrids.where((e) => e.name==_gridX.text||e.name==_gridY.text).forEach((element) {print(element.name);});
+                                  var selectGrid = testgrids.where((e) => e.name==_gridX.text||e.name==_gridY.text).toList();
                                   Line i = Line(Offset(selectGrid.first.startX.toDouble(),-selectGrid.first.startY.toDouble()),Offset(selectGrid.first.endX.toDouble(),-selectGrid.first.endY.toDouble()));
                                   Line j = Line(Offset(selectGrid.last.startX.toDouble(),-selectGrid.last.startY.toDouble()),Offset(selectGrid.last.endX.toDouble(),-selectGrid.last.endY.toDouble()));
                                   selectIntersect=Intersection().compute(i,j)/gScale*deviceWidth;
