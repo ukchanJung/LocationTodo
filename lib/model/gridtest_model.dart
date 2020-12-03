@@ -10,17 +10,9 @@ class Gridtestmodel {
   num endX;
   num endY;
 
-  Gridtestmodel({
-      this.name, 
-      this.type, 
-      this.index, 
-      this.startX, 
-      this.startY, 
-      this.endX, 
-      this.endY});
+  Gridtestmodel({this.name, this.type, this.index, this.startX, this.startY, this.endX, this.endY});
 
-
-  Gridtestmodel.fromJson(Map<String, dynamic> json,{DocumentReference reference}) {
+  Gridtestmodel.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
     name = json["name"];
     type = json["type"];
     index = json["index"];
@@ -41,7 +33,6 @@ class Gridtestmodel {
     map["endY"] = endY;
     return map;
   }
-  Gridtestmodel.fromSnapshot(DocumentSnapshot snapshot)
-  : this.fromJson(snapshot.data(), reference: snapshot.reference);
 
+  Gridtestmodel.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
 }
