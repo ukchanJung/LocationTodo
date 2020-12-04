@@ -18,8 +18,8 @@ class DrawingPath with ChangeNotifier {
   String getPath() => _path;
   String getName() => _name;
   Drawing getDrawing() => _drawing;
-  double getcordiX() => _drawing.witdh * _drawing.originX;
-  double getcordiY() => _drawing.height * _drawing.originY;
+  double getcordiX() => double.parse(_drawing.scale) * _drawing.witdh;
+  double getcordiY() => double.parse(_drawing.scale) * _drawing.height;
   Offset getOffset() => Offset(_drawing.witdh.toDouble(), _drawing.height.toDouble());
   Offset getcordiOffset(witdh, heigh) => Offset(witdh * _drawing.originX, heigh * _drawing.originY);
   Point getcordiPoint(witdh, heigh) => Point(witdh * _drawing.originX, heigh * _drawing.originY);

@@ -89,7 +89,7 @@ class _GridButtonState extends State<GridButton> {
           localPath: 'asset/photos/A31-109.png',
           originX: 1.4458318294031067,
           originY: 0.10323461221782795,
-          witdh: 427,
+          witdh: 421,
           height: 297),
       Drawing(
         drawingNum: 'A12-004',
@@ -183,9 +183,7 @@ class _GridButtonState extends State<GridButton> {
                                         num width2 = _key2.currentContext.size.width;
                                         num heigh2 = _key2.currentContext.size.height;
                                         print(
-                                            '500 X: ${(((m.relative.dx / _photoViewController.scale) / width2 - drawings[0].originX) * 421 * 500).round()}, Y: ${(((m.relative.dy / _photoViewController.scale) / heigh2 - drawings[0].originY) * 297 * 500).round()}');
-                                        print(
-                                            '200X: ${(((m.relative.dx / _photoViewController.scale) / width2 - drawings[1].originX) * 421 * 200).round()}, Y: ${(((m.relative.dy / _photoViewController.scale) / heigh2 - drawings[1].originY) * 297 * 200).round()}');
+                                            'X: ${(((m.relative.dx / _photoViewController.scale) / width2 - context.read<DrawingPath>().getDrawing().originX) * context.read<DrawingPath>().getcordiX()).round()}, Y: ${(((m.relative.dy / _photoViewController.scale) / heigh2 - context.read<DrawingPath>().getDrawing().originY) * context.read<DrawingPath>().getcordiY()).round()}');
                                       });
                                     },
                                     child: Stack(
