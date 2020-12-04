@@ -271,12 +271,17 @@ class _GridButtonState extends State<GridButton> {
                                   child: ElevatedButton(
                                     onPressed: () {
                                       setState(() {
+                                        num width2 = _key2.currentContext.size.width;
+                                        num heigh2 = _key2.currentContext.size.height;
                                         path = drawings[0].localPath;
                                         docScale = double.parse(drawings[0].scale);
                                         gScale = 421 * docScale;
                                         recaculate();
                                         reaSelectIntersect();
-                                        corinatePoint = Offset(228.7, 185.3) - selectIntersect;
+                                        corinatePoint =
+                                            Offset(drawings[0].originX * 1024, drawings[0].originY * heigh2);
+                                        // originX: 0.7373979439768359,
+                                        // originY: 0.23113260932198965,
                                       });
                                     },
                                     child: Text('1층 평면도'),
