@@ -13,42 +13,13 @@ import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:positioned_tap_detector/positioned_tap_detector.dart';
 
-void write() async {
-  FirebaseFirestore _db = FirebaseFirestore.instance;
-  CollectionReference dbGrid = _db.collection('gridList');
-  dbGrid.doc('test').set({
-    'name': 'X1',
-    'x': 7500.0,
-  });
-}
-
-void writeX(String name, num cordinate) async {
-  FirebaseFirestore _db = FirebaseFirestore.instance;
-  CollectionReference dbGrid = _db.collection('gridList');
-  dbGrid.doc(name).set({
-    'name': name,
-    'x': cordinate,
-  });
-}
-
-void writeY(String name, num cordinate) async {
-  FirebaseFirestore _db = FirebaseFirestore.instance;
-  // QuerySnapshot read = await _db.collection('gridList').get();
-  CollectionReference dbGrid = _db.collection('gridList');
-  dbGrid.doc(name).set({
-    'name': name,
-    'y': cordinate,
-  });
-}
-
-void updateX(String name, num cordinate) async {
-  FirebaseFirestore _db = FirebaseFirestore.instance;
-  // QuerySnapshot read = await _db.collection('gridList').get();
-  CollectionReference dbGrid = _db.collection('gridList');
-  dbGrid.doc(name).update({
-    'name': name,
-    'x': cordinate,
-  });
+class CordinatePoint {
+  String name;
+  num x;
+  num y;
+  String gridX;
+  String gridY;
+  CordinatePoint({this.name, this.x, this.y, this.gridX, this.gridY});
 }
 
 class GridButton extends StatefulWidget {
@@ -69,8 +40,10 @@ class _GridButtonState extends State<GridButton> {
   Grid select;
   List<Offset> _iPs;
   List<Point> rectPoint = [];
+  List<Point> relativeRectPoint = [];
   QuerySnapshot read;
   List<Task> tasks = [];
+  List<Task> relativeasks = [];
   PhotoViewController _photoViewController = PhotoViewController();
   final GlobalKey _key = GlobalKey();
   final GlobalKey _key2 = GlobalKey();
@@ -79,6 +52,7 @@ class _GridButtonState extends State<GridButton> {
   String path = 'asset/Plan2.png';
   Offset corinatePoint = Offset(754.5, 167.1);
   Offset selectIntersect = Offset(0, 0);
+  Offset realIntersect = Offset(0, 0);
   List<Drawing> drawings = [];
 
   @override
@@ -101,14 +75,16 @@ class _GridButtonState extends State<GridButton> {
         title: '1층 평면도',
         scale: '500',
         localPath: 'asset/photos/A31-003.png',
-        originX: 0.7366670231488993,
-        originY: 0.22904007827339623,
+        originX: 0.7373979439768359,
+        originY: 0.23113260932198965,
       ),
       Drawing(
         drawingNum: 'A31-109',
         title: '1층 확대 평면도',
         scale: '200',
         localPath: 'asset/photos/A31-109.png',
+        originX: 0.1640856576345598,
+        originY: 0.17141887724960456,
       ),
       Drawing(
         drawingNum: 'A12-004',
@@ -150,7 +126,7 @@ class _GridButtonState extends State<GridButton> {
                       children: [
                         AspectRatio(
                           key: _key,
-                          aspectRatio: 1,
+                          aspectRatio: 421 / 297,
                           child: ClipRect(
                             child: PhotoView.customChild(
                               minScale: 1.0,
@@ -169,6 +145,7 @@ class _GridButtonState extends State<GridButton> {
                                         num heigh2 = _key2.currentContext.size.height;
                                         drawings[0].originX = m.relative.dx / (width2 * _photoViewController.scale);
                                         drawings[0].originY = m.relative.dy / (heigh2 * _photoViewController.scale);
+                                        print(m.relative / _photoViewController.scale);
                                         print('${drawings[0].originX}, ${drawings[0].originY}');
                                       });
                                     },
@@ -183,6 +160,13 @@ class _GridButtonState extends State<GridButton> {
                                         rectPoint =
                                             Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
                                                 .minRect(Point(_origin.dx, _origin.dy));
+                                        relativeRectPoint =
+                                            Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
+                                                .minRect(Point(_origin.dx, _origin.dy));
+                                        num width2 = _key2.currentContext.size.width;
+                                        num heigh2 = _key2.currentContext.size.height;
+                                        print(
+                                            'X: ${(((m.relative.dx / _photoViewController.scale) / width2 - 0.7373979439768359) * 421 * 200).round()}, Y: ${(((m.relative.dy / _photoViewController.scale) / heigh2 - 0.23113260932198965) * 297 * 200).round()}');
                                       });
                                     },
                                     child: Stack(
@@ -229,27 +213,6 @@ class _GridButtonState extends State<GridButton> {
                         ),
                       ],
                     ),
-                    // Expanded(
-                    //   child: ListView(children: snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList().map((e) => Text('${e.name}은' '${e.startX}' '${e.endY}')).toList()
-                    //       // children: grids.map((e) => Text('${e.name}은''${e.x}''${e.y}')).toList()
-                    //       ),
-                    // ),
-                    // Card(
-                    //   elevation: 4,
-                    //   child: ListTile(
-                    //     title: select == null ? Text('그리드를 선택해주세요') : Text(select.toString()),
-                    //     onTap: () async {
-                    //       Grid _select;
-                    //       _select = await Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(builder: (context) => GridList(snapshot.data.docs.map((e) => Grid.fromSnapshot(e)).toList())),
-                    //       );
-                    //       setState(() {
-                    //         select = _select;
-                    //       });
-                    //     },
-                    //   ),
-                    // ),
                     Expanded(
                       child: ListView(
                         children: [
@@ -282,7 +245,7 @@ class _GridButtonState extends State<GridButton> {
                             ],
                           ),
                           Text(
-                            '선택 교점$selectIntersect',
+                            '선택 교점 $selectIntersect',
                             textScaleFactor: 2,
                           ),
                           Row(
@@ -295,24 +258,7 @@ class _GridButtonState extends State<GridButton> {
                                     autofocus: true,
                                     onPressed: () {
                                       setState(() {
-                                        testgrids
-                                            .where((e) => e.name == _gridX.text || e.name == _gridY.text)
-                                            .forEach((element) {
-                                          print(element.name);
-                                        });
-                                        var selectGrid = testgrids
-                                            .where((e) => e.name == _gridX.text || e.name == _gridY.text)
-                                            .toList();
-                                        Line i = Line(
-                                            Offset(selectGrid.first.startX.toDouble(),
-                                                -selectGrid.first.startY.toDouble()),
-                                            Offset(
-                                                selectGrid.first.endX.toDouble(), -selectGrid.first.endY.toDouble()));
-                                        Line j = Line(
-                                            Offset(
-                                                selectGrid.last.startX.toDouble(), -selectGrid.last.startY.toDouble()),
-                                            Offset(selectGrid.last.endX.toDouble(), -selectGrid.last.endY.toDouble()));
-                                        selectIntersect = Intersection().compute(i, j) / gScale * deviceWidth;
+                                        reaSelectIntersect();
                                       });
                                     },
                                     child: Text('원점지정'),
@@ -326,9 +272,11 @@ class _GridButtonState extends State<GridButton> {
                                     onPressed: () {
                                       setState(() {
                                         path = drawings[0].localPath;
-                                        docScale = 500;
+                                        docScale = double.parse(drawings[0].scale);
                                         gScale = 421 * docScale;
                                         recaculate();
+                                        reaSelectIntersect();
+                                        corinatePoint = Offset(228.7, 185.3) - selectIntersect;
                                       });
                                     },
                                     child: Text('1층 평면도'),
@@ -342,9 +290,11 @@ class _GridButtonState extends State<GridButton> {
                                       onPressed: () {
                                         setState(() {
                                           path = drawings[1].localPath;
-                                          docScale = 200;
+                                          docScale = double.parse(drawings[1].scale);
                                           gScale = 421 * docScale;
                                           recaculate();
+                                          reaSelectIntersect();
+                                          corinatePoint = Offset(168.9, 124.4) - selectIntersect;
                                         });
                                       },
                                       child: Text('1층 확대 평면도')),
@@ -377,6 +327,9 @@ class _GridButtonState extends State<GridButton> {
                                         tasks.add(Task(_wTime,
                                             boundary: Rect.fromPoints(Offset(rectPoint.first.x, rectPoint.first.y),
                                                 Offset(rectPoint.last.x, rectPoint.last.y))));
+                                        relativeasks.add(Task(_wTime,
+                                            boundary: Rect.fromPoints(Offset(rectPoint.first.x, rectPoint.first.y),
+                                                Offset(rectPoint.last.x, rectPoint.last.y))));
                                       });
                                     },
                                     child: Text('Task 추가'),
@@ -407,6 +360,18 @@ class _GridButtonState extends State<GridButton> {
                 ),
               );
             }));
+  }
+
+  void reaSelectIntersect() {
+    testgrids.where((e) => e.name == _gridX.text || e.name == _gridY.text).forEach((element) {
+      print(element.name);
+    });
+    List<Gridtestmodel> selectGrid = testgrids.where((e) => e.name == _gridX.text || e.name == _gridY.text).toList();
+    Line i = Line(Offset(selectGrid.first.startX.toDouble(), -selectGrid.first.startY.toDouble()),
+        Offset(selectGrid.first.endX.toDouble(), -selectGrid.first.endY.toDouble()));
+    Line j = Line(Offset(selectGrid.last.startX.toDouble(), -selectGrid.last.startY.toDouble()),
+        Offset(selectGrid.last.endX.toDouble(), -selectGrid.last.endY.toDouble()));
+    selectIntersect = Intersection().compute(i, j) / gScale * deviceWidth;
   }
 
   void recaculate() {
