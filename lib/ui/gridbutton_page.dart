@@ -83,8 +83,8 @@ class _GridButtonState extends State<GridButton> {
         title: '1층 확대 평면도',
         scale: '200',
         localPath: 'asset/photos/A31-109.png',
-        originX: 0.1640856576345598,
-        originY: 0.17141887724960456,
+        originX: 1.4458318294031067,
+        originY: 0.10323461221782795,
       ),
       Drawing(
         drawingNum: 'A12-004',
@@ -143,10 +143,17 @@ class _GridButtonState extends State<GridButton> {
                                                 selectIntersect;
                                         num width2 = _key2.currentContext.size.width;
                                         num heigh2 = _key2.currentContext.size.height;
-                                        drawings[0].originX = m.relative.dx / (width2 * _photoViewController.scale);
-                                        drawings[0].originY = m.relative.dy / (heigh2 * _photoViewController.scale);
-                                        print(m.relative / _photoViewController.scale);
-                                        print('${drawings[0].originX}, ${drawings[0].originY}');
+                                        // drawings[0].originX = m.relative.dx / (width2 * _photoViewController.scale);
+                                        // drawings[0].originY = m.relative.dy / (heigh2 * _photoViewController.scale);
+                                        drawings[1].originX = (m.relative.dx / (width2 * _photoViewController.scale)) -
+                                            (realIntersect.dx / gScale);
+                                        drawings[1].originY = m.relative.dy / (heigh2 * _photoViewController.scale) -
+                                            realIntersect.dy / (297 * 200);
+                                        // print(m.relative / _photoViewController.scale);
+                                        // print('${drawings[0].originX}, ${drawings[0].originY}');
+
+                                        print(drawings[1].originX);
+                                        print(drawings[1].originY);
                                       });
                                     },
                                     onTap: (m) {
@@ -244,10 +251,8 @@ class _GridButtonState extends State<GridButton> {
                               ),
                             ],
                           ),
-                          Text(
-                            '선택 교점 $selectIntersect',
-                            textScaleFactor: 2,
-                          ),
+                          Text('선택 교점 $selectIntersect', textScaleFactor: 2),
+                          Text('좌표 교점 $realIntersect', textScaleFactor: 2),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -278,10 +283,9 @@ class _GridButtonState extends State<GridButton> {
                                         gScale = 421 * docScale;
                                         recaculate();
                                         reaSelectIntersect();
+                                        //TODO 원점 비율 * 위젯의 사이즈
                                         corinatePoint =
-                                            Offset(drawings[0].originX * 1024, drawings[0].originY * heigh2);
-                                        // originX: 0.7373979439768359,
-                                        // originY: 0.23113260932198965,
+                                            Offset(drawings[0].originX * width2, drawings[0].originY * heigh2);
                                       });
                                     },
                                     child: Text('1층 평면도'),
@@ -294,12 +298,15 @@ class _GridButtonState extends State<GridButton> {
                                   child: ElevatedButton(
                                       onPressed: () {
                                         setState(() {
+                                          num width2 = _key2.currentContext.size.width;
+                                          num heigh2 = _key2.currentContext.size.height;
                                           path = drawings[1].localPath;
                                           docScale = double.parse(drawings[1].scale);
                                           gScale = 421 * docScale;
                                           recaculate();
                                           reaSelectIntersect();
-                                          corinatePoint = Offset(168.9, 124.4) - selectIntersect;
+                                          corinatePoint =
+                                              Offset(drawings[1].originX * width2, drawings[1].originY * heigh2);
                                         });
                                       },
                                       child: Text('1층 확대 평면도')),
@@ -377,6 +384,7 @@ class _GridButtonState extends State<GridButton> {
     Line j = Line(Offset(selectGrid.last.startX.toDouble(), -selectGrid.last.startY.toDouble()),
         Offset(selectGrid.last.endX.toDouble(), -selectGrid.last.endY.toDouble()));
     selectIntersect = Intersection().compute(i, j) / gScale * deviceWidth;
+    realIntersect = Intersection().compute(i, j);
   }
 
   void recaculate() {
