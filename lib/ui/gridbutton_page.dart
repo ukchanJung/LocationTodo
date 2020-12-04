@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
 import 'package:flutter_app_location_todo/model/closest_model.dart';
 import 'package:flutter_app_location_todo/model/drawing_model.dart';
+import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/model/grid_model.dart';
 import 'package:flutter_app_location_todo/model/gridtest_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:positioned_tap_detector/positioned_tap_detector.dart';
+import 'package:provider/provider.dart';
 
 class CordinatePoint {
   String name;
@@ -43,7 +45,7 @@ class _GridButtonState extends State<GridButton> {
   List<Point> relativeRectPoint = [];
   QuerySnapshot read;
   List<Task> tasks = [];
-  List<Task> relativeasks = [];
+  List<Task> relativetasks = [];
   PhotoViewController _photoViewController = PhotoViewController();
   final GlobalKey _key = GlobalKey();
   final GlobalKey _key2 = GlobalKey();
@@ -77,15 +79,18 @@ class _GridButtonState extends State<GridButton> {
         localPath: 'asset/photos/A31-003.png',
         originX: 0.7373979439768359,
         originY: 0.23113260932198965,
+        witdh: 421,
+        height: 297,
       ),
       Drawing(
-        drawingNum: 'A31-109',
-        title: '1층 확대 평면도',
-        scale: '200',
-        localPath: 'asset/photos/A31-109.png',
-        originX: 1.4458318294031067,
-        originY: 0.10323461221782795,
-      ),
+          drawingNum: 'A31-109',
+          title: '1층 확대 평면도',
+          scale: '200',
+          localPath: 'asset/photos/A31-109.png',
+          originX: 1.4458318294031067,
+          originY: 0.10323461221782795,
+          witdh: 427,
+          height: 297),
       Drawing(
         drawingNum: 'A12-004',
         title: '종횡단면도',
@@ -138,17 +143,21 @@ class _GridButtonState extends State<GridButton> {
                                   PositionedTapDetector(
                                     onLongPress: (m) {
                                       setState(() {
-                                        corinatePoint =
-                                            Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale -
-                                                selectIntersect;
+                                        // corinatePoint =
+                                        //     Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale -
+                                        //         selectIntersect;
                                         num width2 = _key2.currentContext.size.width;
                                         num heigh2 = _key2.currentContext.size.height;
                                         // drawings[0].originX = m.relative.dx / (width2 * _photoViewController.scale);
                                         // drawings[0].originY = m.relative.dy / (heigh2 * _photoViewController.scale);
                                         drawings[1].originX = (m.relative.dx / (width2 * _photoViewController.scale)) -
-                                            (realIntersect.dx / gScale);
+                                            (realIntersect.dx /
+                                                double.parse(context.watch<DrawingPath>().getDrawing().scale) *
+                                                421);
                                         drawings[1].originY = m.relative.dy / (heigh2 * _photoViewController.scale) -
-                                            realIntersect.dy / (297 * 200);
+                                            realIntersect.dy /
+                                                double.parse(context.watch<DrawingPath>().getDrawing().scale) *
+                                                297;
                                         // print(m.relative / _photoViewController.scale);
                                         // print('${drawings[0].originX}, ${drawings[0].originY}');
 
@@ -162,6 +171,7 @@ class _GridButtonState extends State<GridButton> {
                                               Point(e.dx, e.dy) * deviceWidth +
                                               Point(corinatePoint.dx, corinatePoint.dy))
                                           .toList();
+
                                       setState(() {
                                         _origin = Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale;
                                         rectPoint =
@@ -173,24 +183,28 @@ class _GridButtonState extends State<GridButton> {
                                         num width2 = _key2.currentContext.size.width;
                                         num heigh2 = _key2.currentContext.size.height;
                                         print(
-                                            'X: ${(((m.relative.dx / _photoViewController.scale) / width2 - 0.7373979439768359) * 421 * 200).round()}, Y: ${(((m.relative.dy / _photoViewController.scale) / heigh2 - 0.23113260932198965) * 297 * 200).round()}');
+                                            '500 X: ${(((m.relative.dx / _photoViewController.scale) / width2 - drawings[0].originX) * 421 * 500).round()}, Y: ${(((m.relative.dy / _photoViewController.scale) / heigh2 - drawings[0].originY) * 297 * 500).round()}');
+                                        print(
+                                            '200X: ${(((m.relative.dx / _photoViewController.scale) / width2 - drawings[1].originX) * 421 * 200).round()}, Y: ${(((m.relative.dy / _photoViewController.scale) / heigh2 - drawings[1].originY) * 297 * 200).round()}');
                                       });
                                     },
                                     child: Stack(
                                       key: _key2,
                                       children: [
-                                        Image.asset(path),
+                                        Image.asset(context.watch<DrawingPath>().getDrawing().localPath),
                                         Container(
                                           child: CustomPaint(
                                             painter: GridMaker(
-                                                snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
-                                                gScale,
-                                                _origin,
-                                                pointList: _iPs,
-                                                deviceWidth: deviceWidth,
-                                                cordinate: corinatePoint),
+                                              snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
+                                              double.parse(context.watch<DrawingPath>().getDrawing().scale) * 421,
+                                              _origin,
+                                              pointList: _iPs,
+                                              deviceWidth: deviceWidth,
+                                              cordinate: corinatePoint,
+                                              // cordinate: context.watch<DrawingPath>().getOffset(),
+                                            ),
                                           ),
-                                        ),
+                                        )
                                       ],
                                     ),
                                   ),
@@ -278,14 +292,14 @@ class _GridButtonState extends State<GridButton> {
                                       setState(() {
                                         num width2 = _key2.currentContext.size.width;
                                         num heigh2 = _key2.currentContext.size.height;
-                                        path = drawings[0].localPath;
-                                        docScale = double.parse(drawings[0].scale);
-                                        gScale = 421 * docScale;
+                                        context.read<DrawingPath>().changePath(drawings[0]);
+                                        // gScale = 421 * docScale;
                                         recaculate();
-                                        reaSelectIntersect();
+                                        // reaSelectIntersect();
                                         //TODO 원점 비율 * 위젯의 사이즈
-                                        corinatePoint =
-                                            Offset(drawings[0].originX * width2, drawings[0].originY * heigh2);
+                                        corinatePoint = context.read<DrawingPath>().getcordiOffset(width2, heigh2);
+                                        // corinatePoint =
+                                        //     Offset(drawings[0].originX * width2, drawings[0].originY * heigh2);
                                       });
                                     },
                                     child: Text('1층 평면도'),
@@ -300,13 +314,11 @@ class _GridButtonState extends State<GridButton> {
                                         setState(() {
                                           num width2 = _key2.currentContext.size.width;
                                           num heigh2 = _key2.currentContext.size.height;
-                                          path = drawings[1].localPath;
-                                          docScale = double.parse(drawings[1].scale);
-                                          gScale = 421 * docScale;
+                                          context.read<DrawingPath>().changePath(drawings[1]);
+                                          // gScale = 421 * docScale;
                                           recaculate();
-                                          reaSelectIntersect();
-                                          corinatePoint =
-                                              Offset(drawings[1].originX * width2, drawings[1].originY * heigh2);
+                                          // reaSelectIntersect();
+                                          corinatePoint = context.read<DrawingPath>().getcordiOffset(width2, heigh2);
                                         });
                                       },
                                       child: Text('1층 확대 평면도')),
@@ -339,9 +351,10 @@ class _GridButtonState extends State<GridButton> {
                                         tasks.add(Task(_wTime,
                                             boundary: Rect.fromPoints(Offset(rectPoint.first.x, rectPoint.first.y),
                                                 Offset(rectPoint.last.x, rectPoint.last.y))));
-                                        relativeasks.add(Task(_wTime,
-                                            boundary: Rect.fromPoints(Offset(rectPoint.first.x, rectPoint.first.y),
-                                                Offset(rectPoint.last.x, rectPoint.last.y))));
+                                        relativetasks.add(Task(_wTime,
+                                            boundary: Rect.fromPoints(
+                                                Offset(relativeRectPoint.first.x, relativeRectPoint.first.y),
+                                                Offset(relativeRectPoint.last.x, relativeRectPoint.last.y))));
                                       });
                                     },
                                     child: Text('Task 추가'),
@@ -375,6 +388,7 @@ class _GridButtonState extends State<GridButton> {
   }
 
   void reaSelectIntersect() {
+    double _scale = double.parse(context.read<DrawingPath>().getDrawing().scale) * 421.0;
     testgrids.where((e) => e.name == _gridX.text || e.name == _gridY.text).forEach((element) {
       print(element.name);
     });
@@ -383,15 +397,16 @@ class _GridButtonState extends State<GridButton> {
         Offset(selectGrid.first.endX.toDouble(), -selectGrid.first.endY.toDouble()));
     Line j = Line(Offset(selectGrid.last.startX.toDouble(), -selectGrid.last.startY.toDouble()),
         Offset(selectGrid.last.endX.toDouble(), -selectGrid.last.endY.toDouble()));
-    selectIntersect = Intersection().compute(i, j) / gScale * deviceWidth;
+    selectIntersect = Intersection().compute(i, j) / _scale * deviceWidth;
     realIntersect = Intersection().compute(i, j);
   }
 
   void recaculate() {
     List<Line> lines = [];
+    double _scale = double.parse(context.read<DrawingPath>().getDrawing().scale) * 421.0;
     testgrids.forEach((e) {
-      lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble()) / gScale,
-          Offset(e.endX.toDouble(), -e.endY.toDouble()) / gScale));
+      lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble()) / _scale,
+          Offset(e.endX.toDouble(), -e.endY.toDouble()) / _scale));
     });
     _iPs = Intersection().computeLines(lines).toSet().toList();
   }

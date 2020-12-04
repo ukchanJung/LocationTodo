@@ -14,6 +14,8 @@ class Drawing {
   List<double> pointX;
   List<double> pointY;
   List<String> pointName;
+  num witdh;
+  num height;
 
   double originX;
   double originY;
@@ -34,6 +36,8 @@ class Drawing {
     this.pointName,
     this.originX,
     this.originY,
+    this.witdh,
+    this.height,
   });
 
   Drawing.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
