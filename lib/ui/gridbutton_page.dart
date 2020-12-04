@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
 import 'package:flutter_app_location_todo/model/closest_model.dart';
+import 'package:flutter_app_location_todo/model/drawing_model.dart';
 import 'package:flutter_app_location_todo/model/grid_model.dart';
 import 'package:flutter_app_location_todo/model/gridtest_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
@@ -72,11 +73,13 @@ class _GridButtonState extends State<GridButton> {
   List<Task> tasks = [];
   PhotoViewController _photoViewController = PhotoViewController();
   final GlobalKey _key = GlobalKey();
+  final GlobalKey _key2 = GlobalKey();
   double deviceWidth;
 
   String path = 'asset/Plan2.png';
-  Offset corinatePoint = Offset(0, 0);
+  Offset corinatePoint = Offset(754.5, 167.1);
   Offset selectIntersect = Offset(0, 0);
+  List<Drawing> drawings = [];
 
   @override
   void initState() {
@@ -84,23 +87,36 @@ class _GridButtonState extends State<GridButton> {
 
     void readingGrid() async {
       FirebaseFirestore _db = FirebaseFirestore.instance;
-      QuerySnapshot read = await _db.collection('gridTest').get();
+      QuerySnapshot read = await _db.collection('origingrid').get();
       testgrids = read.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList();
       //그리드를 통한 교차점 확인
-      List<Line> lines = [];
-      testgrids.forEach(
-        (e) {
-          lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble()) / gScale,
-              Offset(e.endX.toDouble(), -e.endY.toDouble()) / gScale));
-        },
-      );
-      _iPs = Intersection().computeLines(lines).toSet().toList();
-      _iPs.forEach((element) {
-        print(element.toString());
-      });
+      recaculate();
+      //TODO 실시간 연동 바운더리
     }
 
     readingGrid();
+    drawings = [
+      Drawing(
+        drawingNum: 'A31-003',
+        title: '1층 평면도',
+        scale: '500',
+        localPath: 'asset/photos/A31-003.png',
+        originX: 0.7366670231488993,
+        originY: 0.22904007827339623,
+      ),
+      Drawing(
+        drawingNum: 'A31-109',
+        title: '1층 확대 평면도',
+        scale: '200',
+        localPath: 'asset/photos/A31-109.png',
+      ),
+      Drawing(
+        drawingNum: 'A12-004',
+        title: '종횡단면도',
+        scale: '400',
+        localPath: 'asset/photos/A12-004.png',
+      ),
+    ];
   }
 
   @override
@@ -121,29 +137,9 @@ class _GridButtonState extends State<GridButton> {
       deviceWidth = MediaQuery.of(context).size.width;
     });
     return Scaffold(
-        appBar: AppBar(
-          title: Text('그리드 버튼'),
-          actions: [
-            IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () {
-                  List<Line> lines = [];
-                  testgrids.forEach((e) {
-                    lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble()) / gScale,
-                        Offset(e.endX.toDouble(), -e.endY.toDouble()) / gScale));
-                  });
-                  _iPs = Intersection().computeLines(lines).toSet().toList();
-                  _iPs.forEach((element) {
-                    print(element.toString());
-                  });
-                  // RenderBox _containerBox = _key.currentContext.findRenderObject();
-                  // Size containerSize = _containerBox.size;
-                  // print(containerSize);
-                }),
-          ],
-        ),
+        appBar: AppBar(title: Text('그리드 버튼')),
         body: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('gridTest').snapshots(),
+            stream: FirebaseFirestore.instance.collection('origingrid').snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return SafeArea(child: Center(child: CircularProgressIndicator()));
               return SafeArea(
@@ -169,8 +165,11 @@ class _GridButtonState extends State<GridButton> {
                                         corinatePoint =
                                             Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale -
                                                 selectIntersect;
-                                        // print(corinatePoint);
-                                        print(m.relative / _photoViewController.scale);
+                                        num width2 = _key2.currentContext.size.width;
+                                        num heigh2 = _key2.currentContext.size.height;
+                                        drawings[0].originX = m.relative.dx / (width2 * _photoViewController.scale);
+                                        drawings[0].originY = m.relative.dy / (heigh2 * _photoViewController.scale);
+                                        print('${drawings[0].originX}, ${drawings[0].originY}');
                                       });
                                     },
                                     onTap: (m) {
@@ -187,6 +186,7 @@ class _GridButtonState extends State<GridButton> {
                                       });
                                     },
                                     child: Stack(
+                                      key: _key2,
                                       children: [
                                         Image.asset(path),
                                         Container(
@@ -250,180 +250,171 @@ class _GridButtonState extends State<GridButton> {
                     //     },
                     //   ),
                     // ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextField(
-                              controller: _gridX,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'X그리드',
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: TextField(
+                                    controller: _gridX,
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      labelText: 'X그리드',
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextField(
-                              controller: _gridY,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Y그리드',
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: TextField(
+                                    controller: _gridY,
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      labelText: 'Y그리드',
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '선택 교점$selectIntersect',
-                      textScaleFactor: 2,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                              autofocus: true,
-                              onPressed: () {
-                                setState(() {
-                                  testgrids
-                                      .where((e) => e.name == _gridX.text || e.name == _gridY.text)
-                                      .forEach((element) {
-                                    print(element.name);
-                                  });
-                                  var selectGrid =
-                                      testgrids.where((e) => e.name == _gridX.text || e.name == _gridY.text).toList();
-                                  Line i = Line(
-                                      Offset(selectGrid.first.startX.toDouble(), -selectGrid.first.startY.toDouble()),
-                                      Offset(selectGrid.first.endX.toDouble(), -selectGrid.first.endY.toDouble()));
-                                  Line j = Line(
-                                      Offset(selectGrid.last.startX.toDouble(), -selectGrid.last.startY.toDouble()),
-                                      Offset(selectGrid.last.endX.toDouble(), -selectGrid.last.endY.toDouble()));
-                                  selectIntersect = Intersection().compute(i, j) / gScale * deviceWidth;
-                                });
-                              },
-                              child: Text('원점지정'),
-                            ),
+                          Text(
+                            '선택 교점$selectIntersect',
+                            textScaleFactor: 2,
                           ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  path = 'asset/Plan2.png';
-                                  docScale = 500;
-                                  gScale = 421 * docScale;
-                                });
-                              },
-                              child: Text('1층 평면도'),
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                    autofocus: true,
+                                    onPressed: () {
+                                      setState(() {
+                                        testgrids
+                                            .where((e) => e.name == _gridX.text || e.name == _gridY.text)
+                                            .forEach((element) {
+                                          print(element.name);
+                                        });
+                                        var selectGrid = testgrids
+                                            .where((e) => e.name == _gridX.text || e.name == _gridY.text)
+                                            .toList();
+                                        Line i = Line(
+                                            Offset(selectGrid.first.startX.toDouble(),
+                                                -selectGrid.first.startY.toDouble()),
+                                            Offset(
+                                                selectGrid.first.endX.toDouble(), -selectGrid.first.endY.toDouble()));
+                                        Line j = Line(
+                                            Offset(
+                                                selectGrid.last.startX.toDouble(), -selectGrid.last.startY.toDouble()),
+                                            Offset(selectGrid.last.endX.toDouble(), -selectGrid.last.endY.toDouble()));
+                                        selectIntersect = Intersection().compute(i, j) / gScale * deviceWidth;
+                                      });
+                                    },
+                                    child: Text('원점지정'),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        path = drawings[0].localPath;
+                                        docScale = 500;
+                                        gScale = 421 * docScale;
+                                        recaculate();
+                                      });
+                                    },
+                                    child: Text('1층 평면도'),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          path = drawings[1].localPath;
+                                          docScale = 200;
+                                          gScale = 421 * docScale;
+                                          recaculate();
+                                        });
+                                      },
+                                      child: Text('1층 확대 평면도')),
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          path = drawings[2].localPath;
+                                          docScale = num.parse(drawings[2].scale);
+                                        });
+                                      },
+                                      child: Text('단면도')),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    path = 'asset/photos/A31-109.png';
-                                    docScale = 200;
-                                    gScale = 421 * docScale;
-                                  });
-                                },
-                                child: Text('1층 확대 평면도')),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        var _wTime = DateTime.now();
+                                        tasks.add(Task(_wTime,
+                                            boundary: Rect.fromPoints(Offset(rectPoint.first.x, rectPoint.first.y),
+                                                Offset(rectPoint.last.x, rectPoint.last.y))));
+                                      });
+                                    },
+                                    child: Text('Task 추가'),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      setState(() async {
+                                        FirebaseFirestore _db = FirebaseFirestore.instance;
+                                        CollectionReference dbGrid = _db.collection('tasks');
+                                        dbGrid.doc(tasks.last.writeTime.toString()).set(tasks[0].toJson());
+                                      });
+                                    },
+                                    child: Text('서버데이터 추가'),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    path = 'asset/photos/A12-004.png';
-                                  });
-                                },
-                                child: Text('단면도')),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  var _wTime = DateTime.now();
-                                  tasks.add(Task(_wTime,
-                                      boundary: Rect.fromPoints(Offset(rectPoint.first.x, rectPoint.first.y),
-                                          Offset(rectPoint.last.x, rectPoint.last.y))));
-                                });
-                              },
-                              child: Text('Task 추가'),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() async {
-                                  FirebaseFirestore _db = FirebaseFirestore.instance;
-                                  CollectionReference dbGrid = _db.collection('tasks');
-                                  CollectionReference dbGrid2 = _db.collection('origingrid');
-                                  // dbGrid.doc('테스트').set(tasks[0].toJson());
-
-                                  QuerySnapshot read = await _db.collection('gridTest').get();
-                                  List<Gridtestmodel> tempLines =
-                                      read.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList();
-
-                                  tempLines.forEach((e) {
-                                    e.startX = e.startX - 154900;
-                                    e.startY = e.startY + 34000;
-                                    e.endX = e.endX - 154900;
-                                    e.endY = e.endY + 34000;
-                                  });
-                                  print(tempLines);
-                                });
-                              },
-                              child: Text('서버데이터 추가'),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                FirebaseFirestore _db = FirebaseFirestore.instance;
-                                CollectionReference dbGrid2 = _db.collection('origingrid');
-                                testgrids.forEach((e) => dbGrid2.doc(e.name).update({
-                                      'endX': e.endX - 154900,
-                                      'endY': e.endY + 34000,
-                                      'index': e.index,
-                                      'name': e.name,
-                                      'startX': e.startX - 154900,
-                                      'startY': e.startY + 34000,
-                                      'type': e.type,
-                                    }));
-                              },
-                              child: Icon(Icons.add)),
-                        )
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
               );
             }));
+  }
+
+  void recaculate() {
+    List<Line> lines = [];
+    testgrids.forEach((e) {
+      lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble()) / gScale,
+          Offset(e.endX.toDouble(), -e.endY.toDouble()) / gScale));
+    });
+    _iPs = Intersection().computeLines(lines).toSet().toList();
   }
 }
