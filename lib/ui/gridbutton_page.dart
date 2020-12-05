@@ -202,9 +202,11 @@ class _GridButtonState extends State<GridButton> {
                                                 (((m.relative.dy / _photoViewController.scale) / heigh2 -
                                                         context.read<DrawingPath>().getDrawing().originY) *
                                                     context.read<DrawingPath>().getcordiY())));
+                                        print(m.relative / _photoViewController.scale);
                                         print(
                                             ' 선택한점은 절대좌표 X: ${(((m.relative.dx / _photoViewController.scale) / width2 - context.read<DrawingPath>().getDrawing().originX) * context.read<DrawingPath>().getcordiX()).round()}, Y: ${(((m.relative.dy / _photoViewController.scale) / heigh2 - context.read<DrawingPath>().getDrawing().originY) * context.read<DrawingPath>().getcordiY()).round()}');
                                         print(rectPoint);
+                                        print(relativeRectPoint);
                                         print(relativeRectPoint);
                                       });
                                     },
@@ -221,51 +223,73 @@ class _GridButtonState extends State<GridButton> {
                                               pointList: _iPs,
                                               deviceWidth: deviceWidth,
                                               cordinate: corinatePoint,
-                                              // cordinate: context.watch<DrawingPath>().getOffset(),
                                             ),
                                           ),
                                         )
                                       ],
                                     ),
                                   ),
-                                  ...tasks.map(
-                                    (e) => Positioned.fromRect(
-                                      rect: e.boundary,
-                                      child: Opacity(
-                                        opacity: 0.8,
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            print(e.writeTime.toString());
-                                          },
-                                          child: null,
-                                          style: ElevatedButton.styleFrom(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(0.0),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                                  // ...tasks.map(
+                                  //   (e) => Positioned.fromRect(
+                                  //     rect: e.boundary,
+                                  //     child: Opacity(
+                                  //       opacity: 0.8,
+                                  //       child: ElevatedButton(
+                                  //         onPressed: () {
+                                  //           print(e.writeTime.toString());
+                                  //         },
+                                  //         child: null,
+                                  //         style: ElevatedButton.styleFrom(
+                                  //           shape: RoundedRectangleBorder(
+                                  //             borderRadius: BorderRadius.circular(0.0),
+                                  //           ),
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // ),
                                   ...relativetasks.map(
-                                    (e) => Positioned.fromRect(
-                                      rect: e.boundary,
-                                      child: Opacity(
-                                        opacity: 0.8,
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            print(e.writeTime.toString());
-                                          },
-                                          child: null,
-                                          style: ElevatedButton.styleFrom(
-                                            primary: Colors.red,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(0.0),
+                                    (e) {
+                                      var pro = context.watch<DrawingPath>();
+                                      num width3 = 1024;
+                                      num heigh3 = 722.3;
+                                      return Positioned.fromRect(
+                                        // rect: Rect.fromPoints(e.boundary.topLeft, e.boundary.bottomRight),
+                                        rect: Rect.fromPoints(
+                                            Offset(
+                                              e.boundary.bottomRight.dx / (pro.getcordiX() / width3) +
+                                                  (pro.getDrawing().originX * width3),
+                                              e.boundary.bottomRight.dy / (pro.getcordiY() / heigh3) +
+                                                  ((pro.getDrawing().originY * heigh3)),
+                                            ),
+                                            Offset(
+                                              e.boundary.topLeft.dx / (pro.getcordiX() / width3) +
+                                                  (pro.getDrawing().originX * width3),
+                                              e.boundary.topLeft.dy / (pro.getcordiY() / heigh3) +
+                                                  ((pro.getDrawing().originY * heigh3)),
+                                            )),
+                                        // rect: Rect.fromPoints(
+                                        //     Offset(
+                                        //         -4350 / (421 * 500 / 1024) + 754.5, 11150 / (297 * 500 / 722.4) + 167.1),
+                                        //     Offset(
+                                        //         -11300 / (421 * 500 / 1024) + 754.5, 3850 / (297 * 500 / 722.4) + 167.1)),
+                                        child: Opacity(
+                                          opacity: 0.8,
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              print(e.writeTime.toString());
+                                            },
+                                            child: null,
+                                            style: ElevatedButton.styleFrom(
+                                              primary: Colors.red,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(0.0),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
