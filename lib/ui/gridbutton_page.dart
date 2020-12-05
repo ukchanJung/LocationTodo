@@ -41,6 +41,7 @@ class _GridButtonState extends State<GridButton> {
   String dropdownValue = 'One';
   Grid select;
   List<Offset> _iPs;
+  List<Offset> _realIPs;
   List<Point> rectPoint = [];
   List<Point> relativeRectPoint = [];
   QuerySnapshot read;
@@ -89,6 +90,15 @@ class _GridButtonState extends State<GridButton> {
           localPath: 'asset/photos/A31-109.png',
           originX: 1.4458318294031067,
           originY: 0.10323461221782795,
+          witdh: 421,
+          height: 297),
+      Drawing(
+          drawingNum: 'A31-110',
+          title: '1층 확대 평면도',
+          scale: '200',
+          localPath: 'asset/photos/A31-110.png',
+          originX: 0.8621306563916183,
+          originY: 0.103544052143084,
           witdh: 421,
           height: 297),
       Drawing(
@@ -148,21 +158,16 @@ class _GridButtonState extends State<GridButton> {
                                         //         selectIntersect;
                                         num width2 = _key2.currentContext.size.width;
                                         num heigh2 = _key2.currentContext.size.height;
-                                        // drawings[0].originX = m.relative.dx / (width2 * _photoViewController.scale);
-                                        // drawings[0].originY = m.relative.dy / (heigh2 * _photoViewController.scale);
-                                        drawings[1].originX = (m.relative.dx / (width2 * _photoViewController.scale)) -
+                                        context.read<DrawingPath>().getDrawing().originX = (m.relative.dx /
+                                                (width2 * _photoViewController.scale)) -
                                             (realIntersect.dx /
-                                                double.parse(context.watch<DrawingPath>().getDrawing().scale) *
-                                                421);
-                                        drawings[1].originY = m.relative.dy / (heigh2 * _photoViewController.scale) -
-                                            realIntersect.dy /
-                                                double.parse(context.watch<DrawingPath>().getDrawing().scale) *
-                                                297;
-                                        // print(m.relative / _photoViewController.scale);
-                                        // print('${drawings[0].originX}, ${drawings[0].originY}');
-
-                                        print(drawings[1].originX);
-                                        print(drawings[1].originY);
+                                                (double.parse(context.read<DrawingPath>().getDrawing().scale) * 421));
+                                        context.read<DrawingPath>().getDrawing().originY = (m.relative.dy /
+                                                (heigh2 * _photoViewController.scale)) -
+                                            (realIntersect.dy /
+                                                (double.parse(context.read<DrawingPath>().getDrawing().scale) * 297));
+                                        print(
+                                            '${context.read<DrawingPath>().getDrawing().originX}, ${context.read<DrawingPath>().getDrawing().originY}');
                                       });
                                     },
                                     onTap: (m) {
@@ -171,19 +176,36 @@ class _GridButtonState extends State<GridButton> {
                                               Point(e.dx, e.dy) * deviceWidth +
                                               Point(corinatePoint.dx, corinatePoint.dy))
                                           .toList();
+                                      List<Point<double>> realParseList =
+                                          _realIPs.map((e) => Point(e.dx, e.dy)).toList();
 
                                       setState(() {
                                         _origin = Offset(m.relative.dx, m.relative.dy) / _photoViewController.scale;
                                         rectPoint =
                                             Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
                                                 .minRect(Point(_origin.dx, _origin.dy));
-                                        relativeRectPoint =
-                                            Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
-                                                .minRect(Point(_origin.dx, _origin.dy));
                                         num width2 = _key2.currentContext.size.width;
                                         num heigh2 = _key2.currentContext.size.height;
+                                        relativeRectPoint = Closet(
+                                                selectPoint: Point(
+                                                    (((m.relative.dx / _photoViewController.scale) / width2 -
+                                                            context.read<DrawingPath>().getDrawing().originX) *
+                                                        context.read<DrawingPath>().getcordiX()),
+                                                    (((m.relative.dy / _photoViewController.scale) / heigh2 -
+                                                            context.read<DrawingPath>().getDrawing().originY) *
+                                                        context.read<DrawingPath>().getcordiY())),
+                                                pointList: realParseList)
+                                            .minRect(Point(
+                                                (((m.relative.dx / _photoViewController.scale) / width2 -
+                                                        context.read<DrawingPath>().getDrawing().originX) *
+                                                    context.read<DrawingPath>().getcordiX()),
+                                                (((m.relative.dy / _photoViewController.scale) / heigh2 -
+                                                        context.read<DrawingPath>().getDrawing().originY) *
+                                                    context.read<DrawingPath>().getcordiY())));
                                         print(
-                                            'X: ${(((m.relative.dx / _photoViewController.scale) / width2 - context.read<DrawingPath>().getDrawing().originX) * context.read<DrawingPath>().getcordiX()).round()}, Y: ${(((m.relative.dy / _photoViewController.scale) / heigh2 - context.read<DrawingPath>().getDrawing().originY) * context.read<DrawingPath>().getcordiY()).round()}');
+                                            ' 선택한점은 절대좌표 X: ${(((m.relative.dx / _photoViewController.scale) / width2 - context.read<DrawingPath>().getDrawing().originX) * context.read<DrawingPath>().getcordiX()).round()}, Y: ${(((m.relative.dy / _photoViewController.scale) / heigh2 - context.read<DrawingPath>().getDrawing().originY) * context.read<DrawingPath>().getcordiY()).round()}');
+                                        print(rectPoint);
+                                        print(relativeRectPoint);
                                       });
                                     },
                                     child: Stack(
@@ -217,6 +239,26 @@ class _GridButtonState extends State<GridButton> {
                                           },
                                           child: null,
                                           style: ElevatedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(0.0),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  ...relativetasks.map(
+                                    (e) => Positioned.fromRect(
+                                      rect: e.boundary,
+                                      child: Opacity(
+                                        opacity: 0.8,
+                                        child: ElevatedButton(
+                                          onPressed: () {
+                                            print(e.writeTime.toString());
+                                          },
+                                          child: null,
+                                          style: ElevatedButton.styleFrom(
+                                            primary: Colors.red,
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(0.0),
                                             ),
@@ -328,6 +370,24 @@ class _GridButtonState extends State<GridButton> {
                                   child: ElevatedButton(
                                       onPressed: () {
                                         setState(() {
+                                          num width2 = _key2.currentContext.size.width;
+                                          num heigh2 = _key2.currentContext.size.height;
+                                          context.read<DrawingPath>().changePath(drawings[2]);
+                                          // gScale = 421 * docScale;
+                                          recaculate();
+                                          // reaSelectIntersect();
+                                          corinatePoint = context.read<DrawingPath>().getcordiOffset(width2, heigh2);
+                                        });
+                                      },
+                                      child: Text('1층 확대 평면도2')),
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                      onPressed: () {
+                                        setState(() {
                                           path = drawings[2].localPath;
                                           docScale = num.parse(drawings[2].scale);
                                         });
@@ -407,5 +467,11 @@ class _GridButtonState extends State<GridButton> {
           Offset(e.endX.toDouble(), -e.endY.toDouble()) / _scale));
     });
     _iPs = Intersection().computeLines(lines).toSet().toList();
+    List<Line> realLines = [];
+    testgrids.forEach((e) {
+      realLines
+          .add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble()), Offset(e.endX.toDouble(), -e.endY.toDouble())));
+    });
+    _realIPs = Intersection().computeLines(realLines).toSet().toList();
   }
 }
