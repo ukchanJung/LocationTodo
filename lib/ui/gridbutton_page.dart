@@ -143,6 +143,7 @@ class _GridButtonState extends State<GridButton> {
       heigh = deviceWidth / (421 / 297);
     });
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           title: Text('그리드 버튼'),
           actions: [
@@ -276,19 +277,19 @@ class _GridButtonState extends State<GridButton> {
                                                         b.topLeft.dy / (watch.getcordiY() / heigh) +
                                                             ((watch.getDrawing().originY * heigh)),
                                                       )),
-                                                      child: InkWell(
-                                                        onLongPress: () {
-                                                          List<Task> _tempList = tasks.where((e) => e.boundarys.contains(b)).toList();
-                                                          Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
-                                                          );
-                                                        },
+                                                      child: GestureDetector(
+                                                          onLongPress: () {
+                                                            List<Task> _tempList = tasks.where((e) => e.boundarys.contains(b)).toList();
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
+                                                            );
+                                                          },
                                                         child: Container(
-                                                      color: e.favorite==false?Colors.black12:Color.fromRGBO(255, 0, 0, 0.5),
-                                                      child: Center(child: Text(tasks.where((e) => e.boundarys.contains(b)).length.toString())),
+                                                        color: e.favorite==false?Colors.black12:Color.fromRGBO(255, 0, 0, 0.5),
+                                                        child: Center(child: Text(tasks.where((e) => e.boundarys.contains(b)).length.toString())),
                                                     ),
-                                                  ),
+                                                      ),
                                                 );
                                               },
                                             ).toList(),
@@ -343,30 +344,30 @@ class _GridButtonState extends State<GridButton> {
                                         ],
                                       ),
                                     ),
-                                   
+
                                   ],
                                 ),
                               ),
                             ),
                           ),
                         ),
+                        Slider(
+                          value: _currentSliderValue,
+                          min: 1,
+                          max: 365,
+                          divisions: 365,
+                          label: _currentSliderValue.round().toString(),
+                          onChanged: (double value) {
+                            setState(() {
+                              _currentSliderValue = value;
+                            });
+                          },
+                        ),
                       ],
                     ),
                     Expanded(
                       child: Column(
                         children: [
-                          Slider(
-                            value: _currentSliderValue,
-                            min: 1,
-                            max: 365,
-                            divisions: 365,
-                            label: _currentSliderValue.round().toString(),
-                            onChanged: (double value) {
-                              setState(() {
-                                _currentSliderValue = value;
-                              });
-                            },
-                          ),
                           Row(
                             children: [
                               Expanded(
@@ -449,14 +450,6 @@ class _GridButtonState extends State<GridButton> {
                                       child: ListTile(
                                         title: Text(e.name),
                                         leading: Text(e.boundarys.length.toString()),
-                                        trailing: ElevatedButton.icon(
-                                            onPressed: () {
-                                              boundarys
-                                                  .where((b) => b.ischecked == true)
-                                                  .forEach((a) => a.tasksList.add(e));
-                                            },
-                                            icon: Icon(Icons.add),
-                                            label: Text('영역추가')),
                                         selected: e.favorite,
                                         onTap: (){
                                           setState(() {

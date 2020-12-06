@@ -47,12 +47,12 @@ class GridMaker extends CustomPainter {
     // print(pointList.first*deviceWidth);
     // pointList.forEach((element) {print(element*deviceWidth);});
 
-    List<Point<double>> parseList =
-        pointList.map((e) => Point(e.dx * deviceWidth + cordinate.dx, e.dy * deviceWidth + cordinate.dy)).toList();
-    Point<double> parsePoint = Point(_inputP.dx, _inputP.dy);
-    List<Point> cpl = Closet(selectPoint: parsePoint, pointList: parseList).minRect(parsePoint);
-    canvas.drawPoints(PointMode.points, [_inputP], paint4);
-    canvas.drawRect(Rect.fromPoints(Offset(cpl.first.x, cpl.first.y), Offset(cpl.last.x, cpl.last.y)), stroke);
+    // List<Point<double>> parseList =
+    //     pointList.map((e) => Point(e.dx * deviceWidth + cordinate.dx, e.dy * deviceWidth + cordinate.dy)).toList();
+    // Point<double> parsePoint = Point(_inputP.dx, _inputP.dy);
+    // List<Point> cpl = Closet(selectPoint: parsePoint, pointList: parseList).minRect(parsePoint);
+    // canvas.drawPoints(PointMode.points, [_inputP], paint4);
+    // canvas.drawRect(Rect.fromPoints(Offset(cpl.first.x, cpl.first.y), Offset(cpl.last.x, cpl.last.y)), stroke);
     canvas.drawPoints(PointMode.points, pointList.map((e) => e * deviceWidth + cordinate).toList(), paint2);
   }
 

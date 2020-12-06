@@ -35,7 +35,7 @@ class Task {
     name = json["name"];
     start = json["start"];
     end = json["end"];
-    // writeTime = json["writeTime"];
+    writeTime = json["writeTime"].toDate();
     memo = json["memo"];
     ischecked = json["ischecked"];
     favorite = json["favorite"];
