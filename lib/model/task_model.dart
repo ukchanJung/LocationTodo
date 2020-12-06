@@ -14,7 +14,7 @@ class Task {
   double y;
   double z;
   double py;
-  List<Rect> boundarys;
+  List<Rect> boundarys = [];
   Rect boundary;
   List<num> sX;
   List<num> sY;
@@ -35,7 +35,7 @@ class Task {
     name = json["name"];
     start = json["start"];
     end = json["end"];
-    writeTime = json["writeTime"];
+    // writeTime = json["writeTime"];
     memo = json["memo"];
     ischecked = json["ischecked"];
     favorite = json["favorite"];
@@ -47,6 +47,9 @@ class Task {
     sY = json["topLeftY"].cast<num>();
     eX = json["bottomRightX"].cast<num>();
     eY = json["bottomRightY"].cast<num>();
+    for (int i = 0; i < sX.length; i++) {
+      boundarys.add(Rect.fromPoints(Offset(sX[i],sY[i]), Offset(eX[i],eY[i])));
+    }
 
   }
 
