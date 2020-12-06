@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
+import 'package:flutter_app_location_todo/model/boundary_model.dart';
 import 'package:flutter_app_location_todo/model/closest_model.dart';
 import 'package:flutter_app_location_todo/model/drawing_model.dart';
 import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
@@ -38,10 +39,12 @@ class _GridButtonState extends State<GridButton> {
   double gScale = 421.0 * 500;
   TextEditingController _gridX = TextEditingController();
   TextEditingController _gridY = TextEditingController();
+  TextEditingController _task = TextEditingController();
   List<Offset> _iPs;
   List<Offset> _realIPs;
   List<Point> rectPoint = [];
   List<Point> relativeRectPoint = [];
+  List<Boundary> boundarys = [];
   List<Task> tasks = [];
   PhotoViewController _pContrl = PhotoViewController();
   final GlobalKey _key = GlobalKey();
@@ -64,6 +67,11 @@ class _GridButtonState extends State<GridButton> {
       //그리드를 통한 교차점 확인
       recaculate();
       //TODO 실시간 연동 바운더리
+    }
+    void readTasks()async{
+      FirebaseFirestore _db = FirebaseFirestore.instance;
+      QuerySnapshot read = await _db.collection('tasks').get();
+      tasks = read.docs.map((e) => Task.fromSnapshot(e)).toList();
     }
 
     readingGrid();
@@ -115,6 +123,7 @@ class _GridButtonState extends State<GridButton> {
     _pContrl.dispose();
     _gridX.dispose();
     _gridY.dispose();
+    _task.dispose();
   }
 
   @override
@@ -142,6 +151,7 @@ class _GridButtonState extends State<GridButton> {
                           child: ClipRect(
                             child: PhotoView.customChild(
                               minScale: 1.0,
+                              maxScale: 4.0,
                               initialScale: 1.0,
                               controller: _pContrl,
                               backgroundDecoration: BoxDecoration(color: Colors.transparent),
@@ -164,12 +174,12 @@ class _GridButtonState extends State<GridButton> {
                                     onTap: (m) {
                                       List<Point<double>> parseList = _iPs
                                           .map((e) =>
-                                              Point(e.dx, e.dy) * deviceWidth +
-                                              Point(context.read<Current>().getcordiOffset(width, heigh).dx,
-                                                  context.read<Current>().getcordiOffset(width, heigh).dy))
+                                      Point(e.dx, e.dy) * deviceWidth +
+                                          Point(context.read<Current>().getcordiOffset(width, heigh).dx,
+                                              context.read<Current>().getcordiOffset(width, heigh).dy))
                                           .toList();
                                       List<Point<double>> realParseList =
-                                          _realIPs.map((e) => Point(e.dx, e.dy)).toList();
+                                      _realIPs.map((e) => Point(e.dx, e.dy)).toList();
 
                                       setState(() {
                                         _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
@@ -177,29 +187,29 @@ class _GridButtonState extends State<GridButton> {
                                             Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
                                                 .minRect(Point(_origin.dx, _origin.dy));
                                         relativeRectPoint = Closet(
-                                                selectPoint: Point(
-                                                    (((m.relative.dx / _pContrl.scale) / width -
-                                                            context.read<Current>().getDrawing().originX) *
-                                                        context.read<Current>().getcordiX()),
-                                                    (((m.relative.dy / _pContrl.scale) / heigh -
-                                                            context.read<Current>().getDrawing().originY) *
-                                                        context.read<Current>().getcordiY())),
-                                                pointList: realParseList)
-                                            .minRect(Point(
+                                            selectPoint: Point(
                                                 (((m.relative.dx / _pContrl.scale) / width -
-                                                        context.read<Current>().getDrawing().originX) *
+                                                    context.read<Current>().getDrawing().originX) *
                                                     context.read<Current>().getcordiX()),
                                                 (((m.relative.dy / _pContrl.scale) / heigh -
-                                                        context.read<Current>().getDrawing().originY) *
-                                                    context.read<Current>().getcordiY())));
+                                                    context.read<Current>().getDrawing().originY) *
+                                                    context.read<Current>().getcordiY())),
+                                            pointList: realParseList)
+                                            .minRect(Point(
+                                            (((m.relative.dx / _pContrl.scale) / width -
+                                                context.read<Current>().getDrawing().originX) *
+                                                context.read<Current>().getcordiX()),
+                                            (((m.relative.dy / _pContrl.scale) / heigh -
+                                                context.read<Current>().getDrawing().originY) *
+                                                context.read<Current>().getcordiY())));
                                         print(m.relative / _pContrl.scale);
                                         int debugX = (((m.relative.dx / _pContrl.scale) / width -
-                                                    context.read<Current>().getDrawing().originX) *
-                                                context.read<Current>().getcordiX())
+                                            context.read<Current>().getDrawing().originX) *
+                                            context.read<Current>().getcordiX())
                                             .round();
                                         int debugY = (((m.relative.dy / _pContrl.scale) / heigh -
-                                                    context.read<Current>().getDrawing().originY) *
-                                                context.read<Current>().getcordiY())
+                                            context.read<Current>().getDrawing().originY) *
+                                            context.read<Current>().getcordiY())
                                             .round();
                                         print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
                                       });
@@ -223,32 +233,47 @@ class _GridButtonState extends State<GridButton> {
                                       ],
                                     ),
                                   ),
-                                  ...tasks.map(
-                                    (e) {
-                                      var pro = context.watch<Current>();
+                                  ...boundarys.map(
+                                        (e) {
+                                      var watch = context.watch<Current>();
                                       return Positioned.fromRect(
                                         rect: Rect.fromPoints(
                                             Offset(
-                                              e.boundary.bottomRight.dx / (pro.getcordiX() / width) +
-                                                  (pro.getDrawing().originX * width),
-                                              e.boundary.bottomRight.dy / (pro.getcordiY() / heigh) +
-                                                  ((pro.getDrawing().originY * heigh)),
+                                              e.boundary.bottomRight.dx / (watch.getcordiX() / width) +
+                                                  (watch.getDrawing().originX * width),
+                                              e.boundary.bottomRight.dy / (watch.getcordiY() / heigh) +
+                                                  ((watch.getDrawing().originY * heigh)),
                                             ),
                                             Offset(
-                                              e.boundary.topLeft.dx / (pro.getcordiX() / width) +
-                                                  (pro.getDrawing().originX * width),
-                                              e.boundary.topLeft.dy / (pro.getcordiY() / heigh) +
-                                                  ((pro.getDrawing().originY * heigh)),
+                                              e.boundary.topLeft.dx / (watch.getcordiX() / width) +
+                                                  (watch.getDrawing().originX * width),
+                                              e.boundary.topLeft.dy / (watch.getcordiY() / heigh) +
+                                                  ((watch.getDrawing().originY * heigh)),
                                             )),
-                                        child: Opacity(
-                                          opacity: 0.8,
+                                        child:Opacity(
+                                          opacity: 0.5,
                                           child: ElevatedButton(
+                                            onLongPress: (){
+                                              setState(() {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(builder: (context) => ),
+                                                  );
+                                              });
+                                            },
                                             onPressed: () {
+                                              setState(() {
+                                                e.ischecked = !e.ischecked;
+                                                print(e.ischecked);
+                                                print(e.tasksList.length);
+                                              });
                                               print(e.writeTime.toString());
                                             },
-                                            child: null,
+                                            child: e.tasksList.contains(tasks.singleWhere((e) => e.favorite == true))==false? Container():Icon(Icons.check),
                                             style: ElevatedButton.styleFrom(
-                                              primary: Colors.red,
+                                              primary: e.ischecked == false
+                                                  ?Colors.black45
+                                                  :Colors.red,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(0.0),
                                               ),
@@ -266,7 +291,7 @@ class _GridButtonState extends State<GridButton> {
                       ],
                     ),
                     Expanded(
-                      child: ListView(
+                      child: Column(
                         children: [
                           Row(
                             children: [
@@ -296,8 +321,76 @@ class _GridButtonState extends State<GridButton> {
                               ),
                             ],
                           ),
-                          Text('선택 교점 $selectIntersect', textScaleFactor: 2),
-                          Text('좌표 교점 $realIntersect', textScaleFactor: 2),
+                          // Text('선택 교점 $selectIntersect', textScaleFactor: 2),
+                          // Text('좌표 교점 $realIntersect', textScaleFactor: 2),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    height: 50,
+                                    child: TextField(
+                                      controller: _task,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        labelText: '작업을 입력해주세요',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Container(
+                                    height: 50,
+                                    child: ElevatedButton.icon(
+                                      onPressed: () {
+                                        setState(() {
+                                          tasks.add(Task(DateTime.now(),
+                                              name: _task.text, boundarys: boundarys.map((e) => e.boundary).toList()));
+                                          _task.text = '';
+                                        });
+                                      },
+                                      icon: Icon(Icons.check),
+                                      label: Text('작업추가'),
+                                    )),
+                              )
+                            ],
+                          ),
+                          Expanded(
+                            child: Scrollbar(
+                              child: ListView(
+                                children: tasks.map(
+                                      (e) {
+                                    return Container(
+                                      decoration: BoxDecoration(border:Border(bottom: BorderSide())),
+                                      child: ListTile(
+                                        title: Text(e.name),
+                                        leading: Text(e.boundarys.length.toString()),
+                                        trailing: ElevatedButton.icon(
+                                            onPressed: () {
+                                              boundarys
+                                                  .where((b) => b.ischecked == true)
+                                                  .forEach((a) => a.tasksList.add(e));
+                                            },
+                                            icon: Icon(Icons.add),
+                                            label: Text('영역추가')),
+                                        selected: e.favorite,
+                                        onTap: (){
+                                          setState(() {
+                                            tasks.singleWhere((element) => element.favorite == true).favorite = false;
+                                          e.favorite = !e.favorite;
+                                          print(e.favorite);
+                                          });
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ).toList(),
+                              ),
+                            ),
+                          ) ,
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -377,7 +470,7 @@ class _GridButtonState extends State<GridButton> {
                                     onPressed: () {
                                       setState(() {
                                         var _wTime = DateTime.now();
-                                        tasks.add(Task(_wTime,
+                                        boundarys.add(Boundary(_wTime,
                                             boundary: Rect.fromPoints(
                                                 Offset(relativeRectPoint.first.x, relativeRectPoint.first.y),
                                                 Offset(relativeRectPoint.last.x, relativeRectPoint.last.y))));
@@ -395,7 +488,7 @@ class _GridButtonState extends State<GridButton> {
                                       setState(() async {
                                         FirebaseFirestore _db = FirebaseFirestore.instance;
                                         CollectionReference dbGrid = _db.collection('tasks');
-                                        dbGrid.doc(tasks.last.writeTime.toString()).set(tasks[0].toJson());
+                                        dbGrid.doc(tasks.first.name.toString()).set(tasks.first.toJson());
                                       });
                                     },
                                     child: Text('서버데이터 추가'),

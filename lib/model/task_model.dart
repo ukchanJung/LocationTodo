@@ -14,7 +14,13 @@ class Task {
   double y;
   double z;
   double py;
+  List<Rect> boundarys;
   Rect boundary;
+  List<num> sX;
+  List<num> sY;
+  List<num> eX;
+  List<num> eY;
+
 
   Task(
     this.writeTime, {
@@ -22,7 +28,7 @@ class Task {
     this.start,
     this.end,
     this.memo,
-    this.boundary,
+    this.boundarys,
     this.z,
   });
   Task.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
@@ -36,7 +42,12 @@ class Task {
     x = json["x"];
     y = json["y"];
     z = json["z"];
-    boundary = json["boundary"];
+    // boundary = Rect.fromPoints(Offset(), Offset());
+    sX = json["topLeftX"].cast<num>();
+    sY = json["topLeftY"].cast<num>();
+    eX = json["bottomRightX"].cast<num>();
+    eY = json["bottomRightY"].cast<num>();
+
   }
 
   Map<String, dynamic> toJson() {
@@ -51,11 +62,11 @@ class Task {
     map["x"] = x;
     map["y"] = y;
     map["z"] = z;
-    // map["boundary"] = boundary;
-    map["topLeftX"] = boundary.topLeft.dx;
-    map["topLeftY"] = boundary.topLeft.dy;
-    map["bottomRightX"] = boundary.bottomRight.dx;
-    map["bottomRightY"] = boundary.bottomRight.dy;
+    // boundarys.map((e){ map["boundarys"] =[e.topLeft.dx, e.topLeft.dy, e.bottomRight.dx, e.bottomRight.dy]; });
+    map["topLeftX"] = boundarys.map((e)=>e.topLeft.dx).toList();
+    map["topLeftY"] = boundarys.map((e)=>e.topLeft.dy).toList();
+    map["bottomRightX"] = boundarys.map((e)=>e.bottomRight.dx).toList();
+    map["bottomRightY"] = boundarys.map((e)=>e.bottomRight.dy).toList();
     return map;
   }
 
