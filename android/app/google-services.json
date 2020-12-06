@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "801258913989",
+    "firebase_url": "https://locationtodo.firebaseio.com",
+    "project_id": "locationtodo",
+    "storage_bucket": "locationtodo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:801258913989:android:9df2baeb289588d70430ac",
+        "android_client_info": {
+          "package_name": "com.example.flutter_app_location_todo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "801258913989-7uolpe3c1jaaji8j9o0rmj16sv14gejf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAaW-esWVp-zX8oQFYDLmQaibfE4kAP9s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "801258913989-7uolpe3c1jaaji8j9o0rmj16sv14gejf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "801258913989-okr5tsfguhvs4mus0ug6p7eututu1uec.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterAppLocationTodo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

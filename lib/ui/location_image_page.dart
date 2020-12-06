@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_location_todo/model/line_model.dart';
+import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:provider/provider.dart';
 
 class LocationImage extends StatefulWidget {
   List<Task> tasks;
@@ -27,7 +28,7 @@ class _LocationImageState extends State<LocationImage> {
 
   int lastPanStartOnIndex = -1;
 
-  List<Color> cList = [Colors.red,Colors.blue,Colors.green,Colors.deepOrange,Colors.purple];
+  List<Color> cList = [Colors.red, Colors.blue, Colors.green, Colors.deepOrange, Colors.purple];
 
   @override
   void initState() {
@@ -58,7 +59,7 @@ class _LocationImageState extends State<LocationImage> {
                 backgroundDecoration: BoxDecoration(color: Colors.white),
                 child: Stack(
                   children: [
-                    Image.asset('asset/Plan2.png'),
+                    Image.asset(context.watch<Current>().getDrawing().localPath),
                     // Column(
                     //   mainAxisSize: MainAxisSize.min,
                     //   children: List.generate(pController.scale.ceil(), (index){
@@ -66,17 +67,29 @@ class _LocationImageState extends State<LocationImage> {
                     //   }),
                     // ),
                     // Rect.fromPoints(a, b),
-                    Opacity(opacity:0.5,child: Container(child: CustomPaint(painter: MyPainter(Offset(50,50),Offset(200,200)),),)),
-                    Container(child: CustomPaint(painter: MyPainter2(Offset(50,50),Offset(200,200)),),),
-                    Container(child: CustomPaint(painter: MyPainter2(Offset(200,200),Offset(100,100)),),),
+                    Opacity(
+                        opacity: 0.5,
+                        child: Container(
+                          child: CustomPaint(
+                            painter: MyPainter(Offset(50, 50), Offset(200, 200)),
+                          ),
+                        )),
+                    Container(
+                      child: CustomPaint(
+                        painter: MyPainter2(Offset(50, 50), Offset(200, 200)),
+                      ),
+                    ),
+                    Container(
+                      child: CustomPaint(
+                        painter: MyPainter2(Offset(200, 200), Offset(100, 100)),
+                      ),
+                    ),
                     StreamBuilder<PhotoViewControllerValue>(
                         stream: pController.outputStateStream,
                         builder: (BuildContext context, AsyncSnapshot<PhotoViewControllerValue> snapshot) {
                           if (!snapshot.hasData) return Container();
                           return Stack(
-                              children: widget.tasks
-                                  .where((e) => e.x != null)
-                                  .map((e) {
+                              children: widget.tasks.where((e) => e.x != null).map((e) {
                             return Positioned(
                               key: _key,
                               left: e.x - 20,
@@ -212,7 +225,7 @@ class _LocationImageState extends State<LocationImage> {
   }
 }
 
-class MyPainter extends CustomPainter{
+class MyPainter extends CustomPainter {
   Offset p1;
   Offset p2;
 
@@ -220,15 +233,13 @@ class MyPainter extends CustomPainter{
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint =Paint()
-    ..color = Colors.red
-    ..strokeCap = StrokeCap.round
-    ..strokeWidth = 4.0;
+    Paint paint = Paint()
+      ..color = Colors.red
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 4.0;
 
     canvas.drawRect(Rect.fromPoints(p1, p2), paint);
   }
-
-
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
@@ -238,8 +249,7 @@ class MyPainter extends CustomPainter{
   }
 }
 
-
-class MyPainter2 extends CustomPainter{
+class MyPainter2 extends CustomPainter {
   Offset p1;
   Offset p2;
 
@@ -247,15 +257,13 @@ class MyPainter2 extends CustomPainter{
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint =Paint()
-    ..color = Colors.blueAccent
-    ..strokeCap = StrokeCap.round
-    ..strokeWidth = 4.0;
+    Paint paint = Paint()
+      ..color = Colors.blueAccent
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 4.0;
 
     canvas.drawCircle(p1, 10, paint);
   }
-
-
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {

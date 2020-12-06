@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/ui/location_todo_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
-import 'model/drawingpath_provider.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +13,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => DrawingPath()),
+        ChangeNotifierProvider(create: (context) => Current()),
       ],
       child: MyApp(),
     ),
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.orange,
         // elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.deepOrange) )
       ),
       home: LocationTodo(),
