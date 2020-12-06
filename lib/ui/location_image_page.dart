@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
-import 'package:flutter_app_location_todo/model/line_model.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
@@ -60,7 +59,7 @@ class _LocationImageState extends State<LocationImage> {
                 backgroundDecoration: BoxDecoration(color: Colors.white),
                 child: Stack(
                   children: [
-                    Image.asset(context.watch<DrawingPath>().getDrawing().localPath),
+                    Image.asset(context.watch<Current>().getDrawing().localPath),
                     // Column(
                     //   mainAxisSize: MainAxisSize.min,
                     //   children: List.generate(pController.scale.ceil(), (index){

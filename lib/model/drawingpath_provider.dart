@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/drawing_model.dart';
 
-class DrawingPath with ChangeNotifier {
+class Current with ChangeNotifier {
   String _path = 'asset/Plan2.png';
   String _name = 'S01-001.png';
   Drawing _drawing = Drawing(
