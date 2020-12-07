@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -40,7 +38,6 @@ class Task {
     y = json["y"];
     z = json["z"];
     Iterable jsonBoundarys = json["boundarys"];
-    print(jsonBoundarys);
     boundarys = jsonBoundarys.map((e) => Rect.fromPoints(Offset(e["firstX"],e["firstY"]), Offset(e["endX"],e["endY"]))).toList();
   }
 

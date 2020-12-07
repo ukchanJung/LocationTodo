@@ -6,6 +6,7 @@ import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/calendar_page.dart';
 import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
+import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/ui/todo_detail_page.dart';
 import 'package:intl/intl.dart';
 
@@ -66,13 +67,25 @@ class _LocationTodoState extends State<LocationTodo> {
             UserAccountsDrawerHeader(accountName: Text('정욱찬'), accountEmail: null),
             Expanded(
               child: ListView(children: [
-                ListTile(title: Text('그리드 버튼 구현'),onTap: (){
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => GridButton()),
-                    );
-                },),
-              ],),
+                  ListTile(
+                    title: Text('그리드 버튼 구현'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => GridButton()),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    title: Text('도면뷰어'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => TimView()),
+                      );
+                    },
+                  ),
+                ],),
             )
           ],
         ),
