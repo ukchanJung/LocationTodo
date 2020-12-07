@@ -38,7 +38,6 @@ class _GridButtonState extends State<GridButton> {
   Offset _origin = Offset(0, 0);
 
   //TODO 도면의 스케일 값을 지정해줘야됨
-  double gScale = 421.0 * 500;
   TextEditingController _gridX = TextEditingController();
   TextEditingController _gridY = TextEditingController();
   TextEditingController _task = TextEditingController();
@@ -58,8 +57,6 @@ class _GridButtonState extends State<GridButton> {
   Offset realIntersect = Offset(0, 0);
   List<Drawing> drawings = [];
   double _currentSliderValue = 5;
-  double _lowerValue = DateTime(2019,1,1,0,0,0).millisecondsSinceEpoch.toDouble();
-  double _upperValue  = DateTime(2020,1,1,0,0,0).millisecondsSinceEpoch.toDouble();
 
 
   @override
@@ -149,7 +146,7 @@ class _GridButtonState extends State<GridButton> {
           actions: [
             InkWell(
                 onTap: () {
-                  print(tasks.length);
+                  print(tasks[0].boundarys);
                   print(testgrids.length);
                 },
                 child: Icon(Icons.add))
@@ -181,16 +178,16 @@ class _GridButtonState extends State<GridButton> {
                                     PositionedTapDetector(
                                       onLongPress: (m) {
                                         ///TODO 원점 재지정 좌표 메서드
-                                        // setState(() {
-                                        //   context.read<Current>().getDrawing().originX =
-                                        //       (m.relative.dx / (width * _pContrl.scale)) -
-                                        //           (realIntersect.dx / context.read<Current>().getcordiX());
-                                        //   context.read<Current>().getDrawing().originY =
-                                        //       (m.relative.dy / (heigh * _pContrl.scale)) -
-                                        //           (realIntersect.dy / context.read<Current>().getcordiY());
-                                        //   print(
-                                        //       '${context.read<Current>().getDrawing().originX}, ${context.read<Current>().getDrawing().originY}');
-                                        // });
+                                        setState(() {
+                                          context.read<Current>().getDrawing().originX =
+                                              (m.relative.dx / (width * _pContrl.scale)) -
+                                                  (realIntersect.dx / context.read<Current>().getcordiX());
+                                          context.read<Current>().getDrawing().originY =
+                                              (m.relative.dy / (heigh * _pContrl.scale)) -
+                                                  (realIntersect.dy / context.read<Current>().getcordiY());
+                                          print(
+                                              '${context.read<Current>().getDrawing().originX}, ${context.read<Current>().getDrawing().originY}');
+                                        });
                                       },
                                       onTap: (m) {
                                         List<Point<double>> parseList = _iPs
@@ -286,12 +283,22 @@ class _GridButtonState extends State<GridButton> {
                                                             );
                                                           },
                                                         child: Container(
-                                                        color: e.favorite==false?Colors.black12:Color.fromRGBO(255, 0, 0, 0.5),
-                                                        child: Center(child: Text(tasks.where((e) => e.boundarys.contains(b)).length.toString())),
-                                                    ),
+                                                          color: e.favorite == false
+                                                              ? Colors.black12
+                                                              : Color.fromRGBO(255, 0, 0, 0.5),
+                                                          child: Center(
+                                                            child: Text(
+                                                              tasks
+                                                                  .where((e) => e.boundarys.contains(b))
+                                                                  .length
+                                                                  .toString(),
+                                                              textScaleFactor: 200 / width,
+                                                            ),
+                                                          ),
+                                                        ),
                                                       ),
                                                 );
-                                              },
+                                                  },
                                             ).toList(),
                                           )),
                                           ...boundarys.map(
