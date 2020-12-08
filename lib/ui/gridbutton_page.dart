@@ -87,7 +87,7 @@ class _GridButtonState extends State<GridButton> {
         drawingNum: 'A31-003',
         title: '1층 평면도',
         scale: '500',
-        localPath: 'asset/photos/A31-003.png',
+        localPath: 'A31-003.png',
         originX: 0.7373979439768359,
         originY: 0.23113260932198965,
         witdh: 421,
@@ -97,7 +97,7 @@ class _GridButtonState extends State<GridButton> {
           drawingNum: 'A31-109',
           title: '1층 확대 평면도',
           scale: '200',
-          localPath: 'asset/photos/A31-109.png',
+          localPath: 'A31-109.png',
           originX: 1.4458318294031067,
           originY: 0.10323461221782795,
           witdh: 421,
@@ -106,7 +106,7 @@ class _GridButtonState extends State<GridButton> {
           drawingNum: 'A31-110',
           title: '1층 확대 평면도',
           scale: '200',
-          localPath: 'asset/photos/A31-110.png',
+          localPath: 'A31-110.png',
           originX: 0.8621306563916183,
           originY: 0.103544052143084,
           witdh: 421,
@@ -115,7 +115,7 @@ class _GridButtonState extends State<GridButton> {
         drawingNum: 'A12-004',
         title: '종횡단면도',
         scale: '400',
-        localPath: 'asset/photos/A12-004.png',
+        localPath: 'A12-004.png',
       ),
     ];
   }
@@ -244,7 +244,7 @@ class _GridButtonState extends State<GridButton> {
                                       child: Stack(
                                         key: _key2,
                                         children: [
-                                          Image.asset(context.watch<Current>().getDrawing().localPath),
+                                          Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
                                           Container(
                                             child: CustomPaint(
                                               painter: GridMaker(
@@ -457,7 +457,7 @@ class _GridButtonState extends State<GridButton> {
                                       decoration: BoxDecoration(border:Border(bottom: BorderSide())),
                                       child: ListTile(
                                         title: Text(e.name),
-                                        leading: Text(e.boundarys.length.toString()),
+                                        // leading: Text(e.boundarys.length.toString()),
                                         selected: e.favorite,
                                         onTap: (){
                                           setState(() {

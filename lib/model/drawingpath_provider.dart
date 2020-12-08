@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/drawing_model.dart';
 
 class Current with ChangeNotifier {
-  String _path = 'asset/Plan2.png';
+  String _path = 'S01-001.png';
   String _name = 'S01-001.png';
   Drawing _drawing = Drawing(
     drawingNum: 'A31-003',
     title: '1층 평면도',
     scale: '500',
-    localPath: 'asset/photos/A31-003.png',
+    localPath: 'A31-003.png',
     originX: 0.7373979439768359,
     originY: 0.23113260932198965,
   );
