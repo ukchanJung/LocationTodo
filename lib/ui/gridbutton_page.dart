@@ -151,6 +151,7 @@ class _GridButtonState extends State<GridButton> {
                   print(testgrids.length);
                 },
                 child: Icon(Icons.add)),
+            IconButton(icon: Icon(Icons.cloud_upload), onPressed: (){})
           ],
         ),
         body: StreamBuilder<QuerySnapshot>(
@@ -348,7 +349,7 @@ class _GridButtonState extends State<GridButton> {
                                                 ),
                                               );
                                             },
-                                          )
+                                          ),
                                         ],
                                       ),
                                     ),

@@ -59,7 +59,7 @@ class _LocationImageState extends State<LocationImage> {
                 backgroundDecoration: BoxDecoration(color: Colors.white),
                 child: Stack(
                   children: [
-                    Image.asset(context.watch<Current>().getDrawing().localPath),
+                    Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
                     // Column(
                     //   mainAxisSize: MainAxisSize.min,
                     //   children: List.generate(pController.scale.ceil(), (index){

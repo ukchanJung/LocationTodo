@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_location_todo/model/drawing_model.dart';
+import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/calendar_page.dart';
 import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
@@ -9,6 +11,7 @@ import 'package:flutter_app_location_todo/ui/location_image_page.dart';
 import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/ui/todo_detail_page.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class LocationTodo extends StatefulWidget {
   @override
@@ -72,14 +75,28 @@ class _LocationTodoState extends State<LocationTodo> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => GridButton()),
+                        MaterialPageRoute(builder: (context) {
+                          context.watch<Current>().changePath(
+                                Drawing(
+                                  drawingNum: 'A31-003',
+                                  title: '1층 평면도',
+                                  scale: '500',
+                                  localPath: 'A31-003.png',
+                                  originX: 0.7373979439768359,
+                                  originY: 0.23113260932198965,
+                                  witdh: 421,
+                                  height: 297,
+                                ),
+                              );
+                          return GridButton();
+                        }),
                       );
                     },
                   ),
                   ListTile(
                     title: Text('도면뷰어'),
                     onTap: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => TimView()),
                       );
