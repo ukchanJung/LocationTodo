@@ -53,7 +53,7 @@ class Task {
     map["x"] = x;
     map["y"] = y;
     map["z"] = z;
-    boundarys.map((e){ map["boundarys"] =[e.topLeft.dx, e.topLeft.dy, e.bottomRight.dx, e.bottomRight.dy]; });
+    // boundarys.map((e){ map["boundarys"] =[e.topLeft.dx, e.topLeft.dy, e.bottomRight.dx, e.bottomRight.dy]; });
     map["boundarys"] = boundarys.map((e) => {
       "firstX": e.topLeft.dx,
       "firstY": e.topLeft.dy,

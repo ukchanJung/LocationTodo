@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class Drawing {
   String localPath;
@@ -17,12 +19,15 @@ class Drawing {
   List<String> pointName;
   num witdh;
   num height;
+
   ///서치기능 활용
   DateTime createdAt;
   String avatar;
 
   double originX;
   double originY;
+
+  List<Map> ocrData;
 
   Drawing({
     this.localPath,
@@ -63,19 +68,24 @@ class Drawing {
       pointName: json['pointName'].cast<String>(),
     );
   }
-  static List<Drawing> fromJsonList(List list){
+
+  static List<Drawing> fromJsonList(List list) {
     if (list == null) return null;
     return list.map((item) => Drawing.fromJsonSearch(item)).toList();
   }
-  String userAsString(){
+
+  String userAsString() {
     return '#${this.drawingNum} ${this.title}';
   }
-  bool userFilterByCreationDate(String filter){
+
+  bool userFilterByCreationDate(String filter) {
     return this?.createdAt?.toString()?.contains(filter);
   }
-  bool isEqual(Drawing model){
+
+  bool isEqual(Drawing model) {
     return this?.title == model?.title;
   }
+
   Drawing.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
     localPath = json['localPath'];
     drawingNum = json['drawingNum'];
@@ -89,7 +99,19 @@ class Drawing {
     pointX = json['pointX'].cast<double>();
     pointY = json['pointY'].cast<double>();
     pointName = json['pointName'].cast<String>();
+    Iterable jsonOcrRect = json["ocrData"];
+    ocrData = jsonOcrRect.map((e) =>
+    {
+      'text': e['text'],
+      'rect': {
+        'left' :e['L'],
+        'top' :e['T'],
+        'right' :e['R'],
+        'bottom' :e['B'],
+      },
+    }).toList();
   }
+
   Drawing.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
 
   Map<String, dynamic> toJson() {
@@ -105,8 +127,18 @@ class Drawing {
     data['infoCategory'] = this.infoCategory;
     data['pointX'] = this.pointX;
     data['pointY'] = this.pointY;
+    data["ocrData"] = ocrData;
     return data;
   }
+
   @override
   String toString() => '[${drawingNum}] $title';
+}
+
+class Ocr {
+  String name;
+  Rect rect;
+
+  Ocr({this.name, this.rect});
+
 }

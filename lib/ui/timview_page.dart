@@ -40,11 +40,12 @@ class _TimViewState extends State<TimView> {
     void readDrawings() async {
       FirebaseFirestore _db = FirebaseFirestore.instance;
       QuerySnapshot read = await _db.collection('drawing').get();
-      drawings = read.docs.map((e) => Drawing.fromSnapshot(e)).toList();
+      // drawings = read.docs.map((e) => Drawing.fromSnapshot(e)).toList();
     }
 
+
     watch.then((v) {
-      drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
+      drawings = v.docs.sublist(0,2).map((e) => Drawing.fromSnapshot(e)).toList();
       setState(() {});
     });
   }
@@ -99,26 +100,33 @@ class _TimViewState extends State<TimView> {
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
-          ByteData bytes = await rootBundle.load(tempRoot);
-          // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
-          String tempPath = (await getTemporaryDirectory()).path;
-          String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
-          File file = File(tempName);
-          // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
-          await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-
-          FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
-          final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
-          print(textRecognizer);
-
-          visionText = await textRecognizer.processImage(vIa);
-          print(visionText);
-          decodeImage = await decodeImageFromList(file.readAsBytesSync());
-
-          iS = decodeImage.width / _keyA.currentContext.size.width;
-          print(_photoViewController.scale);
-          setState(() {});
+          print(visionText.blocks.length);
+          FirebaseFirestore.instance.collection('drawing').doc(context.read<Current>().getDrawing().drawingNum).update({
+            "ocrData" : visionText.blocks.map((e) =>{
+              "text": e.text,
+              "Rect": {"L":e.boundingBox.left, "T":e.boundingBox.top, "R":e.boundingBox.right, "B":e.boundingBox.bottom}
+            } ).toList()
+          });
+          // String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+          // ByteData bytes = await rootBundle.load(tempRoot);
+          // // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
+          // String tempPath = (await getTemporaryDirectory()).path;
+          // String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+          // File file = File(tempName);
+          // // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
+          // await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+          //
+          // FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+          // final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+          // print(textRecognizer);
+          //
+          // visionText = await textRecognizer.processImage(vIa);
+          // print(visionText);
+          // decodeImage = await decodeImageFromList(file.readAsBytesSync());
+          //
+          // iS = decodeImage.width / _keyA.currentContext.size.width;
+          // print(_photoViewController.scale);
+          // setState(() {});
         },
       ),
       body: Column(
@@ -132,7 +140,24 @@ class _TimViewState extends State<TimView> {
               maxHeight: 600,
               onFind: (String filter) => getData(filter),
               label: "도면을 선택해주세요",
-              onChanged: context.watch<Current>().changePath,
+              onChanged: (e){
+                setState(() async {
+                  context.read<Current>().changePath(e);
+                  String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+                  ByteData bytes = await rootBundle.load(tempRoot);
+                  String tempPath = (await getTemporaryDirectory()).path;
+                  String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+                  File file = File(tempName);
+                  await file
+                      .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+                  FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+                  final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+                  visionText = await textRecognizer.processImage(vIa);
+                  decodeImage = await decodeImageFromList(file.readAsBytesSync());
+                  iS = decodeImage.width / _keyA.currentContext.size.width;
+                  setState(() {});
+                });
+              },
               showSearchBox: true,
             ),
           ),
@@ -177,12 +202,10 @@ class _TimViewState extends State<TimView> {
                                                 String tempRoot =
                                                     'asset/photos/${context.read<Current>().getDrawing().localPath}';
                                                 ByteData bytes = await rootBundle.load(tempRoot);
-                                                // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
                                                 String tempPath = (await getTemporaryDirectory()).path;
                                                 String tempName =
                                                     '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
                                                 File file = File(tempName);
-                                                // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
                                                 await file.writeAsBytes(bytes.buffer.asUint8List(
                                                     bytes.offsetInBytes, bytes.lengthInBytes));
 
@@ -190,11 +213,8 @@ class _TimViewState extends State<TimView> {
                                                 FirebaseVisionImage.fromFile(file);
                                                 final TextRecognizer textRecognizer =
                                                 FirebaseVision.instance.cloudTextRecognizer();
-                                                print(textRecognizer);
-
                                                 visionText = await textRecognizer.processImage(vIa);
                                                 print(visionText);
-                                                decodeImage =
                                                 await decodeImageFromList(file.readAsBytesSync());
 
                                                 iS =
@@ -203,8 +223,7 @@ class _TimViewState extends State<TimView> {
                                               });
                                             },
                                           ),
-                                        )
-                                            .toList(),
+                                        ).toList(),
                                       ),
                                     );
                                   },
@@ -225,6 +244,7 @@ class _TimViewState extends State<TimView> {
               ),
             ),
           ),
+          
         ],
       ),
     );
