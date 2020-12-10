@@ -32,6 +32,18 @@ class _LocationTodoState extends State<LocationTodo> {
   @override
   void initState() {
     super.initState();
+    context.read<Current>().changePath(
+          Drawing(
+            drawingNum: 'A31-003',
+            title: '1층 평면도',
+            scale: '500',
+            localPath: 'A31-003.png',
+            originX: 0.7373979439768359,
+            originY: 0.23113260932198965,
+            witdh: 421,
+            height: 297,
+          ),
+        );
     setState(() {
       tasks = [
         Task(DateTime.now(), name: '메모1'),
@@ -77,18 +89,18 @@ class _LocationTodoState extends State<LocationTodo> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) {
-                          context.watch<Current>().changePath(
-                                Drawing(
-                                  drawingNum: 'A31-003',
-                                  title: '1층 평면도',
-                                  scale: '500',
-                                  localPath: 'A31-003.png',
-                                  originX: 0.7373979439768359,
-                                  originY: 0.23113260932198965,
-                                  witdh: 421,
-                                  height: 297,
-                                ),
-                              );
+                          // context.watch<Current>().changePath(
+                          //       Drawing(
+                          //         drawingNum: 'A31-003',
+                          //         title: '1층 평면도',
+                          //         scale: '500',
+                          //         localPath: 'A31-003.png',
+                          //         originX: 0.7373979439768359,
+                          //         originY: 0.23113260932198965,
+                          //         witdh: 421,
+                          //         height: 297,
+                          //       ),
+                          //     );
                           return GridButton();
                         }),
                       );

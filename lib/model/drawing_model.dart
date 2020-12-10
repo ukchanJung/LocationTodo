@@ -100,6 +100,11 @@ class Drawing {
     pointX = json['pointX'].cast<double>();
     pointY = json['pointY'].cast<double>();
     pointName = json['pointName'].cast<String>();
+    originX = json["originX"];
+    originY = json["originY"];
+    floor = json["floor"];
+    witdh = json["width"];
+    height = json["height"];
     // Iterable jsonOcrRect = json["ocrData"];
     // ocrData = jsonOcrRect.map((e) =>
     // {

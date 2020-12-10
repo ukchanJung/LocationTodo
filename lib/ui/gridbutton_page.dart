@@ -1,9 +1,14 @@
+import 'dart:io';
+import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'dart:math';
 import 'package:calendar_strip/calendar_strip.dart';
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app_location_todo/data/local_list.dart';
 import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
 import 'package:flutter_app_location_todo/model/boundary_model.dart';
@@ -15,8 +20,10 @@ import 'package:flutter_app_location_todo/model/gridtest_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/boundary_detail_page.dart';
+import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:positioned_tap_detector/positioned_tap_detector.dart';
 import 'package:provider/provider.dart';
@@ -64,6 +71,10 @@ class _GridButtonState extends State<GridButton> {
   DateTime _selectedDate;
   DateTime _selectedValue = DateTime.now();
   DatePickerController _controller = DatePickerController();
+  double iS;
+  ui.Image decodeImage;
+  VisionText visionText;
+
 
 
 
@@ -90,42 +101,46 @@ class _GridButtonState extends State<GridButton> {
     print(tasks.length);
     print(testgrids.length);
     _resetSelectedDate();
-    drawings = [
-      Drawing(
-        drawingNum: 'A31-003',
-        title: '1층 평면도',
-        scale: '500',
-        localPath: 'A31-003.png',
-        originX: 0.7373979439768359,
-        originY: 0.23113260932198965,
-        witdh: 421,
-        height: 297,
-      ),
-      Drawing(
-          drawingNum: 'A31-109',
-          title: '1층 확대 평면도',
-          scale: '200',
-          localPath: 'A31-109.png',
-          originX: 1.4458318294031067,
-          originY: 0.10323461221782795,
-          witdh: 421,
-          height: 297),
-      Drawing(
-          drawingNum: 'A31-110',
-          title: '1층 확대 평면도',
-          scale: '200',
-          localPath: 'A31-110.png',
-          originX: 0.8621306563916183,
-          originY: 0.103544052143084,
-          witdh: 421,
-          height: 297),
-      Drawing(
-        drawingNum: 'A12-004',
-        title: '종횡단면도',
-        scale: '400',
-        localPath: 'A12-004.png',
-      ),
-    ];
+    // drawings = [
+    //   Drawing(
+    //     drawingNum: 'A31-003',
+    //     title: '1층 평면도',
+    //     scale: '500',
+    //     localPath: 'A31-003.png',
+    //     originX: 0.7373979439768359,
+    //     originY: 0.23113260932198965,
+    //     witdh: 421,
+    //     height: 297,
+    //   ),
+    //   Drawing(
+    //       drawingNum: 'A31-109',
+    //       title: '1층 확대 평면도',
+    //       scale: '200',
+    //       localPath: 'A31-109.png',
+    //       originX: 1.4458318294031067,
+    //       originY: 0.10323461221782795,
+    //       witdh: 421,
+    //       height: 297),
+    //   Drawing(
+    //       drawingNum: 'A31-110',
+    //       title: '1층 확대 평면도',
+    //       scale: '200',
+    //       localPath: 'A31-110.png',
+    //       originX: 0.8621306563916183,
+    //       originY: 0.103544052143084,
+    //       witdh: 421,
+    //       height: 297),
+    //   Drawing(
+    //     drawingNum: 'A12-004',
+    //     title: '종횡단면도',
+    //     scale: '400',
+    //     localPath: 'A12-004.png',
+    //   ),
+    // ];
+    Future<QuerySnapshot> watch = FirebaseFirestore.instance.collection('drawing').get();
+    watch.then((v) {
+      drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
+      setState(() {});});
   }
   void _resetSelectedDate() {
     _selectedDate = DateTime.now().add(Duration(days: 5));
@@ -184,6 +199,34 @@ class _GridButtonState extends State<GridButton> {
                             },
                           ),
                         ),
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: DropdownSearch<Drawing>(
+                            items: drawings,
+                            maxHeight: 600,
+                            onFind: (String filter) => getData(filter),
+                            label: "도면을 선택해주세요",
+                            onChanged: (e){
+                              setState(() async {
+                                context.read<Current>().changePath(e);
+                                String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+                                ByteData bytes = await rootBundle.load(tempRoot);
+                                String tempPath = (await getTemporaryDirectory()).path;
+                                String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+                                File file = File(tempName);
+                                await file
+                                    .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+                                FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+                                final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+                                visionText = await textRecognizer.processImage(vIa);
+                                decodeImage = await decodeImageFromList(file.readAsBytesSync());
+                                iS = decodeImage.width / _key.currentContext.size.width;
+                                setState(() {});
+                              });
+                            },
+                            showSearchBox: true,
+                          ),
+                        ),
                         Stack(
                           children: [
                             Container(
@@ -200,19 +243,19 @@ class _GridButtonState extends State<GridButton> {
                                     child: Stack(
                                       children: [
                                         PositionedTapDetector(
-                                          onLongPress: (m) {
-                                            ///TODO 원점 재지정 좌표 메서드
-                                            setState(() {
-                                              context.read<Current>().getDrawing().originX =
-                                                  (m.relative.dx / (width * _pContrl.scale)) -
-                                                      (realIntersect.dx / context.read<Current>().getcordiX());
-                                              context.read<Current>().getDrawing().originY =
-                                                  (m.relative.dy / (heigh * _pContrl.scale)) -
-                                                      (realIntersect.dy / context.read<Current>().getcordiY());
-                                              print(
-                                                  '${context.read<Current>().getDrawing().originX}, ${context.read<Current>().getDrawing().originY}');
-                                            });
-                                          },
+                                          // onLongPress: (m) {
+                                          //   ///TODO 원점 재지정 좌표 메서드
+                                          //   setState(() {
+                                          //     context.read<Current>().getDrawing().originX =
+                                          //         (m.relative.dx / (width * _pContrl.scale)) -
+                                          //             (realIntersect.dx / context.read<Current>().getcordiX());
+                                          //     context.read<Current>().getDrawing().originY =
+                                          //         (m.relative.dy / (heigh * _pContrl.scale)) -
+                                          //             (realIntersect.dy / context.read<Current>().getcordiY());
+                                          //     print(
+                                          //         '${context.read<Current>().getDrawing().originX}, ${context.read<Current>().getDrawing().originY}');
+                                          //   });
+                                          // },
                                           onTap: (m) {
                                             List<Point<double>> parseList = _iPs
                                                 .map((e) =>
@@ -375,6 +418,7 @@ class _GridButtonState extends State<GridButton> {
                                             ],
                                           ),
                                         ),
+
 
                                       ],
                                     ),
