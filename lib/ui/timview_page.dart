@@ -31,6 +31,7 @@ class _TimViewState extends State<TimView> {
   Future<QuerySnapshot> watch = FirebaseFirestore.instance.collection('drawing').get();
   final _formKey = GlobalKey<FormState>();
   final _openDropDownProgKey = GlobalKey<DropdownSearchState<String>>();
+  List<Drawing> favoriteds= [];
 
   @override
   void initState() {
@@ -45,7 +46,7 @@ class _TimViewState extends State<TimView> {
 
 
     watch.then((v) {
-      drawings = v.docs.sublist(0,2).map((e) => Drawing.fromSnapshot(e)).toList();
+      drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
       setState(() {});
     });
   }
@@ -160,6 +161,23 @@ class _TimViewState extends State<TimView> {
               },
               showSearchBox: true,
             ),
+          ),
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      favoriteds.add(context.read<Current>().getDrawing());
+                      },
+                    );
+                  },
+                  child: Text('추가'),
+                ),
+              ),
+
+            ],
           ),
           AspectRatio(
             aspectRatio: 421/297,

@@ -44,6 +44,9 @@ dependencies:
   flutter_xlider: ^3.4.0
   dropdown_search: ^0.4.8
   dio: ^3.0.10
+  calendar_strip: ^1.0.7
+  calendar_timeline: ^0.6.3
+  date_picker_timeline: ^1.2.1
 
 dev_dependencies:
   flutter_test:

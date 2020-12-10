@@ -17,6 +17,7 @@ class Current with ChangeNotifier {
 
   String getPath() => _path;
   String getName() => _name;
+  String getcordi() => '${_drawing.toString()}${_drawing.originX}, ${_drawing.originY}, ${_drawing.scale}';
   Drawing getDrawing() => _drawing;
   double getcordiX() => double.parse(_drawing.scale) * _drawing.witdh;
   double getcordiY() => double.parse(_drawing.scale) * _drawing.height;

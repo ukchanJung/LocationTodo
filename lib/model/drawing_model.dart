@@ -19,6 +19,7 @@ class Drawing {
   List<String> pointName;
   num witdh;
   num height;
+  num floor;
 
   ///서치기능 활용
   DateTime createdAt;
@@ -99,17 +100,17 @@ class Drawing {
     pointX = json['pointX'].cast<double>();
     pointY = json['pointY'].cast<double>();
     pointName = json['pointName'].cast<String>();
-    Iterable jsonOcrRect = json["ocrData"];
-    ocrData = jsonOcrRect.map((e) =>
-    {
-      'text': e['text'],
-      'rect': {
-        'left' :e['L'],
-        'top' :e['T'],
-        'right' :e['R'],
-        'bottom' :e['B'],
-      },
-    }).toList();
+    // Iterable jsonOcrRect = json["ocrData"];
+    // ocrData = jsonOcrRect.map((e) =>
+    // {
+    //   'text': e['text'],
+    //   'rect': {
+    //     'left' :e['L'],
+    //     'top' :e['T'],
+    //     'right' :e['R'],
+    //     'bottom' :e['B'],
+    //   },
+    // }).toList();
   }
 
   Drawing.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
@@ -127,7 +128,12 @@ class Drawing {
     data['infoCategory'] = this.infoCategory;
     data['pointX'] = this.pointX;
     data['pointY'] = this.pointY;
-    data["ocrData"] = ocrData;
+    data["ocrData"] = this.ocrData;
+    data["originX"] = this.originX;
+    data["originY"] = this.originY;
+    data["floor"] = this.floor;
+    data["width"] = this.witdh;
+    data["height"] = this.height;
     return data;
   }
 
