@@ -37,7 +37,11 @@ class _TimViewState extends State<TimView> {
   Future<QuerySnapshot> watch = FirebaseFirestore.instance.collection('drawing').get();
   List<Drawing> favoriteds= [];
   OcrCategory _ocrCategory = OcrCategory.Room;
-  List<TextEditingController> fields = List.filled(10, TextEditingController()).toList();
+  TextEditingController field0 =TextEditingController();
+  TextEditingController field1 =TextEditingController();
+  TextEditingController field2 =TextEditingController();
+  TextEditingController field3 =TextEditingController();
+  TextEditingController field4 =TextEditingController();
 
   List<Gridtestmodel> testgrids = [];
   double deviceWidth;
@@ -49,6 +53,7 @@ class _TimViewState extends State<TimView> {
   int debugY;
   List<Point> relativeRectPoint ;
   Rect selectRect;
+  List<bool> ocrFinList=[];
 
 
 
@@ -81,7 +86,11 @@ class _TimViewState extends State<TimView> {
     // TODO: implement dispose
     super.dispose();
     _pContrl.dispose();
-    fields.forEach((e) {e.dispose();});
+    field0.dispose();
+    field1.dispose();
+    field2.dispose();
+    field3.dispose();
+    field4.dispose();
 
   }
 
@@ -188,6 +197,7 @@ class _TimViewState extends State<TimView> {
                   visionText = await textRecognizer.processImage(vIa);
                   decodeImage = await decodeImageFromList(file.readAsBytesSync());
                   iS = decodeImage.width / _keyA.currentContext.size.width;
+                  ocrFinList = List.filled(visionText.blocks.length, false);
                   recaculate();
                   setState(() {});
                 });
@@ -273,6 +283,13 @@ class _TimViewState extends State<TimView> {
                               rect:
                               Rect.fromPoints(e.boundingBox.topLeft / iS, e.boundingBox.bottomRight / iS),
                               child: InkWell(
+                                onLongPress: (){
+                                  setState(() {
+                                              ocrFinList[visionText.blocks.indexWhere((element) => element == e)] =
+                                                  !ocrFinList[visionText.blocks.indexWhere((element) => element == e)];
+                                              field0.text = e.text;
+                                            });
+                                },
                                 onTap: () {
                                   showDialog(
                                     context: context,
@@ -309,6 +326,7 @@ class _TimViewState extends State<TimView> {
 
                                                   iS =
                                                       decodeImage.width / _keyA.currentContext.size.width;
+                                                  ocrFinList = List.filled(visionText.blocks.length, false);
                                                   setState(() {});
                                                 });
                                               },
@@ -320,9 +338,12 @@ class _TimViewState extends State<TimView> {
                                   );
                                 },
                                 child: Container(
-                                  decoration:
-                                  BoxDecoration(color: Color.fromRGBO(255, 0, 0, 0.3),border: Border.all(color: Colors.red, width: 0.2)),
-                                ),
+                                  decoration: BoxDecoration(
+                                                color:
+                                                ocrFinList[visionText.blocks.indexWhere((element) => element==e)]==false?
+                                                Color.fromRGBO(255, 0, 0, 0.3):Color.fromRGBO(0, 255, 0, 0.5),
+                                                border: Border.all(color: Colors.red, width: 0.2)),
+                                          ),
                               ),
                             ),
                           ).toList(),
@@ -341,7 +362,7 @@ class _TimViewState extends State<TimView> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
-                    controller: fields[0],
+                    controller: field0,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Name을 입력하세요',
@@ -353,7 +374,7 @@ class _TimViewState extends State<TimView> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
-                    controller: fields[1],
+                    controller: field1,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'ID를 입력하세요',
@@ -365,7 +386,7 @@ class _TimViewState extends State<TimView> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
-                    controller: fields[2],
+                    controller: field2,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: '천정고 입력하세요',
@@ -375,7 +396,9 @@ class _TimViewState extends State<TimView> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(onPressed: (){}, child: Text('Room 등록')),
+                child: ElevatedButton(onPressed: (){
+                  
+                }, child: Text('Room 등록')),
               )
             ],
           ),

@@ -11,6 +11,8 @@ class Room{
   num x;
   num y;
   num z;
+
+  Room({this.name, this.id, this.rect, this.x, this.y, this.z});
 }
 
 class CallOut{

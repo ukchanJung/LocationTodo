@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_location_todo/model/room_model.dart';
 
 class Drawing {
   String localPath;
@@ -29,6 +30,10 @@ class Drawing {
   double originY;
 
   List<Map> ocrData;
+
+  List<Room> rooms;
+  List<CallOut> callouts;
+  List<DetailInfo> detailInfos;
 
   Drawing({
     this.localPath,
@@ -105,17 +110,49 @@ class Drawing {
     floor = json["floor"];
     witdh = json["width"];
     height = json["height"];
+    ///OCR데이터 Read
     // Iterable jsonOcrRect = json["ocrData"];
-    // ocrData = jsonOcrRect.map((e) =>
-    // {
-    //   'text': e['text'],
-    //   'rect': {
-    //     'left' :e['L'],
-    //     'top' :e['T'],
-    //     'right' :e['R'],
-    //     'bottom' :e['B'],
-    //   },
-    // }).toList();
+    // ocrData = jsonOcrRect
+    //     .map(
+    //       (e) => {
+    //         'text': e['name'],
+    //         'rect': {
+    //           'left': e['L'],
+    //           'top': e['T'],
+    //           'right': e['R'],
+    //           'bottom': e['B'],
+    //         },
+    //       },
+    //     ).toList();
+    ///Room데이터 Read
+    Iterable jsonRooms = json['rooms'];
+    List<Map> roomsMap = jsonRooms
+        .map(
+          (e) => {
+            'name': e['name'],
+            'id': e['id'],
+            'rect': {
+              'left': e['L'],
+              'top': e['T'],
+              'right': e['R'],
+              'bottom': e['B'],
+            },
+            'x' : e['x'],
+            'y' : e['y'],
+            'z' : e['z'],
+          },
+        )
+        .toList();
+    rooms = roomsMap
+        .map((e) => Room(
+              name: e['name'],
+              id: e['id'],
+              rect: Rect.fromLTRB(e['L'], e['T'], e['R'], e['B']),
+              x: e['x'],
+              y: e['y'],
+              z: e['z'],
+            ))
+        .toList();
   }
 
   Drawing.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
@@ -139,6 +176,9 @@ class Drawing {
     data["floor"] = this.floor;
     data["width"] = this.witdh;
     data["height"] = this.height;
+    data["rooms"] = this.rooms;
+    data["callOuts"] = this.callouts;
+    data["detailInfos"] = this.detailInfos;
     return data;
   }
 
