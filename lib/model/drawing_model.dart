@@ -31,7 +31,7 @@ class Drawing {
 
   List<Map> ocrData;
 
-  List<Room> rooms;
+  List<Room> rooms=[];
   List<CallOut> callouts;
   List<DetailInfo> detailInfos;
 
@@ -66,12 +66,12 @@ class Drawing {
       listCategory: json['listCategory'],
       listSubNum: json['listSubNum'],
       scale: json['scale'],
-      orient: json['Orient'],
-      ocr: json['ocr'],
-      infoCategory: json['infoCategory'].cast<String>(),
-      pointX: json['pointX'].cast<double>(),
-      pointY: json['pointY'].cast<double>(),
-      pointName: json['pointName'].cast<String>(),
+      // orient: json['Orient'],
+      // ocr: json['ocr'],
+      // infoCategory: json['infoCategory'].cast<String>(),
+      // pointX: json['pointX'].cast<double>(),
+      // pointY: json['pointY'].cast<double>(),
+      // pointName: json['pointName'].cast<String>(),
     );
   }
 
@@ -126,33 +126,70 @@ class Drawing {
     //     ).toList();
     ///Room데이터 Read
     Iterable jsonRooms = json['rooms'];
-    List<Map> roomsMap = jsonRooms
-        .map(
-          (e) => {
-            'name': e['name'],
-            'id': e['id'],
-            'rect': {
-              'left': e['L'],
-              'top': e['T'],
-              'right': e['R'],
-              'bottom': e['B'],
-            },
-            'x' : e['x'],
-            'y' : e['y'],
-            'z' : e['z'],
-          },
-        )
-        .toList();
-    rooms = roomsMap
-        .map((e) => Room(
-              name: e['name'],
-              id: e['id'],
-              rect: Rect.fromLTRB(e['L'], e['T'], e['R'], e['B']),
-              x: e['x'],
-              y: e['y'],
-              z: e['z'],
-            ))
-        .toList();
+    if (jsonRooms != null) {
+      rooms = jsonRooms
+          .map((e) => Room(
+                name: e['name'],
+                id: e['id'],
+                rect: Rect.fromLTRB(
+                  e['rect']['left'],
+                  e['rect']['top'],
+                  e['rect']['right'],
+                  e['rect']['bottom'],
+                ),
+                x: e['x'],
+                y: e['y'],
+                z: e['z'],
+              ))
+          .toList();
+    }
+
+    // List<Map> roomsMap = jsonRooms
+     //      .map(
+     //        (e) => {
+     //      'name': e['name'],
+     //      'id': e['id'],
+     //      'rect': {
+     //        'left': e['L'],
+     //        'top': e['T'],
+     //        'right': e['R'],
+     //        'bottom': e['B'],
+     //      },
+     //      'x' : e['x'],
+     //      'y' : e['y'],
+     //      'z' : e['z'],
+     //    },
+     //  ).toList();
+    // if (json['rooms'] != null){
+    //   Iterable jsonRooms = json['rooms'];
+    //   roomsMap = jsonRooms
+    //       .map(
+    //         (e) => {
+    //       'name': e['name'],
+    //       'id': e['id'],
+    //       'rect': {
+    //         'left': e['L'],
+    //         'top': e['T'],
+    //         'right': e['R'],
+    //         'bottom': e['B'],
+    //       },
+    //       'x' : e['x'],
+    //       'y' : e['y'],
+    //       'z' : e['z'],
+    //     },
+    //   )
+    //       .toList();
+    //   rooms = roomsMap
+    //       .map((e) => Room(
+    //     name: e['name'],
+    //     id: e['id'],
+    //     rect: Rect.fromLTRB(e['L'], e['T'], e['R'], e['B']),
+    //     x: e['x'],
+    //     y: e['y'],
+    //     z: e['z'],
+    //   ))
+    //       .toList();
+    // }
   }
 
   Drawing.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
@@ -176,7 +213,22 @@ class Drawing {
     data["floor"] = this.floor;
     data["width"] = this.witdh;
     data["height"] = this.height;
-    data["rooms"] = this.rooms;
+    List<Map>roomsMap = this.rooms.map((e) =>
+    {
+      'name': e.name,
+      'id': e.id,
+      'rect': {
+        'left': e.rect.left,
+        'top': e.rect.top,
+        'right': e.rect.right,
+        'bottom': e.rect.bottom,
+      },
+      'x' : e.x,
+      'y' : e.y,
+      'z' : e.z,
+    }
+    ).toList();
+    data["rooms"] = roomsMap;
     data["callOuts"] = this.callouts;
     data["detailInfos"] = this.detailInfos;
     return data;

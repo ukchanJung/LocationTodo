@@ -140,36 +140,51 @@ class _TimViewState extends State<TimView> {
             ),
           )),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          print(visionText.blocks.length);
-          FirebaseFirestore.instance.collection('drawing').doc(context.read<Current>().getDrawing().drawingNum).update({
-            "ocrData" : visionText.blocks.map((e) =>{
-              "text": e.text,
-              "Rect": {"L":e.boundingBox.left, "T":e.boundingBox.top, "R":e.boundingBox.right, "B":e.boundingBox.bottom}
-            } ).toList()
-          });
-          // String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
-          // ByteData bytes = await rootBundle.load(tempRoot);
-          // // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
-          // String tempPath = (await getTemporaryDirectory()).path;
-          // String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
-          // File file = File(tempName);
-          // // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
-          // await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-          //
-          // FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
-          // final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
-          // print(textRecognizer);
-          //
-          // visionText = await textRecognizer.processImage(vIa);
-          // print(visionText);
-          // decodeImage = await decodeImageFromList(file.readAsBytesSync());
-          //
-          // iS = decodeImage.width / _keyA.currentContext.size.width;
-          // print(_photoViewController.scale);
-          // setState(() {});
-        },
+      floatingActionButton: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(onPressed: ()async{
+              DocumentSnapshot temp= await FirebaseFirestore.instance.collection('drawing').doc('A31-003').get();
+              print(temp.data());
+              Drawing tempD=Drawing.fromJson(temp.data());
+              print(tempD);
+            },child: Text('테스트'),),
+          ),
+          FloatingActionButton(
+            heroTag: null,
+            onPressed: () async {
+              print(visionText.blocks.length);
+              FirebaseFirestore.instance.collection('drawing').doc(context.read<Current>().getDrawing().drawingNum).update({
+                "ocrData" : visionText.blocks.map((e) =>{
+                  "text": e.text,
+                  "Rect": {"L":e.boundingBox.left, "T":e.boundingBox.top, "R":e.boundingBox.right, "B":e.boundingBox.bottom}
+                } ).toList()
+              });
+              // String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+              // ByteData bytes = await rootBundle.load(tempRoot);
+              // // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
+              // String tempPath = (await getTemporaryDirectory()).path;
+              // String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+              // File file = File(tempName);
+              // // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
+              // await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+              //
+              // FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+              // final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+              // print(textRecognizer);
+              //
+              // visionText = await textRecognizer.processImage(vIa);
+              // print(visionText);
+              // decodeImage = await decodeImageFromList(file.readAsBytesSync());
+              //
+              // iS = decodeImage.width / _keyA.currentContext.size.width;
+              // print(_photoViewController.scale);
+              // setState(() {});
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -180,7 +195,7 @@ class _TimViewState extends State<TimView> {
             child: DropdownSearch<Drawing>(
               items: drawings,
               maxHeight: 600,
-              onFind: (String filter) => getData(filter),
+              // onFind: (String filter) => getData(filter),
               label: "도면을 선택해주세요",
               onChanged: (e){
                 setState(() async {
@@ -348,6 +363,20 @@ class _TimViewState extends State<TimView> {
                             ),
                           ).toList(),
                         ),
+                        visionText == null
+                            ? Container()
+                            : Stack(
+                                children: context
+                                    .watch<Current>()
+                                    .getDrawing()
+                                    .rooms
+                                    .map((e) => Positioned.fromRect(
+                                        rect: Rect.fromPoints(e.rect.topLeft / iS, e.rect.bottomRight / iS),
+                                        child: Container(
+                                          color: Colors.black,
+                                        )))
+                                    .toList(),
+                              )
                       ],
                     ),
                   ),
@@ -397,8 +426,18 @@ class _TimViewState extends State<TimView> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(onPressed: (){
-                  
-                }, child: Text('Room 등록')),
+                      context.read<Current>().getDrawing().rooms.add(
+                            Room(
+                              name: field0.text,
+                              id: field1.text,
+                              rect: visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox,
+                              x: debugX,
+                              y: debugY,
+                              z:1,
+                            ),
+                          );
+                      FirebaseFirestore.instance.collection('drawing').doc(context.read<Current>().getDrawing().drawingNum).update(context.read<Current>().getDrawing().toJson());
+                    }, child: Text('Room 등록')),
               )
             ],
           ),
