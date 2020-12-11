@@ -119,7 +119,7 @@ class _LocationTodoState extends State<LocationTodo> {
                   ListTile(
                     title: Text('도면뷰어'),
                     onTap: () {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => TimView()),
                       );

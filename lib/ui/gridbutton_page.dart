@@ -101,42 +101,6 @@ class _GridButtonState extends State<GridButton> {
     print(tasks.length);
     print(testgrids.length);
     _resetSelectedDate();
-    // drawings = [
-    //   Drawing(
-    //     drawingNum: 'A31-003',
-    //     title: '1층 평면도',
-    //     scale: '500',
-    //     localPath: 'A31-003.png',
-    //     originX: 0.7373979439768359,
-    //     originY: 0.23113260932198965,
-    //     witdh: 421,
-    //     height: 297,
-    //   ),
-    //   Drawing(
-    //       drawingNum: 'A31-109',
-    //       title: '1층 확대 평면도',
-    //       scale: '200',
-    //       localPath: 'A31-109.png',
-    //       originX: 1.4458318294031067,
-    //       originY: 0.10323461221782795,
-    //       witdh: 421,
-    //       height: 297),
-    //   Drawing(
-    //       drawingNum: 'A31-110',
-    //       title: '1층 확대 평면도',
-    //       scale: '200',
-    //       localPath: 'A31-110.png',
-    //       originX: 0.8621306563916183,
-    //       originY: 0.103544052143084,
-    //       witdh: 421,
-    //       height: 297),
-    //   Drawing(
-    //     drawingNum: 'A12-004',
-    //     title: '종횡단면도',
-    //     scale: '400',
-    //     localPath: 'A12-004.png',
-    //   ),
-    // ];
     Future<QuerySnapshot> watch = FirebaseFirestore.instance.collection('drawing').get();
     watch.then((v) {
       drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
@@ -199,34 +163,7 @@ class _GridButtonState extends State<GridButton> {
                             },
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: DropdownSearch<Drawing>(
-                            items: drawings,
-                            maxHeight: 600,
-                            onFind: (String filter) => getData(filter),
-                            label: "도면을 선택해주세요",
-                            onChanged: (e){
-                              setState(() async {
-                                context.read<Current>().changePath(e);
-                                String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
-                                ByteData bytes = await rootBundle.load(tempRoot);
-                                String tempPath = (await getTemporaryDirectory()).path;
-                                String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
-                                File file = File(tempName);
-                                await file
-                                    .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-                                FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
-                                final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
-                                visionText = await textRecognizer.processImage(vIa);
-                                decodeImage = await decodeImageFromList(file.readAsBytesSync());
-                                iS = decodeImage.width / _key.currentContext.size.width;
-                                setState(() {});
-                              });
-                            },
-                            showSearchBox: true,
-                          ),
-                        ),
+
                         Stack(
                           children: [
                             Container(
@@ -418,11 +355,43 @@ class _GridButtonState extends State<GridButton> {
                                             ],
                                           ),
                                         ),
-
-
                                       ],
                                     ),
                                   ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Container(
+                                decoration: BoxDecoration(color: Colors.white70),
+                                child: DropdownSearch<Drawing>(
+                                  validator: (v) => v == null ? "required field" : null,
+                                  showSearchBox: true,
+                                  mode: Mode.MENU,
+                                  items: drawings,
+                                  maxHeight: 600,
+                                  onFind: (String filter) => getData(filter),
+                                  label: "도면을 선택해주세요",
+                                  onChanged: (e){
+                                    setState(() async {
+                                      context.read<Current>().changePath(e);
+                                      String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+                                      ByteData bytes = await rootBundle.load(tempRoot);
+                                      String tempPath = (await getTemporaryDirectory()).path;
+                                      String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+                                      File file = File(tempName);
+                                      await file
+                                          .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+                                      FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+                                      final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+                                      visionText = await textRecognizer.processImage(vIa);
+                                      decodeImage = await decodeImageFromList(file.readAsBytesSync());
+                                      iS = decodeImage.width / _key.currentContext.size.width;
+                                      recaculate();
+                                      setState(() {});
+                                    });
+                                  },
                                 ),
                               ),
                             ),
@@ -498,76 +467,6 @@ class _GridButtonState extends State<GridButton> {
                                   ),
                                 ),
                               ) ,
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: ElevatedButton(
-                                        autofocus: true,
-                                        onPressed: () {
-                                          setState(() {
-                                            reaSelectIntersect();
-                                          });
-                                        },
-                                        child: Text('원점지정'),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            context.read<Current>().changePath(drawings[0]);
-                                            recaculate();
-                                            //TODO 원점 비율 * 위젯의 사이즈
-                                          });
-                                        },
-                                        child: Text('1층 평면도'),
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: ElevatedButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              context.read<Current>().changePath(drawings[1]);
-                                              recaculate();
-                                            });
-                                          },
-                                          child: Text('1층 확대 평면도')),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: ElevatedButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              context.read<Current>().changePath(drawings[2]);
-                                              recaculate();
-                                            });
-                                          },
-                                          child: Text('1층 확대 평면도2')),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: ElevatedButton(
-                                          onPressed: () {
-                                            setState(() {});
-                                          },
-                                          child: Text('단면도')),
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ],
                           ),
                         ),
