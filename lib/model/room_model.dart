@@ -7,12 +7,12 @@ class Room{
   Rect rect;
   int FL;
   int SL;
-  int SealL;
+  int sealL;
   num x;
   num y;
   num z;
 
-  Room({this.name, this.id, this.rect, this.x, this.y, this.z,});
+  Room({this.name, this.id, this.rect, this.x, this.y, this.z,this.sealL});
 }
 
 class CallOut{

@@ -212,6 +212,7 @@ class _TimViewState extends State<TimView> {
                   visionText = await textRecognizer.processImage(vIa);
                   decodeImage = await decodeImageFromList(file.readAsBytesSync());
                   iS = decodeImage.width / _keyA.currentContext.size.width;
+                  ocrFinList = List.filled(visionText.blocks.length, false);
                   recaculate();
                   setState(() {});
                 });
@@ -298,7 +299,6 @@ class _TimViewState extends State<TimView> {
                               Rect.fromPoints(e.boundingBox.topLeft / iS, e.boundingBox.bottomRight / iS),
                               child: InkWell(
                                 onLongPress: (){
-                                  ocrFinList = List.filled(visionText.blocks.length, false);
                                   setState(() {
                                               ocrFinList[visionText.blocks.indexWhere((element) => element == e)] =
                                                   !ocrFinList[visionText.blocks.indexWhere((element) => element == e)];
@@ -436,6 +436,7 @@ class _TimViewState extends State<TimView> {
                                 x: debugX,
                                 y: debugY,
                                 z: 1,
+                                sealL: int.parse(field2.text),
                               ),
                             );
                         context.read<Current>().getDrawing().rooms.toSet().toList();
@@ -443,7 +444,7 @@ class _TimViewState extends State<TimView> {
                             .collection('drawing')
                             .doc(context.read<Current>().getDrawing().drawingNum)
                             .update(context.read<Current>().getDrawing().toJson());
-                        // ocrFinList.forEach((b) {b = false; });
+                        ocrFinList = List.filled(visionText.blocks.length, false);
                       });
                     }, child: Text('Room 등록')),
               )

@@ -128,19 +128,21 @@ class Drawing {
     Iterable jsonRooms = json['rooms'];
     if (jsonRooms != null) {
       rooms = jsonRooms
-          .map((e) => Room(
-                name: e['name'],
-                id: e['id'],
-                rect: Rect.fromLTRB(
-                  e['rect']['left'],
-                  e['rect']['top'],
-                  e['rect']['right'],
-                  e['rect']['bottom'],
-                ),
-                x: e['x'],
-                y: e['y'],
-                z: e['z'],
-              ))
+          .map((e) =>
+          Room(
+            name: e['name'],
+            id: e['id'],
+            rect: Rect.fromLTRB(
+              e['rect']['left'],
+              e['rect']['top'],
+              e['rect']['right'],
+              e['rect']['bottom'],
+            ),
+            x: e['x'],
+            y: e['y'],
+            z: e['z'],
+            sealL: e['sealL'],
+          ))
           .toList();
     }
 
@@ -226,6 +228,7 @@ class Drawing {
       'x' : e.x,
       'y' : e.y,
       'z' : e.z,
+      'sealL' : e.sealL
     }
     ).toList();
     data["rooms"] = roomsMap;
