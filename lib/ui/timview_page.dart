@@ -212,7 +212,6 @@ class _TimViewState extends State<TimView> {
                   visionText = await textRecognizer.processImage(vIa);
                   decodeImage = await decodeImageFromList(file.readAsBytesSync());
                   iS = decodeImage.width / _keyA.currentContext.size.width;
-                  ocrFinList = List.filled(visionText.blocks.length, false);
                   recaculate();
                   setState(() {});
                 });
@@ -299,6 +298,7 @@ class _TimViewState extends State<TimView> {
                               Rect.fromPoints(e.boundingBox.topLeft / iS, e.boundingBox.bottomRight / iS),
                               child: InkWell(
                                 onLongPress: (){
+                                  ocrFinList = List.filled(visionText.blocks.length, false);
                                   setState(() {
                                               ocrFinList[visionText.blocks.indexWhere((element) => element == e)] =
                                                   !ocrFinList[visionText.blocks.indexWhere((element) => element == e)];
@@ -373,7 +373,7 @@ class _TimViewState extends State<TimView> {
                                     .map((e) => Positioned.fromRect(
                                         rect: Rect.fromPoints(e.rect.topLeft / iS, e.rect.bottomRight / iS),
                                         child: Container(
-                                          color: Colors.black,
+                                          color: Color.fromRGBO(0, 0, 0, 0.6),
                                         )))
                                     .toList(),
                               )
@@ -425,18 +425,26 @@ class _TimViewState extends State<TimView> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(onPressed: (){
-                      context.read<Current>().getDrawing().rooms.add(
-                            Room(
-                              name: field0.text,
-                              id: field1.text,
-                              rect: visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox,
-                              x: debugX,
-                              y: debugY,
-                              z:1,
-                            ),
-                          );
-                      FirebaseFirestore.instance.collection('drawing').doc(context.read<Current>().getDrawing().drawingNum).update(context.read<Current>().getDrawing().toJson());
+                child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        context.read<Current>().getDrawing().rooms.add(
+                              Room(
+                                name: field0.text,
+                                id: field1.text,
+                                rect: visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox,
+                                x: debugX,
+                                y: debugY,
+                                z: 1,
+                              ),
+                            );
+                        context.read<Current>().getDrawing().rooms.toSet().toList();
+                        FirebaseFirestore.instance
+                            .collection('drawing')
+                            .doc(context.read<Current>().getDrawing().drawingNum)
+                            .update(context.read<Current>().getDrawing().toJson());
+                        // ocrFinList.forEach((b) {b = false; });
+                      });
                     }, child: Text('Room 등록')),
               )
             ],

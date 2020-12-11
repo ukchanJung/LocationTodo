@@ -12,7 +12,7 @@ class Room{
   num y;
   num z;
 
-  Room({this.name, this.id, this.rect, this.x, this.y, this.z});
+  Room({this.name, this.id, this.rect, this.x, this.y, this.z,});
 }
 
 class CallOut{
