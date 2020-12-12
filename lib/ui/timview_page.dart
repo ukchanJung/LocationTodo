@@ -257,22 +257,6 @@ class _TimViewState extends State<TimView> {
 
                       setState(() {
                         _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                        relativeRectPoint = Closet(
-                            selectPoint: Point(
-                                (((m.relative.dx / _pContrl.scale) / width -
-                                    context.read<Current>().getDrawing().originX) *
-                                    context.read<Current>().getcordiX()),
-                                (((m.relative.dy / _pContrl.scale) / heigh -
-                                    context.read<Current>().getDrawing().originY) *
-                                    context.read<Current>().getcordiY())),
-                            pointList: realParseList)
-                            .minRect(Point(
-                            (((m.relative.dx / _pContrl.scale) / width -
-                                context.read<Current>().getDrawing().originX) *
-                                context.read<Current>().getcordiX()),
-                            (((m.relative.dy / _pContrl.scale) / heigh -
-                                context.read<Current>().getDrawing().originY) *
-                                context.read<Current>().getcordiY())));
                          debugX = (((m.relative.dx / _pContrl.scale) / width -
                             context.read<Current>().getDrawing().originX) *
                             context.read<Current>().getcordiX())
@@ -282,11 +266,27 @@ class _TimViewState extends State<TimView> {
                             context.read<Current>().getcordiY())
                             .round();
                         print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
-                        setState(() {
-                          selectRect= Rect.fromPoints(
-                                  Offset(relativeRectPoint.first.x, relativeRectPoint.first.y),
-                                  Offset(relativeRectPoint.last.x, relativeRectPoint.last.y));
-                        });
+                        // relativeRectPoint = Closet(
+                        //     selectPoint: Point(
+                        //         (((m.relative.dx / _pContrl.scale) / width -
+                        //             context.read<Current>().getDrawing().originX) *
+                        //             context.read<Current>().getcordiX()),
+                        //         (((m.relative.dy / _pContrl.scale) / heigh -
+                        //             context.read<Current>().getDrawing().originY) *
+                        //             context.read<Current>().getcordiY())),
+                        //     pointList: realParseList)
+                        //     .minRect(Point(
+                        //     (((m.relative.dx / _pContrl.scale) / width -
+                        //         context.read<Current>().getDrawing().originX) *
+                        //         context.read<Current>().getcordiX()),
+                        //     (((m.relative.dy / _pContrl.scale) / heigh -
+                        //         context.read<Current>().getDrawing().originY) *
+                        //         context.read<Current>().getcordiY())));
+                        // setState(() {
+                        //   selectRect= Rect.fromPoints(
+                        //           Offset(relativeRectPoint.first.x, relativeRectPoint.first.y),
+                        //           Offset(relativeRectPoint.last.x, relativeRectPoint.last.y));
+                        // });
                       });
                     }, 
                     child: Stack(
@@ -301,7 +301,7 @@ class _TimViewState extends State<TimView> {
                               .roomMap
                               .map((e) => Positioned.fromRect(
                               rect: Rect.fromLTRB(
-                                e['left'] / iS,
+                                e['left'].toDouble() / iS,
                                 e['top'].toDouble() / iS,
                                 e['right'].toDouble() / iS,
                                 e['bottom'].toDouble() / iS,
@@ -311,6 +311,25 @@ class _TimViewState extends State<TimView> {
                               )))
                               .toList(),
                         ),
+                        context.watch<Current>().getDrawing().callOutMap == [] || visionText == null
+                            ? Container()
+                            : Stack(
+                                children: context
+                                    .watch<Current>()
+                                    .getDrawing()
+                                    .callOutMap
+                                    .map((e) => Positioned.fromRect(
+                                        rect: Rect.fromLTRB(
+                                          e['left'].toDouble() / iS,
+                                          e['top'].toDouble() / iS,
+                                          e['right'].toDouble() / iS,
+                                          e['bottom'].toDouble() / iS,
+                                        ),
+                                        child: Container(
+                                          color: Color.fromRGBO(0, 0, 255, 0.6),
+                                        )))
+                                    .toList(),
+                              ),
                         visionText == null
                             ? Container()
                             : Stack(
@@ -394,77 +413,207 @@ class _TimViewState extends State<TimView> {
             ),
           ),
           buildOcrCategorySelect(),
-          Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: field0,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Name을 입력하세요',
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: field1,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'ID를 입력하세요',
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: field2,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: '천정고 입력하세요',
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                        context.read<Current>().getDrawing().roomMap.add({
-                          'name': field0.text,
-                          'id': field1.text,
-                          'left':_selBox.left,
-                          'top':_selBox.top,
-                          'right':_selBox.right,
-                          'bottom':_selBox.bottom,
-                          'x': debugX,
-                          'y': debugY,
-                          'z': 2,
-                          'sealL': int.parse(field2.text),
-                        });
-                        context.read<Current>().getDrawing().roomMap.toSet().toList();
-                        FirebaseFirestore.instance
-                            .collection('drawing')
-                            .doc(context.read<Current>().getDrawing().drawingNum)
-                            .update(context.read<Current>().getDrawing().toJson());
-                        ocrFinList = List.filled(visionText.blocks.length, false);
-                      });
-                    }, child: Text('Room 등록')),
-              )
-            ],
-          ),
+          buildRoomDateField(context),
+          buildCallOutDataField(context),
+          buildDetailInfoField(context),
           Text(' 선택한점은 절대좌표 X: $debugX, Y: $debugY',textScaleFactor: 2,),
         ],
       ),
     );
+  }
+
+  Row buildDetailInfoField(BuildContext context) {
+    return Row(
+          children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: field0,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Name을 입력하세요',
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: field1,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: '카테고리 를 입력하세요',
+              ),
+            ),
+          ),
+        ),
+        Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
+                      context.read<Current>().getDrawing().detailInfoMap.add({
+                        'name': field0.text,
+                        'category': field1.text,
+                        'left':_selBox.left,
+                        'top':_selBox.top,
+                        'right':_selBox.right,
+                        'bottom':_selBox.bottom,
+                        'x': debugX,
+                        'y': debugY,
+                        'z': context.read<Current>().getDrawing().floor,
+                      });
+                      context.read<Current>().getDrawing().detailInfoMap.toSet().toList();
+                      FirebaseFirestore.instance
+                          .collection('drawing')
+                          .doc(context.read<Current>().getDrawing().drawingNum)
+                          .update(context.read<Current>().getDrawing().toJson());
+                      ocrFinList = List.filled(visionText.blocks.length, false);
+                    });
+                  }, child: Text('DetailInfo 등록')),
+            )
+          ],
+        );
+  }
+  Row buildCallOutDataField(BuildContext context) {
+    return Row(
+          children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: field0,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Name을 입력하세요',
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: field1,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'ID 를 입력하세요',
+              ),
+            ),
+          ),
+        ),        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: field2,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: '카테고리 를 입력하세요',
+              ),
+            ),
+          ),
+        ),
+        Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
+                      context.read<Current>().getDrawing().callOutMap.add({
+                        'name': field0.text,
+                        'id': field1.text,
+                        'category': field2.text,
+                        'left':_selBox.left,
+                        'top':_selBox.top,
+                        'right':_selBox.right,
+                        'bottom':_selBox.bottom,
+                        'x': debugX,
+                        'y': debugY,
+                        'z': context.read<Current>().getDrawing().floor,
+                      });
+                      context.read<Current>().getDrawing().callOutMap.toSet().toList();
+                      FirebaseFirestore.instance
+                          .collection('drawing')
+                          .doc(context.read<Current>().getDrawing().drawingNum)
+                          .update(context.read<Current>().getDrawing().toJson());
+                      ocrFinList = List.filled(visionText.blocks.length, false);
+                    });
+                  }, child: Text('CallOut 등록')),
+            )
+          ],
+        );
+  }
+  Row buildRoomDateField(BuildContext context) {
+    return Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: field0,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Name을 입력하세요',
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: field1,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'ID를 입력하세요',
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: field2,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: '천정고 입력하세요',
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
+                      context.read<Current>().getDrawing().roomMap.add({
+                        'name': field0.text,
+                        'id': field1.text,
+                        'left':_selBox.left,
+                        'top':_selBox.top,
+                        'right':_selBox.right,
+                        'bottom':_selBox.bottom,
+                        'x': debugX,
+                        'y': debugY,
+                        'z': context.read<Current>().getDrawing().floor,
+                        'sealL': int.parse(field2.text),
+                      });
+                      context.read<Current>().getDrawing().roomMap.toSet().toList();
+                      FirebaseFirestore.instance
+                          .collection('drawing')
+                          .doc(context.read<Current>().getDrawing().drawingNum)
+                          .update(context.read<Current>().getDrawing().toJson());
+                      ocrFinList = List.filled(visionText.blocks.length, false);
+                    });
+                  }, child: Text('Room 등록')),
+            )
+          ],
+        );
   }
   void recaculate() {
     List<Line> realLines = [];

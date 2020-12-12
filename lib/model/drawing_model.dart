@@ -33,8 +33,8 @@ class Drawing {
 
   List<Room> rooms;
   List<Map> roomMap = [];
-  List<CallOut> callouts;
-  List<DetailInfo> detailInfos;
+  List<Map> callOutMap = [];
+  List<Map> detailInfoMap = [];
 
   Drawing({
     this.localPath,
@@ -142,6 +142,37 @@ class Drawing {
             'sealL': e['sealL'],
             }).toList();
     }
+    Iterable jsonCallOut = json['callOutMap'];
+    if (jsonCallOut != null) {
+      callOutMap = jsonCallOut
+          .map((f) => {
+                'name': f['name'],
+                'id': f['id'],
+                'category': f['category'],
+                'left': f['left'],
+                'top': f['top'],
+                'right': f['right'],
+                'bottom': f['bottom'],
+                'x': f['x'],
+                'y': f['y'],
+                'z': f['z'],
+              })
+          .toList();
+    }
+    Iterable jsonDetailInfo = json['detailInfo'];
+    if (jsonDetailInfo != null){
+      callOutMap = jsonDetailInfo.map((e) => {
+        'name' : e['name'],
+        'category' : e['category'],
+        'left': e['left'],
+        'top': e['top'],
+        'right': e['right'],
+        'bottom': e['bottom'],
+        'x': e['x'],
+        'y': e['y'],
+        'z': e['z'],
+      }).toList();
+    }
     // if (jsonRooms != null) {
     //   rooms = jsonRooms.map((e) {
     //     var t = e['rect'];
@@ -227,8 +258,8 @@ class Drawing {
     //         })
     //     .toList();
     data["roomMap"] = roomMap;
-    data["callOuts"] = this.callouts;
-    data["detailInfos"] = this.detailInfos;
+    data["callOutMap"] = this.callOutMap;
+    data["detailInfoMap"] = this.detailInfoMap;
     return data;
   }
 

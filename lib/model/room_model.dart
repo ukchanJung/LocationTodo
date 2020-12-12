@@ -23,20 +23,34 @@ class Room{
 
 class CallOut{
   String name;
+  String id;
+  String category;
   Drawing parent;
   num readCount;
   Rect rect;
+  double left;
+  double top;
+  double right;
+  double bottom;
   num x;
   num y;
   num z;
+
+  CallOut({this.name, this.id,this.category, this.left, this.top, this.right, this.bottom, this.x, this.y, this.z});
 }
 
 class DetailInfo{
   String name;
   String category;
   Rect rect;
+  double left;
+  double top;
+  double right;
+  double bottom;
   num x;
   num y;
   num z;
+
+  DetailInfo({this.name, this.category, this.left, this.top, this.right, this.bottom, this.x, this.y, this.z});
 }
 enum OcrCategory { Room, CallOut, DetailInfo }
