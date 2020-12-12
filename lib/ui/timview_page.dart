@@ -145,12 +145,15 @@ class _TimViewState extends State<TimView> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: FloatingActionButton(onPressed: ()async{
-              DocumentSnapshot temp= await FirebaseFirestore.instance.collection('drawing').doc('A31-003').get();
-              print(temp.data());
-              Drawing tempD=Drawing.fromJson(temp.data());
-              print(tempD);
-            },child: Text('테스트'),),
+            child: FloatingActionButton(
+              onPressed: () async {
+                DocumentSnapshot temp = await FirebaseFirestore.instance.collection('drawing').doc('A31-003').get();
+                // print(temp.data());
+                Drawing tempD = Drawing.fromJson(temp.data());
+                print(tempD.roomMap);
+              },
+              child: Text('테스트'),
+            ),
           ),
           FloatingActionButton(
             heroTag: null,
@@ -289,6 +292,26 @@ class _TimViewState extends State<TimView> {
                     child: Stack(
                       children: [
                         Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                        // context.watch<Current>().getDrawing().rooms.length > 0
+                        visionText == null
+                            ? Container()
+                            : Stack(
+                          children: context
+                              .watch<Current>()
+                              .getDrawing()
+                              .roomMap
+                              .map((e) => Positioned.fromRect(
+                              rect: Rect.fromLTRB(
+                                e['left'] / iS,
+                                e['top'].toDouble() / iS,
+                                e['right'].toDouble() / iS,
+                                e['bottom'].toDouble() / iS,
+                              ),
+                              child: Container(
+                                color: Color.fromRGBO(0, 0, 0, 0.6),
+                              )))
+                              .toList(),
+                        ),
                         visionText == null
                             ? Container()
                             : Stack(
@@ -363,20 +386,7 @@ class _TimViewState extends State<TimView> {
                             ),
                           ).toList(),
                         ),
-                        visionText == null
-                            ? Container()
-                            : Stack(
-                                children: context
-                                    .watch<Current>()
-                                    .getDrawing()
-                                    .rooms
-                                    .map((e) => Positioned.fromRect(
-                                        rect: Rect.fromPoints(e.rect.topLeft / iS, e.rect.bottomRight / iS),
-                                        child: Container(
-                                          color: Color.fromRGBO(0, 0, 0, 0.6),
-                                        )))
-                                    .toList(),
-                              )
+
                       ],
                     ),
                   ),

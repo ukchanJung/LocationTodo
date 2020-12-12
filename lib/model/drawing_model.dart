@@ -31,7 +31,8 @@ class Drawing {
 
   List<Map> ocrData;
 
-  List<Room> rooms=[];
+  List<Room> rooms;
+  List<Map> roomMap;
   List<CallOut> callouts;
   List<DetailInfo> detailInfos;
 
@@ -127,70 +128,47 @@ class Drawing {
     ///Room데이터 Read
     Iterable jsonRooms = json['rooms'];
     if (jsonRooms != null) {
-      rooms = jsonRooms
-          .map((e) =>
-          Room(
-            name: e['name'],
-            id: e['id'],
-            rect: Rect.fromLTRB(
-              e['rect']['left'],
-              e['rect']['top'],
-              e['rect']['right'],
-              e['rect']['bottom'],
-            ),
-            x: e['x'],
-            y: e['y'],
-            z: e['z'],
-            sealL: e['sealL'],
-          ))
-          .toList();
+      roomMap = jsonRooms
+          .map((e)=> {
+            'name': e['name'],
+            'id': e['id'],
+            'left': e['rect']['left'],
+            'top': e['rect']['top'],
+            'right': e['rect']['right'],
+            'bottom': e['rect']['bottom'],
+            'x': e['x'],
+            'y': e['y'],
+            'z': e['z'],
+            'sealL': e['sealL'],
+            }).toList();
     }
-
-    // List<Map> roomsMap = jsonRooms
-     //      .map(
-     //        (e) => {
-     //      'name': e['name'],
-     //      'id': e['id'],
-     //      'rect': {
-     //        'left': e['L'],
-     //        'top': e['T'],
-     //        'right': e['R'],
-     //        'bottom': e['B'],
-     //      },
-     //      'x' : e['x'],
-     //      'y' : e['y'],
-     //      'z' : e['z'],
-     //    },
-     //  ).toList();
-    // if (json['rooms'] != null){
-    //   Iterable jsonRooms = json['rooms'];
-    //   roomsMap = jsonRooms
-    //       .map(
-    //         (e) => {
-    //       'name': e['name'],
-    //       'id': e['id'],
-    //       'rect': {
-    //         'left': e['L'],
-    //         'top': e['T'],
-    //         'right': e['R'],
-    //         'bottom': e['B'],
-    //       },
-    //       'x' : e['x'],
-    //       'y' : e['y'],
-    //       'z' : e['z'],
-    //     },
-    //   )
-    //       .toList();
-    //   rooms = roomsMap
-    //       .map((e) => Room(
-    //     name: e['name'],
-    //     id: e['id'],
-    //     rect: Rect.fromLTRB(e['L'], e['T'], e['R'], e['B']),
-    //     x: e['x'],
-    //     y: e['y'],
-    //     z: e['z'],
-    //   ))
-    //       .toList();
+    // if (jsonRooms != null) {
+    //   rooms = jsonRooms.map((e) {
+    //     var t = e['rect'];
+    //     double _left = t['left'].toDouble();
+    //     double _top = t['top'].toDouble();
+    //     double _right = t['right'].toDouble();
+    //     double _bottom = t['bottom'].toDouble();
+    //     // print('${_left.runtimeType}, ${_top.runtimeType}, ${_right.runtimeType}, ${_bottom.runtimeType}');
+    //     // print('${_left}, ${_top}, ${_right}, ${_bottom}');
+    //     Room(
+    //       name: e['name'],
+    //       id: e['id'],
+    //       left: _left,
+    //       top: _top,
+    //       right: _right,
+    //       bottom: _bottom,
+    //       // rect:Rect.fromLTRB(100.0, 100.0, 100.0, 100.0),
+    //       // rect: Rect.fromPoints(
+    //       //   Offset(_left.toDouble(),_top.toDouble()),Offset(_right.toDouble(),_bottom.toDouble())
+    //       // ),
+    //       // rect: _tempRect,
+    //       x: e['x'],
+    //       y: e['y'],
+    //       z: e['z'],
+    //       sealL: e['sealL'],
+    //     );
+    //   }).toList();
     // }
   }
 
@@ -220,10 +198,10 @@ class Drawing {
       'name': e.name,
       'id': e.id,
       'rect': {
-        'left': e.rect.left,
-        'top': e.rect.top,
-        'right': e.rect.right,
-        'bottom': e.rect.bottom,
+        'left': e.left,
+        'top': e.top,
+        'right': e.right,
+        'bottom': e.bottom,
       },
       'x' : e.x,
       'y' : e.y,

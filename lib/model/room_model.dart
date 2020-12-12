@@ -1,18 +1,24 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:math';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/drawing_model.dart';
 
 class Room{
   String name;
   String id;
   Rect rect;
-  int FL;
-  int SL;
-  int sealL;
+  num FL;
+  num SL;
+  num sealL;
   num x;
   num y;
   num z;
+  double left;
+  double top;
+  double right;
+  double bottom;
 
-  Room({this.name, this.id, this.rect, this.x, this.y, this.z,this.sealL});
+  Room({this.name, this.id, this.rect, this.x, this.y, this.z,this.sealL, this.left, this.top, this.right, this.bottom});
 }
 
 class CallOut{
