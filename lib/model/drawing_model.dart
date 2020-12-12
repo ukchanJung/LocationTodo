@@ -32,7 +32,7 @@ class Drawing {
   List<Map> ocrData;
 
   List<Room> rooms;
-  List<Map> roomMap;
+  List<Map> roomMap = [];
   List<CallOut> callouts;
   List<DetailInfo> detailInfos;
 
@@ -126,16 +126,16 @@ class Drawing {
     //       },
     //     ).toList();
     ///Room데이터 Read
-    Iterable jsonRooms = json['rooms'];
+    Iterable jsonRooms = json['roomMap'];
     if (jsonRooms != null) {
       roomMap = jsonRooms
           .map((e)=> {
             'name': e['name'],
             'id': e['id'],
-            'left': e['rect']['left'],
-            'top': e['rect']['top'],
-            'right': e['rect']['right'],
-            'bottom': e['rect']['bottom'],
+            'left': e['left'],
+            'top': e['top'],
+            'right': e['right'],
+            'bottom': e['bottom'],
             'x': e['x'],
             'y': e['y'],
             'z': e['z'],
@@ -193,23 +193,40 @@ class Drawing {
     data["floor"] = this.floor;
     data["width"] = this.witdh;
     data["height"] = this.height;
-    List<Map>roomsMap = this.rooms.map((e) =>
-    {
-      'name': e.name,
-      'id': e.id,
-      'rect': {
-        'left': e.left,
-        'top': e.top,
-        'right': e.right,
-        'bottom': e.bottom,
-      },
-      'x' : e.x,
-      'y' : e.y,
-      'z' : e.z,
-      'sealL' : e.sealL
-    }
-    ).toList();
-    data["rooms"] = roomsMap;
+    // List<Map>roomsMap = this.roomMap.map((e) =>
+    // {
+    //   'name': e.name,
+    //   'id': e.id,
+    //   'rect': {
+    //     'left': e.left,
+    //     'top': e.top,
+    //     'right': e.right,
+    //     'bottom': e.bottom,
+    //   },
+    //   'x' : e.x,
+    //   'y' : e.y,
+    //   'z' : e.z,
+    //   'sealL' : e.sealL
+    // }
+    // ).toList();
+    // List<Map> roomsMap = this
+    //     .rooms
+    //     .map((e) => {
+    //           'name': e.name,
+    //           'id': e.id,
+    //           'rect': {
+    //             'left': e.left,
+    //             'top': e.top,
+    //             'right': e.right,
+    //             'bottom': e.bottom,
+    //           },
+    //           'x': e.x,
+    //           'y': e.y,
+    //           'z': e.z,
+    //           'sealL': e.sealL
+    //         })
+    //     .toList();
+    data["roomMap"] = roomMap;
     data["callOuts"] = this.callouts;
     data["detailInfos"] = this.detailInfos;
     return data;

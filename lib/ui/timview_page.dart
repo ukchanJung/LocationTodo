@@ -292,8 +292,7 @@ class _TimViewState extends State<TimView> {
                     child: Stack(
                       children: [
                         Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
-                        // context.watch<Current>().getDrawing().rooms.length > 0
-                        visionText == null
+                        context.watch<Current>().getDrawing().roomMap == [] ||visionText == null
                             ? Container()
                             : Stack(
                           children: context
@@ -438,18 +437,20 @@ class _TimViewState extends State<TimView> {
                 child: ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        context.read<Current>().getDrawing().rooms.add(
-                              Room(
-                                name: field0.text,
-                                id: field1.text,
-                                rect: visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox,
-                                x: debugX,
-                                y: debugY,
-                                z: 1,
-                                sealL: int.parse(field2.text),
-                              ),
-                            );
-                        context.read<Current>().getDrawing().rooms.toSet().toList();
+                        Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
+                        context.read<Current>().getDrawing().roomMap.add({
+                          'name': field0.text,
+                          'id': field1.text,
+                          'left':_selBox.left,
+                          'top':_selBox.top,
+                          'right':_selBox.right,
+                          'bottom':_selBox.bottom,
+                          'x': debugX,
+                          'y': debugY,
+                          'z': 2,
+                          'sealL': int.parse(field2.text),
+                        });
+                        context.read<Current>().getDrawing().roomMap.toSet().toList();
                         FirebaseFirestore.instance
                             .collection('drawing')
                             .doc(context.read<Current>().getDrawing().drawingNum)
