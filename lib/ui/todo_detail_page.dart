@@ -109,7 +109,7 @@ class _TodoDetailState extends State<TodoDetail> {
                   },
                   child: Stack(
                     children: [
-                      Image.asset(Provider.of<Current>(context, listen: true).getPath(),),
+                      Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
                       StreamBuilder<PhotoViewControllerValue>(
                           stream: _photoViewController.outputStateStream,
                           builder: (context, snapshot) {

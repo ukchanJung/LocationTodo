@@ -15,11 +15,6 @@ class Task {
   double z;
   double py;
   List<Rect> boundarys = [];
-  Rect boundary;
-  List<num> sX;
-  List<num> sY;
-  List<num> eX;
-  List<num> eY;
 
 
   Task(
@@ -35,22 +30,15 @@ class Task {
     name = json["name"];
     start = json["start"];
     end = json["end"];
-    // writeTime = json["writeTime"];
+    writeTime = json["writeTime"].toDate();
     memo = json["memo"];
     ischecked = json["ischecked"];
     favorite = json["favorite"];
     x = json["x"];
     y = json["y"];
     z = json["z"];
-    // boundary = Rect.fromPoints(Offset(), Offset());
-    sX = json["topLeftX"].cast<num>();
-    sY = json["topLeftY"].cast<num>();
-    eX = json["bottomRightX"].cast<num>();
-    eY = json["bottomRightY"].cast<num>();
-    for (int i = 0; i < sX.length; i++) {
-      boundarys.add(Rect.fromPoints(Offset(sX[i],sY[i]), Offset(eX[i],eY[i])));
-    }
-
+    Iterable jsonBoundarys = json["boundarys"];
+    boundarys = jsonBoundarys.map((e) => Rect.fromPoints(Offset(e["firstX"],e["firstY"]), Offset(e["endX"],e["endY"]))).toList();
   }
 
   Map<String, dynamic> toJson() {
@@ -66,10 +54,12 @@ class Task {
     map["y"] = y;
     map["z"] = z;
     // boundarys.map((e){ map["boundarys"] =[e.topLeft.dx, e.topLeft.dy, e.bottomRight.dx, e.bottomRight.dy]; });
-    map["topLeftX"] = boundarys.map((e)=>e.topLeft.dx).toList();
-    map["topLeftY"] = boundarys.map((e)=>e.topLeft.dy).toList();
-    map["bottomRightX"] = boundarys.map((e)=>e.bottomRight.dx).toList();
-    map["bottomRightY"] = boundarys.map((e)=>e.bottomRight.dy).toList();
+    map["boundarys"] = boundarys.map((e) => {
+      "firstX": e.topLeft.dx,
+      "firstY": e.topLeft.dy,
+      "endX": e.bottomRight.dx,
+      "endY": e.bottomRight.dy,
+    }).toList();
     return map;
   }
 
