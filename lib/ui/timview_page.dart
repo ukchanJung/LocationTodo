@@ -330,6 +330,25 @@ class _TimViewState extends State<TimView> {
                                         )))
                                     .toList(),
                               ),
+                        context.watch<Current>().getDrawing().detailInfoMap == [] || visionText == null
+                            ? Container()
+                            : Stack(
+                                children: context
+                                    .watch<Current>()
+                                    .getDrawing()
+                                    .detailInfoMap
+                                    .map((e) => Positioned.fromRect(
+                                        rect: Rect.fromLTRB(
+                                          e['left'].toDouble() / iS,
+                                          e['top'].toDouble() / iS,
+                                          e['right'].toDouble() / iS,
+                                          e['bottom'].toDouble() / iS,
+                                        ),
+                                        child: Container(
+                                          color: Color.fromRGBO(0, 255, 0, 0.6),
+                                        )))
+                                    .toList(),
+                              ),
                         visionText == null
                             ? Container()
                             : Stack(
@@ -397,8 +416,10 @@ class _TimViewState extends State<TimView> {
                                   decoration: BoxDecoration(
                                                 color:
                                                 ocrFinList[visionText.blocks.indexWhere((element) => element==e)]==false?
-                                                Color.fromRGBO(255, 0, 0, 0.3):Color.fromRGBO(0, 255, 0, 0.5),
-                                                border: Border.all(color: Colors.red, width: 0.2)),
+                                                Color.fromRGBO(255, 0, 0, 0.3):Color.fromRGBO(200, 200, 200, 0.3),
+                                                border:
+                                                ocrFinList[visionText.blocks.indexWhere((element) => element==e)]==false?
+                                                Border.all(color: Colors.red, width: 0.2):Border.all(color: Colors.green, width: 0.5)),
                                           ),
                               ),
                             ),
@@ -455,7 +476,7 @@ class _TimViewState extends State<TimView> {
                   onPressed: () {
                     setState(() {
                       Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                      context.read<Current>().getDrawing().detailInfoMap.add({
+                      context.read<Current>().getDrawing().detailInfoMap.add(<String,dynamic>{
                         'name': field0.text,
                         'category': field1.text,
                         'left':_selBox.left,
@@ -522,7 +543,7 @@ class _TimViewState extends State<TimView> {
                   onPressed: () {
                     setState(() {
                       Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                      context.read<Current>().getDrawing().callOutMap.add({
+                      context.read<Current>().getDrawing().callOutMap.add(<String,dynamic>{
                         'name': field0.text,
                         'id': field1.text,
                         'category': field2.text,
@@ -591,7 +612,7 @@ class _TimViewState extends State<TimView> {
                   onPressed: () {
                     setState(() {
                       Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                      context.read<Current>().getDrawing().roomMap.add({
+                      context.read<Current>().getDrawing().roomMap.add(<String,dynamic>{
                         'name': field0.text,
                         'id': field1.text,
                         'left':_selBox.left,
@@ -600,7 +621,7 @@ class _TimViewState extends State<TimView> {
                         'bottom':_selBox.bottom,
                         'x': debugX,
                         'y': debugY,
-                        'z': context.read<Current>().getDrawing().floor,
+                        'z': context.read<Current>().getDrawing().floor.toDouble(),
                         'sealL': int.parse(field2.text),
                       });
                       context.read<Current>().getDrawing().roomMap.toSet().toList();

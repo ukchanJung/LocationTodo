@@ -74,10 +74,77 @@ class _GridButtonState extends State<GridButton> {
   double iS;
   ui.Image decodeImage;
   VisionText visionText;
-
-
-
-
+//   ///
+//   DateTime startDate = DateTime.now().subtract(Duration(days: 10));
+//   DateTime endDate = DateTime.now().add(Duration(days: 50));
+//   DateTime selectedDate = DateTime.now();
+//   List<DateTime> markedDates = [
+//     DateTime.now().subtract(Duration(days: 1)),
+//     DateTime.now().subtract(Duration(days: 2)),
+//     DateTime.now().add(Duration(days: 4))
+//   ];
+//
+//   onSelect(data) {
+//     print("Selected Date -> $data");
+//   }
+//
+//   onWeekSelect(data) {
+//     print("Selected week starting at -> $data");
+//   }
+//
+//   _monthNameWidget(monthName) {
+//     return Container(
+//       child: Text(monthName,
+//           style:
+//           TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Colors.black87, fontStyle: FontStyle.italic)),
+//     );
+//   }
+//
+//   getMarkedIndicatorWidget() {
+//     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+//       Container(
+//         margin: EdgeInsets.only(left: 1, right: 1),
+//         width: 7,
+//         height: 7,
+//         decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.red),
+//       ),
+//       Container(
+//         width: 7,
+//         height: 7,
+//         decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
+//       )
+//     ]);
+//   }
+//
+//   dateTileBuilder(date, selectedDate, rowIndex, dayName, isDateMarked, isDateOutOfRange) {
+//     bool isSelectedDate = date.compareTo(selectedDate) == 0;
+//     Color fontColor = isDateOutOfRange ? Colors.black26 : Colors.black87;
+//     TextStyle normalStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: fontColor);
+//     TextStyle selectedStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.black87);
+//     TextStyle dayNameStyle = TextStyle(fontSize: 14.5, color: fontColor);
+//     List<Widget> _children = [
+//       Text(dayName, style: dayNameStyle),
+//       Text(date.day.toString(), style: !isSelectedDate ? normalStyle : selectedStyle),
+//     ];
+//
+//     if (isDateMarked == true) {
+//       _children.add(getMarkedIndicatorWidget());
+//     }
+//
+//     return AnimatedContainer(
+//       duration: Duration(milliseconds: 150),
+//       alignment: Alignment.center,
+//       padding: EdgeInsets.only(top: 8, left: 5, right: 5, bottom: 5),
+//       decoration: BoxDecoration(
+//         color: !isSelectedDate ? Colors.transparent : Colors.white70,
+//         borderRadius: BorderRadius.all(Radius.circular(60)),
+//       ),
+//       child: Column(
+//         children: _children,
+//       ),
+//     );
+//   }
+// ///
   @override
   void initState() {
     super.initState();
@@ -144,55 +211,67 @@ class _GridButtonState extends State<GridButton> {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Container(
-                          child: DatePicker(
-                            DateTime.now(),
-                            dayTextStyle: TextStyle(fontSize: 8),
-                            dateTextStyle: TextStyle(fontSize: 12),
-                            locale: 'ko',
-                            width: 51,
-                            height: 84,
-                            controller: _controller,
-                            initialSelectedDate: DateTime.now(),
-                            selectionColor: Colors.deepOrange,
-                            selectedTextColor: Colors.white,
-                            onDateChange: (date) {
-                              setState(() {
-                                _selectedValue = date;
-                              });
-                            },
+                      // CalendarStrip(
+                    //     addSwipeGesture: true,
+                    //   weekStartsOnSunday: true,
+                    //   startDate: startDate,
+                    //   endDate: endDate,
+                    //   onDateSelected: onSelect,
+                    //   onWeekSelected: onWeekSelect,
+                    //   dateTileBuilder: dateTileBuilder,
+                    //   iconColor: Colors.black87,
+                    //   monthNameWidget: _monthNameWidget,
+                    //   markedDates: markedDates,
+                    //   containerDecoration: BoxDecoration(color: Colors.black12),
+                    // ),
+                    //     Container(
+                    //       child: DatePicker(
+                    //         DateTime.now(),
+                    //         dayTextStyle: TextStyle(fontSize: 8),
+                    //         dateTextStyle: TextStyle(fontSize: 12),
+                    //         locale: 'ko',
+                    //         width: 51,
+                    //         height: 84,
+                    //         controller: _controller,
+                    //         initialSelectedDate: DateTime.now(),
+                    //         selectionColor: Colors.deepOrange,
+                    //         selectedTextColor: Colors.white,
+                    //         onDateChange: (date) {
+                    //           setState(() {
+                    //             _selectedValue = date;
+                    //           });
+                    //         },
+                    //       ),
+                    //     ),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(children: [
+                          ElevatedButton(
+                            child: Container(
+                              width: 50,
+                              height: 70,
+                              color: Colors.red,
+                            ),
+                            onPressed: (){},
                           ),
+                      ],),
                         ),
-
                         Stack(
                           children: [
                             Container(
                               child: AspectRatio(
                                 key: _key,
-                                aspectRatio: 421 / 297,
+                                aspectRatio: 421 / 500,
                                 child: ClipRect(
                                   child: PhotoView.customChild(
                                     minScale: 1.0,
-                                    maxScale: 4.0,
+                                    maxScale: 20.0,
                                     initialScale: 1.0,
                                     controller: _pContrl,
                                     backgroundDecoration: BoxDecoration(color: Colors.transparent),
                                     child: Stack(
                                       children: [
                                         PositionedTapDetector(
-                                          // onLongPress: (m) {
-                                          //   ///TODO 원점 재지정 좌표 메서드
-                                          //   setState(() {
-                                          //     context.read<Current>().getDrawing().originX =
-                                          //         (m.relative.dx / (width * _pContrl.scale)) -
-                                          //             (realIntersect.dx / context.read<Current>().getcordiX());
-                                          //     context.read<Current>().getDrawing().originY =
-                                          //         (m.relative.dy / (heigh * _pContrl.scale)) -
-                                          //             (realIntersect.dy / context.read<Current>().getcordiY());
-                                          //     print(
-                                          //         '${context.read<Current>().getDrawing().originX}, ${context.read<Current>().getDrawing().originY}');
-                                          //   });
-                                          // },
                                           onTap: (m) {
                                             List<Point<double>> parseList = _iPs
                                                 .map((e) =>
@@ -248,18 +327,19 @@ class _GridButtonState extends State<GridButton> {
                                             key: _key2,
                                             children: [
                                               Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
-                                              Container(
-                                                child: CustomPaint(
-                                                  painter: GridMaker(
-                                                    snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
-                                                    double.parse(context.watch<Current>().getDrawing().scale) * 421,
-                                                    _origin,
-                                                    pointList: _iPs,
-                                                    deviceWidth: deviceWidth,
-                                                    cordinate: context.watch<Current>().getcordiOffset(width, heigh),
-                                                  ),
-                                                ),
-                                              ),
+                                              ///커스텀페인터
+                                              // Container(
+                                              //   child: CustomPaint(
+                                              //     painter: GridMaker(
+                                              //       snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
+                                              //       double.parse(context.watch<Current>().getDrawing().scale) * 421,
+                                              //       _origin,
+                                              //       pointList: _iPs,
+                                              //       deviceWidth: deviceWidth,
+                                              //       cordinate: context.watch<Current>().getcordiOffset(width, heigh),
+                                              //     ),
+                                              //   ),
+                                              // ),
                                               ...tasks.map((e) => Stack(
                                                 children: e.boundarys.map(
                                                       (b) {
@@ -352,7 +432,13 @@ class _GridButtonState extends State<GridButton> {
                                                   );
                                                 },
                                               ),
-                                            ],
+                                              StreamBuilder<PhotoViewControllerValue>(
+                                                stream: _pContrl.outputStateStream,
+                                                builder: (context, snapshot) {
+                                                  return snapshot.data.scale<12?planInfo(context):detailInfo(context);
+                                                }
+                                              ),
+                                        ],
                                           ),
                                         ),
                                       ],
@@ -444,26 +530,59 @@ class _GridButtonState extends State<GridButton> {
                               ),
                               Expanded(
                                 child: Scrollbar(
-                                  child: ListView(
-                                    children: tasks.map(
-                                          (e) {
-                                        return Container(
-                                          decoration: BoxDecoration(border:Border(bottom: BorderSide())),
-                                          child: ListTile(
-                                            title: Text(e.name),
-                                            // leading: Text(e.boundarys.length.toString()),
-                                            selected: e.favorite,
-                                            onTap: (){
-                                              setState(() {
-                                                // tasks.singleWhere((element) => element.favorite == true).favorite = false;
-                                              e.favorite = !e.favorite;
-                                              print(e.favorite);
-                                              });
-                                            },
-                                          ),
-                                        );
-                                      },
-                                    ).toList(),
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      children: tasks.map(
+                                            (e) {
+                                          return Container(
+                                            decoration: BoxDecoration(border:Border(bottom: BorderSide())),
+                                            child: ListTile(
+                                              title: Text(e.name),
+                                              // leading: Text(e.boundarys.length.toString()),
+                                              selected: e.favorite,
+                                              trailing: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  ElevatedButton(
+                                                      onPressed: () async {
+                                                       e.start = await showDatePicker(
+                                                            context: context,
+                                                            initialDate: DateTime.now(),
+                                                            firstDate: DateTime(2018),
+                                                            lastDate: DateTime(2021),
+                                                            builder: (context, Widget child) {
+                                                              return Theme(data: ThemeData.dark(), child: child);
+                                                            });
+                                                      },
+                                                      child: Text('시작') ,
+                                                  ),
+                                                  ElevatedButton(
+                                                      onPressed: () async {
+                                                       e.end = await showDatePicker(
+                                                            context: context,
+                                                            initialDate: DateTime.now(),
+                                                            firstDate: DateTime(2018),
+                                                            lastDate: DateTime(2021),
+                                                            builder: (context, Widget child) {
+                                                              return Theme(data: ThemeData.dark(), child: child);
+                                                            });
+                                                      },
+                                                      child:  Text('종료') ,
+                                                  )
+                                                ],
+                                              ),
+                                              onTap: (){
+                                                setState(() {
+                                                  // tasks.singleWhere((element) => element.favorite == true).favorite = false;
+                                                e.favorite = !e.favorite;
+                                                print(e.favorite);
+                                                });
+                                              },
+                                            ),
+                                          );
+                                        },
+                                      ).toList(),
+                                    ),
                                   ),
                                 ),
                               ) ,
@@ -474,6 +593,81 @@ class _GridButtonState extends State<GridButton> {
                     ),
               );
             }));
+  }
+
+  Stack detailInfo(BuildContext context) {
+    return Stack(
+      children: [
+        Stack(
+          children: drawings.singleWhere((d) => d.drawingNum == 'A31-109').detailInfoMap.map((e) {
+            double tempX = e['x'] / (500 * 421.0) * deviceWidth;
+            double tempY = e['y'] / (500 * 297.0) * heigh;
+            return Positioned(
+                left: tempX + context.watch<Current>().getcordiOffset(width, heigh).dx,
+                top: tempY + context.watch<Current>().getcordiOffset(width, heigh).dy,
+                child: Text(
+                  '${e['name']}',
+                  textScaleFactor: 0.1,
+                ));
+          }).toList(),
+        ),
+        Stack(
+          children: drawings.singleWhere((d) => d.drawingNum == 'A31-110').detailInfoMap.map((e) {
+            double tempX = e['x'] / (500 * 421.0) * deviceWidth;
+            double tempY = e['y'] / (500 * 297.0) * heigh;
+            return Positioned(
+                left: tempX + context.watch<Current>().getcordiOffset(width, heigh).dx,
+                top: tempY + context.watch<Current>().getcordiOffset(width, heigh).dy,
+                child: Text(
+                  '${e['name']}',
+                  textScaleFactor: 0.1,
+                ));
+          }).toList(),
+        ),
+        Stack(
+          children: drawings.singleWhere((d) => d.drawingNum == 'A31-111').detailInfoMap.map((e) {
+            double tempX = e['x'] / (500 * 421.0) * deviceWidth;
+            double tempY = e['y'] / (500 * 297.0) * heigh;
+            return Positioned(
+                left: tempX + context.watch<Current>().getcordiOffset(width, heigh).dx,
+                top: tempY + context.watch<Current>().getcordiOffset(width, heigh).dy,
+                child: Text(
+                  '${e['name']}',
+                  textScaleFactor: 0.1,
+                ));
+          }).toList(),
+        ),
+        Stack(
+          children: drawings.singleWhere((d) => d.drawingNum == 'A31-112').detailInfoMap.map((e) {
+            double tempX = e['x'] / (500 * 421.0) * deviceWidth;
+            double tempY = e['y'] / (500 * 297.0) * heigh;
+            return Positioned(
+                left: tempX + context.watch<Current>().getcordiOffset(width, heigh).dx,
+                top: tempY + context.watch<Current>().getcordiOffset(width, heigh).dy,
+                child: Text(
+                  '${e['name']}',
+                  textScaleFactor: 0.1,
+                ));
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Stack planInfo(BuildContext context) {
+    return Stack(
+      children: context.watch<Current>().getDrawing().detailInfoMap.map((e) {
+        double tempX = e['x'] / (double.parse(context.watch<Current>().getDrawing().scale) * 421.0) * deviceWidth;
+        double tempY = e['y'] / (double.parse(context.watch<Current>().getDrawing().scale) * 297.0) * heigh;
+        return Positioned(
+            left: tempX + context.watch<Current>().getcordiOffset(width, heigh).dx,
+            top: tempY + context.watch<Current>().getcordiOffset(width, heigh).dy,
+            child: Text(
+              '${e['name']}',
+              textScaleFactor: 0.2,
+            ));
+      }).toList(),
+    );
   }
 
   void reaSelectIntersect() {

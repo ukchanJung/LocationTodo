@@ -159,9 +159,9 @@ class Drawing {
               })
           .toList();
     }
-    Iterable jsonDetailInfo = json['detailInfo'];
+    Iterable jsonDetailInfo = json['detailInfoMap'];
     if (jsonDetailInfo != null){
-      callOutMap = jsonDetailInfo.map((e) => {
+      detailInfoMap = jsonDetailInfo.map((e) => {
         'name' : e['name'],
         'category' : e['category'],
         'left': e['left'],
