@@ -87,7 +87,7 @@ class _LocationTodoState extends State<LocationTodo> {
                   ListTile(
                     title: Text('그리드 버튼 구현'),
                     onTap: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) {
                           // context.watch<Current>().changePath(

@@ -145,6 +145,13 @@ class _GridButtonState extends State<GridButton> {
 //     );
 //   }
 // ///
+  double _lowerValue = DateTime.now().millisecondsSinceEpoch.toDouble();
+  double _upperValue = DateTime.now().add(Duration(days: 1)).millisecondsSinceEpoch.toDouble();
+  Color trackBarColor;
+  double  _minD = DateTime.now().subtract(Duration(days: 7)).millisecondsSinceEpoch.toDouble();
+  double  _maxD = DateTime.now().add(Duration(days: 6)).millisecondsSinceEpoch.toDouble();
+  // double _lowerValue = DateTime(2020, 6, 1, 0, 0, 0).millisecondsSinceEpoch.toDouble();
+  // double _upperValue = DateTime(2020, 9, 1, 0, 0, 0).millisecondsSinceEpoch.toDouble();
   @override
   void initState() {
     super.initState();
@@ -178,9 +185,6 @@ class _GridButtonState extends State<GridButton> {
   }
 
   @override
-  void didChangeDependencies() async {
-    super.didChangeDependencies();
-  }
 
   void dispose() {
     super.dispose();
@@ -207,392 +211,438 @@ class _GridButtonState extends State<GridButton> {
             builder: (context, snapshot) {
               if (!snapshot.hasData) return SafeArea(child: Center(child: CircularProgressIndicator()));
               return SafeArea(
-                child:
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                bottom: false,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                // calendarStrip(),
+                    Stack(
+                      alignment: Alignment.bottomCenter,
                       children: [
-                      // CalendarStrip(
-                    //     addSwipeGesture: true,
-                    //   weekStartsOnSunday: true,
-                    //   startDate: startDate,
-                    //   endDate: endDate,
-                    //   onDateSelected: onSelect,
-                    //   onWeekSelected: onWeekSelect,
-                    //   dateTileBuilder: dateTileBuilder,
-                    //   iconColor: Colors.black87,
-                    //   monthNameWidget: _monthNameWidget,
-                    //   markedDates: markedDates,
-                    //   containerDecoration: BoxDecoration(color: Colors.black12),
-                    // ),
-                    //     Container(
-                    //       child: DatePicker(
-                    //         DateTime.now(),
-                    //         dayTextStyle: TextStyle(fontSize: 8),
-                    //         dateTextStyle: TextStyle(fontSize: 12),
-                    //         locale: 'ko',
-                    //         width: 51,
-                    //         height: 84,
-                    //         controller: _controller,
-                    //         initialSelectedDate: DateTime.now(),
-                    //         selectionColor: Colors.deepOrange,
-                    //         selectedTextColor: Colors.white,
-                    //         onDateChange: (date) {
-                    //           setState(() {
-                    //             _selectedValue = date;
-                    //           });
-                    //         },
-                    //       ),
-                    //     ),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(children: [
-                          ElevatedButton(
-                            child: Container(
-                              width: 50,
-                              height: 70,
-                              color: Colors.red,
-                            ),
-                            onPressed: (){},
-                          ),
-                      ],),
-                        ),
-                        Stack(
+                        buildViewer(context, snapshot),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              child: AspectRatio(
-                                key: _key,
-                                aspectRatio: 421 / 500,
-                                child: ClipRect(
-                                  child: PhotoView.customChild(
-                                    minScale: 1.0,
-                                    maxScale: 20.0,
-                                    initialScale: 1.0,
-                                    controller: _pContrl,
-                                    backgroundDecoration: BoxDecoration(color: Colors.transparent),
-                                    child: Stack(
-                                      children: [
-                                        PositionedTapDetector(
-                                          onTap: (m) {
-                                            List<Point<double>> parseList = _iPs
-                                                .map((e) =>
-                                            Point(e.dx, e.dy) * deviceWidth +
-                                                Point(context.read<Current>().getcordiOffset(width, heigh).dx,
-                                                    context.read<Current>().getcordiOffset(width, heigh).dy))
-                                                .toList();
-                                            List<Point<double>> realParseList =
-                                            _realIPs.map((e) => Point(e.dx, e.dy)).toList();
-
-                                            setState(() {
-                                              _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                                              rectPoint =
-                                                  Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
-                                                      .minRect(Point(_origin.dx, _origin.dy));
-                                              relativeRectPoint = Closet(
-                                                  selectPoint: Point(
-                                                      (((m.relative.dx / _pContrl.scale) / width -
-                                                          context.read<Current>().getDrawing().originX) *
-                                                          context.read<Current>().getcordiX()),
-                                                      (((m.relative.dy / _pContrl.scale) / heigh -
-                                                          context.read<Current>().getDrawing().originY) *
-                                                          context.read<Current>().getcordiY())),
-                                                  pointList: realParseList)
-                                                  .minRect(Point(
-                                                  (((m.relative.dx / _pContrl.scale) / width -
-                                                      context.read<Current>().getDrawing().originX) *
-                                                      context.read<Current>().getcordiX()),
-                                                  (((m.relative.dy / _pContrl.scale) / heigh -
-                                                      context.read<Current>().getDrawing().originY) *
-                                                      context.read<Current>().getcordiY())));
-                                              print(m.relative / _pContrl.scale);
-                                              int debugX = (((m.relative.dx / _pContrl.scale) / width -
-                                                  context.read<Current>().getDrawing().originX) *
-                                                  context.read<Current>().getcordiX())
-                                                  .round();
-                                              int debugY = (((m.relative.dy / _pContrl.scale) / heigh -
-                                                  context.read<Current>().getDrawing().originY) *
-                                                  context.read<Current>().getcordiY())
-                                                  .round();
-                                              print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
-                                              setState(() {
-                                                var _wTime = DateTime.now();
-                                                boundarys.add(Boundary(_wTime,
-                                                    boundary: Rect.fromPoints(
-                                                        Offset(relativeRectPoint.first.x, relativeRectPoint.first.y),
-                                                        Offset(relativeRectPoint.last.x, relativeRectPoint.last.y))));
-                                              });
-
-                                            });
-                                          },
-                                          child: Stack(
-                                            key: _key2,
-                                            children: [
-                                              Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
-                                              ///커스텀페인터
-                                              // Container(
-                                              //   child: CustomPaint(
-                                              //     painter: GridMaker(
-                                              //       snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
-                                              //       double.parse(context.watch<Current>().getDrawing().scale) * 421,
-                                              //       _origin,
-                                              //       pointList: _iPs,
-                                              //       deviceWidth: deviceWidth,
-                                              //       cordinate: context.watch<Current>().getcordiOffset(width, heigh),
-                                              //     ),
-                                              //   ),
-                                              // ),
-                                              ...tasks.map((e) => Stack(
-                                                children: e.boundarys.map(
-                                                      (b) {
-                                                    var watch = context.watch<Current>();
-                                                    return Positioned.fromRect(
-                                                      rect: Rect.fromPoints(
-                                                          Offset(
-                                                            b.bottomRight.dx / (watch.getcordiX() / width) +
-                                                                (watch.getDrawing().originX * width),
-                                                            b.bottomRight.dy / (watch.getcordiY() / heigh) +
-                                                                ((watch.getDrawing().originY * heigh)),
-                                                          ),
-                                                          Offset(
-                                                            b.topLeft.dx / (watch.getcordiX() / width) +
-                                                                (watch.getDrawing().originX * width),
-                                                            b.topLeft.dy / (watch.getcordiY() / heigh) +
-                                                                ((watch.getDrawing().originY * heigh)),
-                                                          )),
-                                                          child: GestureDetector(
-                                                              onLongPress: () {
-                                                                List<Task> _tempList = tasks.where((e) => e.boundarys.contains(b)).toList();
-                                                                Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
-                                                                );
-                                                              },
-                                                            child: Container(
-                                                              color: e.favorite == false
-                                                                  ? Colors.black12
-                                                                  : Color.fromRGBO(255, 0, 0, 0.5),
-                                                              child: Center(
-                                                                child: Text(
-                                                                  tasks
-                                                                      .where((e) => e.boundarys.contains(b))
-                                                                      .length
-                                                                      .toString(),
-                                                                  textScaleFactor: 200 / width,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                    );
-                                                      },
-                                                ).toList(),
-                                              )),
-                                              ...boundarys.map(
-                                                    (e) {
-                                                  var watch = context.watch<Current>();
-                                                  return Positioned.fromRect(
-                                                    rect: Rect.fromPoints(
-                                                        Offset(
-                                                          e.boundary.bottomRight.dx / (watch.getcordiX() / width) +
-                                                              (watch.getDrawing().originX * width),
-                                                          e.boundary.bottomRight.dy / (watch.getcordiY() / heigh) +
-                                                              ((watch.getDrawing().originY * heigh)),
-                                                        ),
-                                                        Offset(
-                                                          e.boundary.topLeft.dx / (watch.getcordiX() / width) +
-                                                              (watch.getDrawing().originX * width),
-                                                          e.boundary.topLeft.dy / (watch.getcordiY() / heigh) +
-                                                              ((watch.getDrawing().originY * heigh)),
-                                                        )),
-                                                    child:Opacity(
-                                                      opacity: 0.5,
-                                                      child: ElevatedButton(
-                                                        onLongPress: (){
-                                                          setState(() {
-                                                            List<Task> _boundaryTask = e.tasksList;
-                                                            Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(builder: (context) =>BoundayDetail(_boundaryTask) ),
-                                                            );
-                                                          });
-                                                        },
-                                                        onPressed: () {
-                                                          setState(() {
-                                                            boundarys.remove(e);
-                                                          });
-                                                          print(e.writeTime.toString());
-                                                        },
-                                                        child:null,
-                                                        style: ElevatedButton.styleFrom(
-                                                          primary: Colors.green,
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius.circular(0.0),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
-                                              StreamBuilder<PhotoViewControllerValue>(
-                                                stream: _pContrl.outputStateStream,
-                                                builder: (context, snapshot) {
-                                                  return snapshot.data.scale<12?planInfo(context):detailInfo(context);
-                                                }
-                                              ),
-                                        ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Container(
-                                decoration: BoxDecoration(color: Colors.white70),
-                                child: DropdownSearch<Drawing>(
-                                  validator: (v) => v == null ? "required field" : null,
-                                  showSearchBox: true,
-                                  mode: Mode.MENU,
-                                  items: drawings,
-                                  maxHeight: 600,
-                                  onFind: (String filter) => getData(filter),
-                                  label: "도면을 선택해주세요",
-                                  onChanged: (e){
-                                    setState(() async {
-                                      context.read<Current>().changePath(e);
-                                      String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
-                                      ByteData bytes = await rootBundle.load(tempRoot);
-                                      String tempPath = (await getTemporaryDirectory()).path;
-                                      String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
-                                      File file = File(tempName);
-                                      await file
-                                          .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-                                      FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
-                                      final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
-                                      visionText = await textRecognizer.processImage(vIa);
-                                      decodeImage = await decodeImageFromList(file.readAsBytesSync());
-                                      iS = decodeImage.width / _key.currentContext.size.width;
-                                      recaculate();
-                                      setState(() {});
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
+                            // planerSlider(),
+                            searchBar(context),
                           ],
-                        ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(
-                                        height: 50,
-                                        child: TextField(
-                                          controller: _task,
-                                          decoration: InputDecoration(
-                                            border: OutlineInputBorder(),
-                                            labelText: '작업을 입력해주세요',
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: Container(
-                                        height: 50,
-                                        child: ElevatedButton.icon(
-                                          onPressed: () {
-                                            setState(() {
-                                              tasks.add(Task(DateTime.now(),
-                                                  name: _task.text, boundarys: boundarys.map((e) => e.boundary).toList()));
-                                              FirebaseFirestore _db = FirebaseFirestore.instance;
-                                              CollectionReference dbGrid = _db.collection('tasks');
-                                              dbGrid.doc(_task.text).set(Task(DateTime.now(),
-                                                  name: _task.text,
-                                                  boundarys: boundarys.map((e) => e.boundary).toList())
-                                                  .toJson());
-                                              _task.text = '';
-                                              boundarys = [];
-                                            });
-                                          },
-                                          icon: Icon(Icons.check),
-                                          label: Text('작업추가'),
-                                        )),
-                                  )
-                                ],
-                              ),
-                              Expanded(
-                                child: Scrollbar(
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      children: tasks.map(
-                                            (e) {
-                                          return Container(
-                                            decoration: BoxDecoration(border:Border(bottom: BorderSide())),
-                                            child: ListTile(
-                                              title: Text(e.name),
-                                              // leading: Text(e.boundarys.length.toString()),
-                                              selected: e.favorite,
-                                              trailing: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  ElevatedButton(
-                                                      onPressed: () async {
-                                                       e.start = await showDatePicker(
-                                                            context: context,
-                                                            initialDate: DateTime.now(),
-                                                            firstDate: DateTime(2018),
-                                                            lastDate: DateTime(2021),
-                                                            builder: (context, Widget child) {
-                                                              return Theme(data: ThemeData.dark(), child: child);
-                                                            });
-                                                      },
-                                                      child: Text('시작') ,
-                                                  ),
-                                                  ElevatedButton(
-                                                      onPressed: () async {
-                                                       e.end = await showDatePicker(
-                                                            context: context,
-                                                            initialDate: DateTime.now(),
-                                                            firstDate: DateTime(2018),
-                                                            lastDate: DateTime(2021),
-                                                            builder: (context, Widget child) {
-                                                              return Theme(data: ThemeData.dark(), child: child);
-                                                            });
-                                                      },
-                                                      child:  Text('종료') ,
-                                                  )
-                                                ],
-                                              ),
-                                              onTap: (){
-                                                setState(() {
-                                                  // tasks.singleWhere((element) => element.favorite == true).favorite = false;
-                                                e.favorite = !e.favorite;
-                                                print(e.favorite);
-                                                });
-                                              },
-                                            ),
-                                          );
-                                        },
-                                      ).toList(),
-                                    ),
-                                  ),
-                                ),
-                              ) ,
-                            ],
-                          ),
                         ),
                       ],
                     ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Container(
+                            child: DatePicker(
+                              DateTime.now(),
+                              dayTextStyle: TextStyle(fontSize: 8),
+                              dateTextStyle: TextStyle(fontSize: 12),
+                              locale: 'ko',
+                              width: 51,
+                              height: 84,
+                              daysCount: 90,
+                              controller: _controller,
+                              selectionColor: Colors.deepOrange,
+                              selectedTextColor: Colors.white,
+                              onDateChange: (date) {
+                                setState(() {
+                                  _selectedValue = date;
+                                });
+                              },
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    height: 50,
+                                    child: TextField(
+                                      controller: _task,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        labelText: '작업을 입력해주세요',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Container(
+                                    height: 50,
+                                    child: ElevatedButton.icon(
+                                      onPressed: () {
+                                        setState(() {
+                                          tasks.add(Task(DateTime.now(),
+                                              name: _task.text, boundarys: boundarys.map((e) => e.boundary).toList()));
+                                          FirebaseFirestore _db = FirebaseFirestore.instance;
+                                          CollectionReference dbGrid = _db.collection('tasks');
+                                          dbGrid.doc(_task.text).set(Task(DateTime.now(),
+                                              name: _task.text,
+                                              boundarys: boundarys.map((e) => e.boundary).toList())
+                                              .toJson());
+                                          _task.text = '';
+                                          boundarys = [];
+                                        });
+                                      },
+                                      icon: Icon(Icons.check),
+                                      label: Text('작업추가'),
+                                    )),
+                              )
+                            ],
+                          ),
+                          Expanded(
+                            child: Scrollbar(
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: tasks.map(
+                                        (e) {
+                                      return Container(
+                                        decoration: BoxDecoration(border:Border(bottom: BorderSide())),
+                                        child: ListTile(
+                                          title: Text(e.name),
+                                          // leading: Text(e.boundarys.length.toString()),
+                                          selected: e.favorite,
+                                          trailing: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              ElevatedButton(
+                                                  onPressed: () async {
+                                                   e.start = await showDatePicker(
+                                                        context: context,
+                                                        initialDate: DateTime.now(),
+                                                        firstDate: DateTime(2018),
+                                                        lastDate: DateTime(2021),
+                                                        builder: (context, Widget child) {
+                                                          return Theme(data: ThemeData.dark(), child: child);
+                                                        });
+                                                  },
+                                                  child: Text('시작') ,
+                                              ),
+                                              ElevatedButton(
+                                                  onPressed: () async {
+                                                   e.end = await showDatePicker(
+                                                        context: context,
+                                                        initialDate: DateTime.now(),
+                                                        firstDate: DateTime(2018),
+                                                        lastDate: DateTime(2021),
+                                                        builder: (context, Widget child) {
+                                                          return Theme(data: ThemeData.dark(), child: child);
+                                                        });
+                                                  },
+                                                  child:  Text('종료') ,
+                                              )
+                                            ],
+                                          ),
+                                          onTap: (){
+                                            setState(() {
+                                              // tasks.singleWhere((element) => element.favorite == true).favorite = false;
+                                            e.favorite = !e.favorite;
+                                            print(e.favorite);
+                                            });
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ).toList(),
+                                ),
+                              ),
+                            ),
+                          ) ,
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               );
             }));
+  }
+
+  // CalendarStrip calendarStrip() {
+  //   return CalendarStrip(
+  //                 addSwipeGesture: true,
+  //               weekStartsOnSunday: true,
+  //               startDate: startDate,
+  //               endDate: endDate,
+  //               onDateSelected: onSelect,
+  //               onWeekSelected: onWeekSelect,
+  //               dateTileBuilder: dateTileBuilder,
+  //               iconColor: Colors.black87,
+  //               monthNameWidget: _monthNameWidget,
+  //               markedDates: markedDates,
+  //               containerDecoration: BoxDecoration(color: Colors.black12),
+  //             );
+  // }
+
+  Padding searchBar(BuildContext context) {
+    return Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Container(
+                            decoration: BoxDecoration(color: Colors.white24),
+                            child: DropdownSearch<Drawing>(
+                              validator: (v) => v == null ? "required field" : null,
+                              showSearchBox: true,
+                              mode: Mode.BOTTOM_SHEET,
+                              items: drawings,
+                              maxHeight: 400,
+                              onFind: (String filter) => getData(filter),
+                              label: "도면을 선택해주세요",
+                              onChanged: (e){
+                                setState(()  {
+                                  context.read<Current>().changePath(e);
+                                  recaculate();
+                                  setState(() {});
+                                });
+                              },
+                            ),
+                          ),
+                        );
+  }
+
+  Container buildViewer(BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+    return Container(
+                      child: AspectRatio(
+                        key: _key,
+                        aspectRatio: 421 / 421,
+                        child: ClipRect(
+                          child: PhotoView.customChild(
+                            minScale: 1.0,
+                            maxScale: 20.0,
+                            initialScale: 1.0,
+                            controller: _pContrl,
+                            backgroundDecoration: BoxDecoration(color: Colors.transparent),
+                            child: Stack(
+                              // alignment: Alignment.center,
+                              children: [
+                                PositionedTapDetector(
+                                  onTap: (m) {
+                                    List<Point<double>> parseList = _iPs
+                                        .map((e) =>
+                                    Point(e.dx, e.dy) * deviceWidth +
+                                        Point(context.read<Current>().getcordiOffset(width, heigh).dx,
+                                            context.read<Current>().getcordiOffset(width, heigh).dy))
+                                        .toList();
+                                    List<Point<double>> realParseList =
+                                    _realIPs.map((e) => Point(e.dx, e.dy)).toList();
+
+                                    setState(() {
+                                      _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
+                                      rectPoint =
+                                          Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
+                                              .minRect(Point(_origin.dx, _origin.dy));
+                                      relativeRectPoint = Closet(
+                                          selectPoint: Point(
+                                              (((m.relative.dx / _pContrl.scale) / width -
+                                                  context.read<Current>().getDrawing().originX) *
+                                                  context.read<Current>().getcordiX()),
+                                              (((m.relative.dy / _pContrl.scale) / heigh -
+                                                  context.read<Current>().getDrawing().originY) *
+                                                  context.read<Current>().getcordiY())),
+                                          pointList: realParseList)
+                                          .minRect(Point(
+                                          (((m.relative.dx / _pContrl.scale) / width -
+                                              context.read<Current>().getDrawing().originX) *
+                                              context.read<Current>().getcordiX()),
+                                          (((m.relative.dy / _pContrl.scale) / heigh -
+                                              context.read<Current>().getDrawing().originY) *
+                                              context.read<Current>().getcordiY())));
+                                      print(m.relative / _pContrl.scale);
+                                      int debugX = (((m.relative.dx / _pContrl.scale) / width -
+                                          context.read<Current>().getDrawing().originX) *
+                                          context.read<Current>().getcordiX())
+                                          .round();
+                                      int debugY = (((m.relative.dy / _pContrl.scale) / heigh -
+                                          context.read<Current>().getDrawing().originY) *
+                                          context.read<Current>().getcordiY())
+                                          .round();
+                                      print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
+                                      setState(() {
+                                        var _wTime = DateTime.now();
+                                        boundarys.add(Boundary(_wTime,
+                                            boundary: Rect.fromPoints(
+                                                Offset(relativeRectPoint.first.x, relativeRectPoint.first.y),
+                                                Offset(relativeRectPoint.last.x, relativeRectPoint.last.y))));
+                                      });
+
+                                    });
+                                  },
+                                  child: Stack(
+                                    key: _key2,
+                                    children: [
+                                      Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                                      ///커스텀페인터
+                                      Container(
+                                        child: CustomPaint(
+                                          painter: GridMaker(
+                                            snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
+                                            double.parse(context.watch<Current>().getDrawing().scale) * 421,
+                                            _origin,
+                                            pointList: _iPs,
+                                            deviceWidth: deviceWidth,
+                                            cordinate: context.watch<Current>().getcordiOffset(width, heigh),
+                                          ),
+                                        ),
+                                      ),
+                                      ...tasks.map((e) => Stack(
+                                        children: e.boundarys.map(
+                                              (b) {
+                                            var watch = context.watch<Current>();
+                                            return Positioned.fromRect(
+                                              rect: Rect.fromPoints(
+                                                  Offset(
+                                                    b.bottomRight.dx / (watch.getcordiX() / width) +
+                                                        (watch.getDrawing().originX * width),
+                                                    b.bottomRight.dy / (watch.getcordiY() / heigh) +
+                                                        ((watch.getDrawing().originY * heigh)),
+                                                  ),
+                                                  Offset(
+                                                    b.topLeft.dx / (watch.getcordiX() / width) +
+                                                        (watch.getDrawing().originX * width),
+                                                    b.topLeft.dy / (watch.getcordiY() / heigh) +
+                                                        ((watch.getDrawing().originY * heigh)),
+                                                  )),
+                                                  child: GestureDetector(
+                                                      onLongPress: () {
+                                                        List<Task> _tempList = tasks.where((e) => e.boundarys.contains(b)).toList();
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
+                                                        );
+                                                      },
+                                                    child: Container(
+                                                      color: e.favorite == false
+                                                          ? Colors.black12
+                                                          : Color.fromRGBO(255, 0, 0, 0.5),
+                                                      child: Center(
+                                                        child: Text(
+                                                          tasks
+                                                              .where((e) => e.boundarys.contains(b))
+                                                              .length
+                                                              .toString(),
+                                                          textScaleFactor: 200 / width,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                            );
+                                              },
+                                        ).toList(),
+                                      )),
+                                      ...boundarys.map(
+                                            (e) {
+                                          var watch = context.watch<Current>();
+                                          return Positioned.fromRect(
+                                            rect: Rect.fromPoints(
+                                                Offset(
+                                                  e.boundary.bottomRight.dx / (watch.getcordiX() / width) +
+                                                      (watch.getDrawing().originX * width),
+                                                  e.boundary.bottomRight.dy / (watch.getcordiY() / heigh) +
+                                                      ((watch.getDrawing().originY * heigh)),
+                                                ),
+                                                Offset(
+                                                  e.boundary.topLeft.dx / (watch.getcordiX() / width) +
+                                                      (watch.getDrawing().originX * width),
+                                                  e.boundary.topLeft.dy / (watch.getcordiY() / heigh) +
+                                                      ((watch.getDrawing().originY * heigh)),
+                                                )),
+                                            child:Opacity(
+                                              opacity: 0.5,
+                                              child: ElevatedButton(
+                                                onLongPress: (){
+                                                  setState(() {
+                                                    List<Task> _boundaryTask = e.tasksList;
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(builder: (context) =>BoundayDetail(_boundaryTask) ),
+                                                    );
+                                                  });
+                                                },
+                                                onPressed: () {
+                                                  setState(() {
+                                                    boundarys.remove(e);
+                                                  });
+                                                  print(e.writeTime.toString());
+                                                },
+                                                child:null,
+                                                style: ElevatedButton.styleFrom(
+                                                  primary: Colors.green,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(0.0),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      StreamBuilder<PhotoViewControllerValue>(
+                                        stream: _pContrl.outputStateStream,
+                                        builder: (context, snapshot) {
+                                          return snapshot.data.scale<12?planInfo(context):detailInfo(context);
+                                        }
+                                      ),
+                                ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+  }
+
+  Padding planerSlider() {
+    return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: FlutterSlider(
+                      handlerHeight: 25,
+                      trackBar: FlutterSliderTrackBar(
+                        activeTrackBar: BoxDecoration(color: trackBarColor)
+                      ),
+                      handler: FlutterSliderHandler(
+                          child: Text(DateTime.fromMillisecondsSinceEpoch(_lowerValue.toInt()).day.toString())),
+                      // hatchMark: FlutterSliderHatchMark(
+                      //   density: 0.142857143,
+                      //   bigLine: FlutterSliderSizedBox(height: 50, width: 1,decoration:BoxDecoration(color: Colors.red) ),
+                      //   smallLine: FlutterSliderSizedBox(height: 50, width: 1,decoration:BoxDecoration(color: Colors.red) ),
+                      //   linesDistanceFromTrackBar: 5,
+                      //   displayLines: true
+                      // ),
+                      values: [
+                        _lowerValue,
+                        // _upperValue,
+                      ],
+                      // minimumDistance: DateTim,
+                      min:  _minD,
+                      max:  _maxD,
+                      // rangeSlider: false,
+                      jump: true,
+                      step: FlutterSliderStep(step: 86400000),
+                      // rangeSlider: true,
+                      centeredOrigin: true,
+                      tooltip: FlutterSliderTooltip(custom: (value) {
+                        DateTime dtValue = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                        String valueInTime =
+                            dtValue.month.toString() + '.' + dtValue.day.toString();
+                        return Text(valueInTime);
+                      }),
+                      onDragging: (handlerIndex, lowerValue, upperValue) {
+                        if(lowerValue > DateTime.now().millisecondsSinceEpoch){
+                          trackBarColor = Colors.blueAccent;
+                        }else{
+                          trackBarColor = Colors.redAccent;
+                        }
+                        _lowerValue = lowerValue;
+                        // _upperValue = upperValue;
+                        print(DateTime.fromMillisecondsSinceEpoch(_lowerValue.toInt()));
+                        print(_lowerValue);
+                        setState(() {});
+                      },
+                    ),
+                  );
   }
 
   Stack detailInfo(BuildContext context) {
