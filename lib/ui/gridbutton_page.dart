@@ -285,20 +285,19 @@ class _GridButtonState extends State<GridButton> {
                     ),
                     tasks.where((element) => element.favorite ==true).length==0
                         // ?Container(width: 50,height: 10,color: Colors.red,)
-
                     ?Container(width:50,height: 10,color: Colors.blue,)
                     :Column(
-                      children: tasks.where((element) => element.favorite ==true).map((t) => Column(
+                      children: tasks.where((element) => element.favorite ==true && element.start!=null).map((t) => Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
                             width: 50,
-                            height: 5,
+                            height: 3,
                             color: t.start.isAfter(e) || t.end.isBefore(e)
                                 ? Colors.transparent
                                 : Colors.red,
                           ),
-                          SizedBox(height: 5,)
+                          SizedBox(height: 2,)
                         ],
                       ),).toList(),
                     )
