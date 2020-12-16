@@ -23,9 +23,9 @@ class _LabelTextState extends State<LabelText> {
         child: Stack(
           overflow: Overflow.visible,
           children: [
-            CustomPaint(
-              painter: Leader(top,left,widget.scale),
-            ),
+            // CustomPaint(
+            //   painter: Leader(top,left,widget.scale),
+            // ),
             Positioned(
               top: top,
               left: left,
@@ -82,32 +82,27 @@ class _LabelTextState extends State<LabelText> {
 }
 
 class Leader extends CustomPainter {
-  double y =50;
-  double x =150;
-  double s =1;
+  double top;
+  double bottom;
+  double left;
+  double right;
 
-  Leader(this.y,this.x,this.s);
+  Leader({this.left, this.top, this.right, this.bottom,});
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
       ..strokeCap = StrokeCap.square
-      ..strokeWidth = 2.0/s
+      ..strokeWidth = 2.0
       ..color = Colors.red;
     Paint paint2 = Paint()
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 9.0/s
+      ..strokeWidth = 9.0
       ..color = Colors.red;
-    canvas.drawPoints(
-        PointMode.polygon,
-        [
-          Offset(0, 0),
-          Offset(0, y),
-          Offset(x, y),
-        ],
-        paint);
-    canvas.drawPoints(PointMode.points, [Offset(0, 0)], paint2);
-    
+
+    canvas.drawRect(Rect.fromLTRB(left, top, right, bottom), paint);
+
+
   }
 
   @override

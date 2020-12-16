@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
@@ -35,13 +36,13 @@ class _TimViewState extends State<TimView> {
   ui.Image decodeImage;
   List<Drawing> drawings;
   Future<QuerySnapshot> watch = FirebaseFirestore.instance.collection('drawing').get();
-  List<Drawing> favoriteds= [];
+  List<Drawing> favoriteds = [];
   OcrCategory _ocrCategory = OcrCategory.Room;
-  TextEditingController field0 =TextEditingController();
-  TextEditingController field1 =TextEditingController();
-  TextEditingController field2 =TextEditingController();
-  TextEditingController field3 =TextEditingController();
-  TextEditingController field4 =TextEditingController();
+  TextEditingController field0 = TextEditingController();
+  TextEditingController field1 = TextEditingController();
+  TextEditingController field2 = TextEditingController();
+  TextEditingController field3 = TextEditingController();
+  TextEditingController field4 = TextEditingController();
 
   List<Gridtestmodel> testgrids = [];
   double deviceWidth;
@@ -51,11 +52,19 @@ class _TimViewState extends State<TimView> {
   Offset _origin = Offset(0, 0);
   int debugX;
   int debugY;
-  List<Point> relativeRectPoint ;
+  List<Point> relativeRectPoint;
+
   Rect selectRect;
-  List<bool> ocrFinList=[];
-
-
+  List<bool> ocrFinList = [];
+  double sLeft;
+  double sTop;
+  double sRight;
+  double sBottom;
+  int rLeft;
+  int rTop;
+  int rRight;
+  int rBottom;
+  bool sCheck=false;
 
 
   @override
@@ -78,7 +87,6 @@ class _TimViewState extends State<TimView> {
       //TODO 실시간 연동 바운더리
     }
     readingGrid();
-
   }
 
   @override
@@ -91,13 +99,15 @@ class _TimViewState extends State<TimView> {
     field2.dispose();
     field3.dispose();
     field4.dispose();
-
   }
 
   @override
   Widget build(BuildContext context) {
     setState(() {
-      deviceWidth = MediaQuery.of(context).size.width;
+      deviceWidth = MediaQuery
+          .of(context)
+          .size
+          .width;
       width = deviceWidth;
       heigh = deviceWidth / (421 / 297);
     });
@@ -108,34 +118,41 @@ class _TimViewState extends State<TimView> {
               : Expanded(
             child: ListView(
               children: drawings
-                  .map((e) => ListTile(
-                title: Text(e.title),
-                onTap: () {
-                  setState(() async {
-                    context.read<Current>().changePath(e);
-                    String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
-                    ByteData bytes = await rootBundle.load(tempRoot);
-                    // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
-                    String tempPath = (await getTemporaryDirectory()).path;
-                    String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
-                    File file = File(tempName);
-                    // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
-                    await file
-                        .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+                  .map((e) =>
+                  ListTile(
+                    title: Text(e.title),
+                    onTap: () {
+                      setState(() async {
+                        context.read<Current>().changePath(e);
+                        String tempRoot = 'asset/photos/${context
+                            .read<Current>()
+                            .getDrawing()
+                            .localPath}';
+                        ByteData bytes = await rootBundle.load(tempRoot);
+                        // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
+                        String tempPath = (await getTemporaryDirectory()).path;
+                        String tempName = '$tempPath/${context
+                            .read<Current>()
+                            .getDrawing()
+                            .drawingNum}.png';
+                        File file = File(tempName);
+                        // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
+                        await file
+                            .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
 
-                    FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
-                    final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
-                    print(textRecognizer);
+                        FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+                        final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+                        print(textRecognizer);
 
-                    visionText = await textRecognizer.processImage(vIa);
-                    print(visionText);
-                    decodeImage = await decodeImageFromList(file.readAsBytesSync());
+                        visionText = await textRecognizer.processImage(vIa);
+                        print(visionText);
+                        decodeImage = await decodeImageFromList(file.readAsBytesSync());
 
-                    iS = decodeImage.width / _keyA.currentContext.size.width;
-                    setState(() {});
-                  });
-                },
-              ))
+                        iS = decodeImage.width / _keyA.currentContext.size.width;
+                        setState(() {});
+                      });
+                    },
+                  ))
                   .toList(),
             ),
           )),
@@ -143,48 +160,38 @@ class _TimViewState extends State<TimView> {
       floatingActionButton: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FloatingActionButton(
-              onPressed: () async {
-                DocumentSnapshot temp = await FirebaseFirestore.instance.collection('drawing').doc('A31-003').get();
-                // print(temp.data());
-                Drawing tempD = Drawing.fromJson(temp.data());
-                print(tempD.roomMap);
-              },
-              child: Text('테스트'),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(8.0),
+          //   child: FloatingActionButton(
+          //     onPressed: () async {
+          //       DocumentSnapshot temp = await FirebaseFirestore.instance.collection('drawing').doc('A31-003').get();
+          //       // print(temp.data());
+          //       Drawing tempD = Drawing.fromJson(temp.data());
+          //       print(tempD.roomMap);
+          //     },
+          //     child: Text('테스트'),
+          //   ),
+          // ),
           FloatingActionButton(
             heroTag: null,
             onPressed: () async {
               print(visionText.blocks.length);
-              FirebaseFirestore.instance.collection('drawing').doc(context.read<Current>().getDrawing().drawingNum).update({
-                "ocrData" : visionText.blocks.map((e) =>{
+              FirebaseFirestore.instance.collection('drawing').doc(context
+                  .read<Current>()
+                  .getDrawing()
+                  .drawingNum).update({
+                "ocrData": visionText.blocks.map((e) =>
+                {
                   "text": e.text,
-                  "Rect": {"L":e.boundingBox.left, "T":e.boundingBox.top, "R":e.boundingBox.right, "B":e.boundingBox.bottom}
-                } ).toList()
+                  "Rect": {
+                    "L": e.boundingBox.left,
+                    "T": e.boundingBox.top,
+                    "R": e.boundingBox.right,
+                    "B": e.boundingBox.bottom
+                  }
+                }).toList()
               });
-              // String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
-              // ByteData bytes = await rootBundle.load(tempRoot);
-              // // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
-              // String tempPath = (await getTemporaryDirectory()).path;
-              // String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
-              // File file = File(tempName);
-              // // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
-              // await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-              //
-              // FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
-              // final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
-              // print(textRecognizer);
-              //
-              // visionText = await textRecognizer.processImage(vIa);
-              // print(visionText);
-              // decodeImage = await decodeImageFromList(file.readAsBytesSync());
-              //
-              // iS = decodeImage.width / _keyA.currentContext.size.width;
-              // print(_photoViewController.scale);
-              // setState(() {});
+              // String tempRoot
             },
           ),
         ],
@@ -200,13 +207,19 @@ class _TimViewState extends State<TimView> {
               maxHeight: 600,
               // onFind: (String filter) => getData(filter),
               label: "도면을 선택해주세요",
-              onChanged: (e){
+              onChanged: (e) {
                 setState(() async {
                   context.read<Current>().changePath(e);
-                  String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+                  String tempRoot = 'asset/photos/${context
+                      .read<Current>()
+                      .getDrawing()
+                      .localPath}';
                   ByteData bytes = await rootBundle.load(tempRoot);
                   String tempPath = (await getTemporaryDirectory()).path;
-                  String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+                  String tempName = '$tempPath/${context
+                      .read<Current>()
+                      .getDrawing()
+                      .drawingNum}.png';
                   File file = File(tempName);
                   await file
                       .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
@@ -241,7 +254,7 @@ class _TimViewState extends State<TimView> {
           //   ],
           // ),
           AspectRatio(
-            aspectRatio: 421/297,
+            aspectRatio: 421 / 297,
             child: ClipRect(
               child: Container(
                 child: PhotoView.customChild(
@@ -252,180 +265,233 @@ class _TimViewState extends State<TimView> {
                   backgroundDecoration: BoxDecoration(color: Colors.transparent),
                   child: PositionedTapDetector(
                     onTap: (m) {
-                      List<Point<double>> realParseList =
-                      _realIPs.map((e) => Point(e.dx, e.dy)).toList();
-
                       setState(() {
                         _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                         debugX = (((m.relative.dx / _pContrl.scale) / width -
-                            context.read<Current>().getDrawing().originX) *
+                        debugX = (((m.relative.dx / _pContrl.scale) / width -
+                            context
+                                .read<Current>()
+                                .getDrawing()
+                                .originX) *
                             context.read<Current>().getcordiX())
                             .round();
-                         debugY = (((m.relative.dy / _pContrl.scale) / heigh -
-                            context.read<Current>().getDrawing().originY) *
+                        debugY = (((m.relative.dy / _pContrl.scale) / heigh -
+                            context
+                                .read<Current>()
+                                .getDrawing()
+                                .originY) *
                             context.read<Current>().getcordiY())
                             .round();
                         print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
-                        // relativeRectPoint = Closet(
-                        //     selectPoint: Point(
-                        //         (((m.relative.dx / _pContrl.scale) / width -
-                        //             context.read<Current>().getDrawing().originX) *
-                        //             context.read<Current>().getcordiX()),
-                        //         (((m.relative.dy / _pContrl.scale) / heigh -
-                        //             context.read<Current>().getDrawing().originY) *
-                        //             context.read<Current>().getcordiY())),
-                        //     pointList: realParseList)
-                        //     .minRect(Point(
-                        //     (((m.relative.dx / _pContrl.scale) / width -
-                        //         context.read<Current>().getDrawing().originX) *
-                        //         context.read<Current>().getcordiX()),
-                        //     (((m.relative.dy / _pContrl.scale) / heigh -
-                        //         context.read<Current>().getDrawing().originY) *
-                        //         context.read<Current>().getcordiY())));
-                        // setState(() {
-                        //   selectRect= Rect.fromPoints(
-                        //           Offset(relativeRectPoint.first.x, relativeRectPoint.first.y),
-                        //           Offset(relativeRectPoint.last.x, relativeRectPoint.last.y));
-                        // });
+                        print(' 선택한점은 절대좌표 X: $sLeft, Y: $sTop');
+                        print(' 선택한점은 절대좌표 X: $sRight, Y: $sBottom');
+                      },);
+                    },
+                    onLongPress: (m) {
+                      setState(() {
+                        // _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
+                        if(sCheck==false){
+                          sLeft = m.relative.dx/_pContrl.scale;
+                          sTop = m.relative.dy/_pContrl.scale;
+                          rLeft = (((m.relative.dx / _pContrl.scale) / width -
+                              context
+                                  .read<Current>()
+                                  .getDrawing()
+                                  .originX) *
+                              context.read<Current>().getcordiX())
+                              .round();
+                          rTop = (((m.relative.dy / _pContrl.scale) / heigh -
+                              context
+                                  .read<Current>()
+                                  .getDrawing()
+                                  .originY) *
+                              context.read<Current>().getcordiY())
+                              .round();
+                          sCheck=true;
+                        }else{
+                          sRight = m.relative.dx/_pContrl.scale;
+                          sBottom = m.relative.dy/_pContrl.scale;
+                          rRight = (((m.relative.dx / _pContrl.scale) / width -
+                              context
+                                  .read<Current>()
+                                  .getDrawing()
+                                  .originX) *
+                              context.read<Current>().getcordiX())
+                              .round();
+                          rBottom = (((m.relative.dy / _pContrl.scale) / heigh -
+                              context
+                                  .read<Current>()
+                                  .getDrawing()
+                                  .originY) *
+                              context.read<Current>().getcordiY())
+                              .round();
+                          sCheck=false;
+                        }
+
                       });
-                    }, 
+                    },
                     child: Stack(
                       children: [
-                        Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
-                        context.watch<Current>().getDrawing().roomMap == [] ||visionText == null
+                        Image.asset('asset/photos/${context
+                            .watch<Current>()
+                            .getDrawing()
+                            .localPath}'),
+                             CustomPaint(
+                          painter: CallOutBoundary(setPoint: _origin,left:sLeft, top:sTop, right:sRight, bottom:sBottom),
+                        ),
+                        context
+                            .watch<Current>()
+                            .getDrawing()
+                            .roomMap == [] || visionText == null
                             ? Container()
                             : Stack(
                           children: context
                               .watch<Current>()
                               .getDrawing()
                               .roomMap
-                              .map((e) => Positioned.fromRect(
-                              rect: Rect.fromLTRB(
-                                e['left'].toDouble() / iS,
-                                e['top'].toDouble() / iS,
-                                e['right'].toDouble() / iS,
-                                e['bottom'].toDouble() / iS,
-                              ),
-                              child: Container(
-                                color: Color.fromRGBO(0, 0, 0, 0.6),
-                              )))
+                              .map((e) =>
+                              Positioned.fromRect(
+                                  rect: Rect.fromLTRB(
+                                    e['left'].toDouble() / iS,
+                                    e['top'].toDouble() / iS,
+                                    e['right'].toDouble() / iS,
+                                    e['bottom'].toDouble() / iS,
+                                  ),
+                                  child: Container(
+                                    color: Color.fromRGBO(0, 0, 0, 0.6),
+                                  )))
                               .toList(),
                         ),
-                        context.watch<Current>().getDrawing().callOutMap == [] || visionText == null
+                        context
+                            .watch<Current>()
+                            .getDrawing()
+                            .callOutMap == [] || visionText == null
                             ? Container()
                             : Stack(
-                                children: context
-                                    .watch<Current>()
-                                    .getDrawing()
-                                    .callOutMap
-                                    .map((e) => Positioned.fromRect(
-                                        rect: Rect.fromLTRB(
-                                          e['left'].toDouble() / iS,
-                                          e['top'].toDouble() / iS,
-                                          e['right'].toDouble() / iS,
-                                          e['bottom'].toDouble() / iS,
-                                        ),
-                                        child: Container(
-                                          color: Color.fromRGBO(0, 0, 255, 0.6),
-                                        )))
-                                    .toList(),
-                              ),
-                        context.watch<Current>().getDrawing().detailInfoMap == [] || visionText == null
+                          children: context
+                              .watch<Current>()
+                              .getDrawing()
+                              .callOutMap
+                              .map((e) =>
+                              Positioned.fromRect(
+                                  rect: Rect.fromLTRB(
+                                    e['left'].toDouble() / iS,
+                                    e['top'].toDouble() / iS,
+                                    e['right'].toDouble() / iS,
+                                    e['bottom'].toDouble() / iS,
+                                  ),
+                                  child: Container(
+                                    color: Color.fromRGBO(0, 0, 255, 0.6),
+                                  )))
+                              .toList(),
+                        ),
+                        context
+                            .watch<Current>()
+                            .getDrawing()
+                            .detailInfoMap == [] || visionText == null
                             ? Container()
                             : Stack(
-                                children: context
-                                    .watch<Current>()
-                                    .getDrawing()
-                                    .detailInfoMap
-                                    .map((e) => Positioned.fromRect(
-                                        rect: Rect.fromLTRB(
-                                          e['left'].toDouble() / iS,
-                                          e['top'].toDouble() / iS,
-                                          e['right'].toDouble() / iS,
-                                          e['bottom'].toDouble() / iS,
-                                        ),
-                                        child: Container(
-                                          color: Color.fromRGBO(0, 255, 0, 0.6),
-                                        )))
-                                    .toList(),
-                              ),
+                          children: context
+                              .watch<Current>()
+                              .getDrawing()
+                              .detailInfoMap
+                              .map((e) =>
+                              Positioned.fromRect(
+                                  rect: Rect.fromLTRB(
+                                    e['left'].toDouble() / iS,
+                                    e['top'].toDouble() / iS,
+                                    e['right'].toDouble() / iS,
+                                    e['bottom'].toDouble() / iS,
+                                  ),
+                                  child: Container(
+                                    color: Color.fromRGBO(0, 255, 0, 0.6),
+                                  )))
+                              .toList(),
+                        ),
                         visionText == null
                             ? Container()
                             : Stack(
                           children: visionText.blocks
                               .map(
-                                (e) => Positioned.fromRect(
-                              rect:
-                              Rect.fromPoints(e.boundingBox.topLeft / iS, e.boundingBox.bottomRight / iS),
-                              child: InkWell(
-                                onLongPress: (){
-                                  setState(() {
-                                              ocrFinList[visionText.blocks.indexWhere((element) => element == e)] =
-                                                  !ocrFinList[visionText.blocks.indexWhere((element) => element == e)];
-                                              field0.text = e.text;
-                                            });
-                                },
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: Text(e.text),
-                                        content: Column(
-                                          children: drawings
-                                              .where((v) => v.drawingNum == e.text)
-                                              .map(
-                                                (e) => ListTile(
-                                              subtitle: Text(e.drawingNum),
-                                              title: Text(e.title),
-                                              onTap: () {
-                                                setState(() async {
-                                                  context.read<Current>().changePath(e);
-                                                  String tempRoot =
-                                                      'asset/photos/${context.read<Current>().getDrawing().localPath}';
-                                                  ByteData bytes = await rootBundle.load(tempRoot);
-                                                  String tempPath = (await getTemporaryDirectory()).path;
-                                                  String tempName =
-                                                      '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
-                                                  File file = File(tempName);
-                                                  await file.writeAsBytes(bytes.buffer.asUint8List(
-                                                      bytes.offsetInBytes, bytes.lengthInBytes));
+                                (e) =>
+                                Positioned.fromRect(
+                                  rect:
+                                  Rect.fromPoints(e.boundingBox.topLeft / iS, e.boundingBox.bottomRight / iS),
+                                  child: InkWell(
+                                    onLongPress: () {
+                                      setState(() {
+                                        ocrFinList[visionText.blocks.indexWhere((element) => element == e)] =
+                                        !ocrFinList[visionText.blocks.indexWhere((element) => element == e)];
+                                        field0.text = e.text;
+                                      });
+                                    },
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: Text(e.text),
+                                            content: Column(
+                                              children: drawings
+                                                  .where((v) => v.drawingNum == e.text)
+                                                  .map(
+                                                    (e) =>
+                                                    ListTile(
+                                                      subtitle: Text(e.drawingNum),
+                                                      title: Text(e.title),
+                                                      onTap: () {
+                                                        setState(() async {
+                                                          context.read<Current>().changePath(e);
+                                                          String tempRoot =
+                                                              'asset/photos/${context
+                                                              .read<Current>()
+                                                              .getDrawing()
+                                                              .localPath}';
+                                                          ByteData bytes = await rootBundle.load(tempRoot);
+                                                          String tempPath = (await getTemporaryDirectory()).path;
+                                                          String tempName =
+                                                              '$tempPath/${context
+                                                              .read<Current>()
+                                                              .getDrawing()
+                                                              .drawingNum}.png';
+                                                          File file = File(tempName);
+                                                          await file.writeAsBytes(bytes.buffer.asUint8List(
+                                                              bytes.offsetInBytes, bytes.lengthInBytes));
 
-                                                  FirebaseVisionImage vIa =
-                                                  FirebaseVisionImage.fromFile(file);
-                                                  final TextRecognizer textRecognizer =
-                                                  FirebaseVision.instance.cloudTextRecognizer();
-                                                  visionText = await textRecognizer.processImage(vIa);
-                                                  print(visionText);
-                                                  await decodeImageFromList(file.readAsBytesSync());
+                                                          FirebaseVisionImage vIa =
+                                                          FirebaseVisionImage.fromFile(file);
+                                                          final TextRecognizer textRecognizer =
+                                                          FirebaseVision.instance.cloudTextRecognizer();
+                                                          visionText = await textRecognizer.processImage(vIa);
+                                                          print(visionText);
+                                                          await decodeImageFromList(file.readAsBytesSync());
 
-                                                  iS =
-                                                      decodeImage.width / _keyA.currentContext.size.width;
-                                                  ocrFinList = List.filled(visionText.blocks.length, false);
-                                                  setState(() {});
-                                                });
-                                              },
+                                                          iS =
+                                                              decodeImage.width / _keyA.currentContext.size.width;
+                                                          ocrFinList = List.filled(visionText.blocks.length, false);
+                                                          setState(() {});
+                                                        });
+                                                      },
+                                                    ),
+                                              ).toList(),
                                             ),
-                                          ).toList(),
-                                        ),
+                                          );
+                                        },
                                       );
                                     },
-                                  );
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                                color:
-                                                ocrFinList[visionText.blocks.indexWhere((element) => element==e)]==false?
-                                                Color.fromRGBO(255, 0, 0, 0.3):Color.fromRGBO(200, 200, 200, 0.3),
-                                                border:
-                                                ocrFinList[visionText.blocks.indexWhere((element) => element==e)]==false?
-                                                Border.all(color: Colors.red, width: 0.2):Border.all(color: Colors.green, width: 0.5)),
-                                          ),
-                              ),
-                            ),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color:
+                                          ocrFinList[visionText.blocks.indexWhere((element) => element == e)] == false ?
+                                          Color.fromRGBO(255, 0, 0, 0.3) : Color.fromRGBO(200, 200, 200, 0.3),
+                                          border:
+                                          ocrFinList[visionText.blocks.indexWhere((element) => element == e)] == false ?
+                                          Border.all(color: Colors.red, width: 0.2) : Border.all(
+                                              color: Colors.green, width: 0.5)),
+                                    ),
+                                  ),
+                                ),
                           ).toList(),
                         ),
-
                       ],
                     ),
                   ),
@@ -437,7 +503,9 @@ class _TimViewState extends State<TimView> {
           buildRoomDateField(context),
           buildCallOutDataField(context),
           buildDetailInfoField(context),
-          Text(' 선택한점은 절대좌표 X: $debugX, Y: $debugY',textScaleFactor: 2,),
+          Text(' 선택한점은 절대좌표 X: $debugX, Y: $debugY', textScaleFactor: 2,),
+          Text(' 선택한점은 절대좌표 X: $sLeft, Y: $sTop', textScaleFactor: 2,),
+          Text(' 선택한점은 절대좌표 X: $sRight, Y: $sBottom', textScaleFactor: 2,),
         ],
       ),
     );
@@ -445,7 +513,7 @@ class _TimViewState extends State<TimView> {
 
   Row buildDetailInfoField(BuildContext context) {
     return Row(
-          children: [
+      children: [
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -471,37 +539,53 @@ class _TimViewState extends State<TimView> {
           ),
         ),
         Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                      context.read<Current>().getDrawing().detailInfoMap.add(<String,dynamic>{
-                        'name': field0.text,
-                        'category': field1.text,
-                        'left':_selBox.left,
-                        'top':_selBox.top,
-                        'right':_selBox.right,
-                        'bottom':_selBox.bottom,
-                        'x': debugX,
-                        'y': debugY,
-                        'z': context.read<Current>().getDrawing().floor,
-                      });
-                      context.read<Current>().getDrawing().detailInfoMap.toSet().toList();
-                      FirebaseFirestore.instance
-                          .collection('drawing')
-                          .doc(context.read<Current>().getDrawing().drawingNum)
-                          .update(context.read<Current>().getDrawing().toJson());
-                      ocrFinList = List.filled(visionText.blocks.length, false);
-                    });
-                  }, child: Text('DetailInfo 등록')),
-            )
-          ],
-        );
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
+                  context
+                      .read<Current>()
+                      .getDrawing()
+                      .detailInfoMap
+                      .add(<String, dynamic>{
+                    'name': field0.text,
+                    'category': field1.text,
+                    'left': _selBox.left,
+                    'top': _selBox.top,
+                    'right': _selBox.right,
+                    'bottom': _selBox.bottom,
+                    'x': debugX,
+                    'y': debugY,
+                    'z': context
+                        .read<Current>()
+                        .getDrawing()
+                        .floor,
+                  });
+                  context
+                      .read<Current>()
+                      .getDrawing()
+                      .detailInfoMap
+                      .toSet()
+                      .toList();
+                  FirebaseFirestore.instance
+                      .collection('drawing')
+                      .doc(context
+                      .read<Current>()
+                      .getDrawing()
+                      .drawingNum)
+                      .update(context.read<Current>().getDrawing().toJson());
+                  ocrFinList = List.filled(visionText.blocks.length, false);
+                });
+              }, child: Text('DetailInfo 등록')),
+        )
+      ],
+    );
   }
+
   Row buildCallOutDataField(BuildContext context) {
     return Row(
-          children: [
+      children: [
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -525,7 +609,7 @@ class _TimViewState extends State<TimView> {
               ),
             ),
           ),
-        ),        Expanded(
+        ), Expanded(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
@@ -538,104 +622,137 @@ class _TimViewState extends State<TimView> {
           ),
         ),
         Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                      context.read<Current>().getDrawing().callOutMap.add(<String,dynamic>{
-                        'name': field0.text,
-                        'id': field1.text,
-                        'category': field2.text,
-                        'left':_selBox.left,
-                        'top':_selBox.top,
-                        'right':_selBox.right,
-                        'bottom':_selBox.bottom,
-                        'x': debugX,
-                        'y': debugY,
-                        'z': context.read<Current>().getDrawing().floor,
-                      });
-                      context.read<Current>().getDrawing().callOutMap.toSet().toList();
-                      FirebaseFirestore.instance
-                          .collection('drawing')
-                          .doc(context.read<Current>().getDrawing().drawingNum)
-                          .update(context.read<Current>().getDrawing().toJson());
-                      ocrFinList = List.filled(visionText.blocks.length, false);
-                    });
-                  }, child: Text('CallOut 등록')),
-            )
-          ],
-        );
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
+                  context
+                      .read<Current>()
+                      .getDrawing()
+                      .callOutMap
+                      .add(<String, dynamic>{
+                    'name': field0.text,
+                    'id': field1.text,
+                    'category': field2.text,
+                    'left': _selBox.left,
+                    'top': _selBox.top,
+                    'right': _selBox.right,
+                    'bottom': _selBox.bottom,
+                    'x': debugX,
+                    'y': debugY,
+                    'z': context
+                        .read<Current>()
+                        .getDrawing()
+                        .floor,
+                  });
+                  context
+                      .read<Current>()
+                      .getDrawing()
+                      .callOutMap
+                      .toSet()
+                      .toList();
+                  FirebaseFirestore.instance
+                      .collection('drawing')
+                      .doc(context
+                      .read<Current>()
+                      .getDrawing()
+                      .drawingNum)
+                      .update(context.read<Current>().getDrawing().toJson());
+                  ocrFinList = List.filled(visionText.blocks.length, false);
+                });
+              }, child: Text('CallOut 등록')),
+        )
+      ],
+    );
   }
+
   Row buildRoomDateField(BuildContext context) {
     return Row(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: field0,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Name을 입력하세요',
-                  ),
-                ),
+      children: [
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: field0,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Name을 입력하세요',
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: field1,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'ID를 입력하세요',
-                  ),
-                ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: field1,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'ID를 입력하세요',
               ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: field2,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '천정고 입력하세요',
-                  ),
-                ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: field2,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: '천정고 입력하세요',
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                      context.read<Current>().getDrawing().roomMap.add(<String,dynamic>{
-                        'name': field0.text,
-                        'id': field1.text,
-                        'left':_selBox.left,
-                        'top':_selBox.top,
-                        'right':_selBox.right,
-                        'bottom':_selBox.bottom,
-                        'x': debugX,
-                        'y': debugY,
-                        'z': context.read<Current>().getDrawing().floor.toDouble(),
-                        'sealL': int.parse(field2.text),
-                      });
-                      context.read<Current>().getDrawing().roomMap.toSet().toList();
-                      FirebaseFirestore.instance
-                          .collection('drawing')
-                          .doc(context.read<Current>().getDrawing().drawingNum)
-                          .update(context.read<Current>().getDrawing().toJson());
-                      ocrFinList = List.filled(visionText.blocks.length, false);
-                    });
-                  }, child: Text('Room 등록')),
-            )
-          ],
-        );
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
+                  context
+                      .read<Current>()
+                      .getDrawing()
+                      .roomMap
+                      .add(<String, dynamic>{
+                    'name': field0.text,
+                    'id': field1.text,
+                    'left': _selBox.left,
+                    'top': _selBox.top,
+                    'right': _selBox.right,
+                    'bottom': _selBox.bottom,
+                    'x': debugX,
+                    'y': debugY,
+                    'z': context
+                        .read<Current>()
+                        .getDrawing()
+                        .floor
+                        .toDouble(),
+                    'sealL': int.parse(field2.text),
+                  });
+                  context
+                      .read<Current>()
+                      .getDrawing()
+                      .roomMap
+                      .toSet()
+                      .toList();
+                  FirebaseFirestore.instance
+                      .collection('drawing')
+                      .doc(context
+                      .read<Current>()
+                      .getDrawing()
+                      .drawingNum)
+                      .update(context.read<Current>().getDrawing().toJson());
+                  ocrFinList = List.filled(visionText.blocks.length, false);
+                });
+              }, child: Text('Room 등록')),
+        )
+      ],
+    );
   }
+
   void recaculate() {
     List<Line> realLines = [];
     testgrids.forEach((e) {
@@ -647,51 +764,52 @@ class _TimViewState extends State<TimView> {
 
   Row buildOcrCategorySelect() {
     return Row(children: [
-          Expanded(
-            child: Card(
-              child: RadioListTile(
-                title: Text('Room'),
-                value: OcrCategory.Room,
-                groupValue: _ocrCategory,
-                onChanged: (OcrCategory value) {
-                  setState(() {
-                    _ocrCategory = value;
-                  });
-                },
-              ),
-            ),
+      Expanded(
+        child: Card(
+          child: RadioListTile(
+            title: Text('Room'),
+            value: OcrCategory.Room,
+            groupValue: _ocrCategory,
+            onChanged: (OcrCategory value) {
+              setState(() {
+                _ocrCategory = value;
+              });
+            },
           ),
-          Expanded(
-            child: Card(
-              child: RadioListTile(
-                title: Text('CallOut'),
-                value: OcrCategory.CallOut,
-                groupValue: _ocrCategory,
-                onChanged: (OcrCategory value) {
-                  setState(() {
-                    _ocrCategory = value;
-                  });
-                },
-              ),
-            ),
+        ),
+      ),
+      Expanded(
+        child: Card(
+          child: RadioListTile(
+            title: Text('CallOut'),
+            value: OcrCategory.CallOut,
+            groupValue: _ocrCategory,
+            onChanged: (OcrCategory value) {
+              setState(() {
+                _ocrCategory = value;
+              });
+            },
           ),
-          Expanded(
-            child: Card(
-              child: RadioListTile(
-                title: Text('DetailInfo'),
-                value: OcrCategory.DetailInfo,
-                groupValue: _ocrCategory,
-                onChanged: (OcrCategory value) {
-                  setState(() {
-                    _ocrCategory = value;
-                  });
-                },
-              ),
-            ),
+        ),
+      ),
+      Expanded(
+        child: Card(
+          child: RadioListTile(
+            title: Text('DetailInfo'),
+            value: OcrCategory.DetailInfo,
+            groupValue: _ocrCategory,
+            onChanged: (OcrCategory value) {
+              setState(() {
+                _ocrCategory = value;
+              });
+            },
           ),
-        ],);
+        ),
+      ),
+    ],);
   }
 }
+
 Future<List<Drawing>> getData(filter) async {
   var response = await Dio().get(
     "http://5d85ccfb1e61af001471bf60.mockapi.io/user",
@@ -700,6 +818,40 @@ Future<List<Drawing>> getData(filter) async {
 
   var models = Drawing.fromJsonList(response.data);
   return models;
+}
+
+class CallOutBoundary extends CustomPainter {
+  Offset setPoint;
+  double top;
+  double bottom;
+  double left;
+  double right;
+
+  CallOutBoundary({this.left, this.top, this.right, this.bottom,this.setPoint});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..strokeCap = StrokeCap.square
+      ..strokeWidth = 2.0
+      ..color = Color.fromRGBO(0, 0, 255, 0.5);
+    Paint paint2 = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 5.0
+      ..color = Color.fromRGBO(255, 0, 0, 0.6);
+
+    left==null&&top==null&&right==null&&bottom==null
+        ?null
+        :canvas.drawRect(Rect.fromLTRB(left, top, right, bottom), paint);
+    setPoint ==null
+        ?null
+        :canvas.drawPoints(PointMode.points, [setPoint], paint2);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
 }
 
 
