@@ -7,6 +7,7 @@ import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/calendar_page.dart';
 import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
+import 'package:flutter_app_location_todo/ui/label_text_widget.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
 import 'package:flutter_app_location_todo/ui/map_page.dart';
 import 'package:flutter_app_location_todo/ui/setting_page.dart';
@@ -117,6 +118,17 @@ class _LocationTodoState extends State<LocationTodo> {
                       );
                     },
                   ),
+                // ListTile(
+                //     title: Text('LabelText'),
+                //     onTap: () {
+                //       Navigator.push(
+                //         context,
+                //         MaterialPageRoute(builder: (context) {
+                //           return LabelText();
+                //         }),
+                //       );
+                //     },
+                //   ),
                   ListTile(
                     title: Text('도면뷰어'),
                     onTap: () {

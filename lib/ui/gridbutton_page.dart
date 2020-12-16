@@ -20,6 +20,7 @@ import 'package:flutter_app_location_todo/model/gridtest_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/boundary_detail_page.dart';
+import 'package:flutter_app_location_todo/ui/label_text_widget.dart';
 import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
@@ -77,8 +78,8 @@ class _GridButtonState extends State<GridButton> {
   double iS;
   ui.Image decodeImage;
   VisionText visionText;
-  DateFormat weekfomat;
-  DateFormat mdformat ;
+  DateFormat weekfomat = DateFormat.E();
+  DateFormat mdformat = DateFormat('MM.dd');
 
 //   ///
 //   DateTime startDate = DateTime.now().subtract(Duration(days: 10));
@@ -165,8 +166,8 @@ class _GridButtonState extends State<GridButton> {
     _controller2.addListener(() {
       _gantContrl.jumpTo(_controller2.offset);
     });
-    weekfomat = DateFormat('E');
-    mdformat = DateFormat('MM.dd');
+    // weekfomat = DateFormat('E');
+    // mdformat = DateFormat('MM.dd');
 
     void readingGrid() async {
       FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -301,8 +302,6 @@ class _GridButtonState extends State<GridButton> {
                         ],
                       ),).toList(),
                     )
-
-
                   ],
                 ),
               )
@@ -421,25 +420,6 @@ class _GridButtonState extends State<GridButton> {
     );
   }
 
-  DatePicker buildDatePicker() {
-    return DatePicker(
-      DateTime.now(),
-      dayTextStyle: TextStyle(fontSize: 8),
-      dateTextStyle: TextStyle(fontSize: 12),
-      locale: 'ko',
-      width: 50,
-      height: 65,
-      daysCount: 90,
-      controller: _controller,
-      selectionColor: Colors.deepOrange,
-      selectedTextColor: Colors.white,
-      onDateChange: (date) {
-        setState(() {
-          _selectedValue = date;
-        });
-      },
-    );
-  }
 
   // CalendarStrip calendarStrip() {
   //   return CalendarStrip(
@@ -650,6 +630,7 @@ class _GridButtonState extends State<GridButton> {
                           );
                         },
                       ),
+
                       StreamBuilder<PhotoViewControllerValue>(
                           stream: _pContrl.outputStateStream,
                           builder: (context, snapshot) {
