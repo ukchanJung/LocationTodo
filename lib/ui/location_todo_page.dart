@@ -10,6 +10,7 @@ import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
 import 'package:flutter_app_location_todo/ui/label_text_widget.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
 import 'package:flutter_app_location_todo/ui/map_page.dart';
+import 'package:flutter_app_location_todo/ui/originViewer.dart';
 import 'package:flutter_app_location_todo/ui/setting_page.dart';
 import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/ui/todo_detail_page.dart';
@@ -137,7 +138,17 @@ class _LocationTodoState extends State<LocationTodo> {
                         MaterialPageRoute(builder: (context) => TimView()),
                       );
                     },
-                  ),                  ListTile(
+                  ),
+                  ListTile(
+                    title: Text('기존뷰어'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => originView()),
+                      );
+                    },
+                  ),
+                ListTile(
                     title: Text('도면맵'),
                     onTap: () {
                       Navigator.push(

@@ -223,6 +223,24 @@ class _GridButtonState extends State<GridButton> {
       // appBar: AppBar(
       //   title: Text('그리드 버튼'),
       // ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print(drawings.length);
+          print(drawings.where((e) => e.witdh==null).length);
+          // drawings.where((e) => e.witdh==null).forEach((element) {
+          //   element.witdh = 421;
+          //   element.height = 297;
+          //   FirebaseFirestore.instance.collection('drawing').doc(element.drawingNum).update(element.toJson());
+          // });
+          // drawings.where((e) => e.scale==null).forEach((element) {
+          //   element.scale='1';
+          //   FirebaseFirestore.instance.collection('drawing').doc(element.drawingNum).update(element.toJson());
+          // });
+          //   drawings.forEach((d) {
+          //   FirebaseFirestore.instance.collection('drawing2').doc(d.drawingNum).set(d.toJson());
+          //   });
+        },
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('origingrid').snapshots(),
         builder: (context, snapshot) {
@@ -264,6 +282,7 @@ class _GridButtonState extends State<GridButton> {
           SingleChildScrollView(
               controller: _gantContrl,
               scrollDirection: Axis.horizontal,
+            //달력간트차트
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: calendars
@@ -308,6 +327,7 @@ class _GridButtonState extends State<GridButton> {
                   .toList(),
             ),
           ),
+          //추가버튼
           Row(
             children: [
               Expanded(
@@ -531,35 +551,49 @@ class _GridButtonState extends State<GridButton> {
                       Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
 
                       ///커스텀페인터
-                      Container(
-                        child: CustomPaint(
-                          painter: GridMaker(
-                            snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
-                            double.parse(context.watch<Current>().getDrawing().scale) * 421,
-                            _origin,
-                            pointList: _iPs,
-                            deviceWidth: deviceWidth,
-                            cordinate: context.watch<Current>().getcordiOffset(width, heigh),
-                          ),
-                        ),
-                      ),
-                      ...tasks.map((e) => Stack(
+                      context.watch<Current>().getDrawing().scale != '1'
+                          ? Container(
+                              child: CustomPaint(
+                                painter: GridMaker(
+                                  snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
+                                  double.parse(context.watch<Current>().getDrawing().scale) * 421,
+                                  _origin,
+                                  pointList: _iPs,
+                                  deviceWidth: deviceWidth,
+                                  cordinate: context.watch<Current>().getcordiOffset(width, heigh),
+                                ),
+                              ),
+                            )
+                          : Container(),
+                      // 테스크 바운더리 위젯
+                      context.watch<Current>()
+                          .getDrawing()
+                          .scale != '1' ? Stack(children: tasks.map((e) =>
+                          Stack(
                             children: e.boundarys.map(
-                              (b) {
+                                  (b) {
                                 var watch = context.watch<Current>();
                                 return Positioned.fromRect(
                                   rect: Rect.fromPoints(
                                       Offset(
                                         b.bottomRight.dx / (watch.getcordiX() / width) +
-                                            (watch.getDrawing().originX * width),
+                                            (watch
+                                                .getDrawing()
+                                                .originX * width),
                                         b.bottomRight.dy / (watch.getcordiY() / heigh) +
-                                            ((watch.getDrawing().originY * heigh)),
+                                            ((watch
+                                                .getDrawing()
+                                                .originY * heigh)),
                                       ),
                                       Offset(
                                         b.topLeft.dx / (watch.getcordiX() / width) +
-                                            (watch.getDrawing().originX * width),
+                                            (watch
+                                                .getDrawing()
+                                                .originX * width),
                                         b.topLeft.dy / (watch.getcordiY() / heigh) +
-                                            ((watch.getDrawing().originY * heigh)),
+                                            ((watch
+                                                .getDrawing()
+                                                .originY * heigh)),
                                       )),
                                   child: GestureDetector(
                                     onLongPress: () {
@@ -573,7 +607,10 @@ class _GridButtonState extends State<GridButton> {
                                       color: e.favorite == false ? Colors.black12 : Color.fromRGBO(255, 0, 0, 0.5),
                                       child: Center(
                                         child: Text(
-                                          tasks.where((e) => e.boundarys.contains(b)).length.toString(),
+                                          tasks
+                                              .where((e) => e.boundarys.contains(b))
+                                              .length
+                                              .toString(),
                                           textScaleFactor: 200 / width,
                                         ),
                                       ),
@@ -582,7 +619,9 @@ class _GridButtonState extends State<GridButton> {
                                 );
                               },
                             ).toList(),
-                          )),
+                          )).toList())
+                          : Container(),
+                      //선택한 바운더리 위젯
                       ...boundarys.map(
                         (e) {
                           var watch = context.watch<Current>();
@@ -631,6 +670,7 @@ class _GridButtonState extends State<GridButton> {
                         },
                       ),
 
+                      // 도면 정보 스케일 위젯
                       StreamBuilder<PhotoViewControllerValue>(
                           stream: _pContrl.outputStateStream,
                           builder: (context, snapshot) {
