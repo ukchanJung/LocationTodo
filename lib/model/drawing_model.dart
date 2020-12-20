@@ -111,6 +111,7 @@ class Drawing {
     floor = json["floor"];
     witdh = json["width"];
     height = json["height"];
+
     ///OCR데이터 Read
     // Iterable jsonOcrRect = json["ocrData"];
     // ocrData = jsonOcrRect
@@ -129,18 +130,23 @@ class Drawing {
     Iterable jsonRooms = json['roomMap'];
     if (jsonRooms != null) {
       roomMap = jsonRooms
-          .map((e)=> {
-            'name': e['name'],
-            'id': e['id'],
-            'left': e['left'],
-            'top': e['top'],
-            'right': e['right'],
-            'bottom': e['bottom'],
-            'x': e['x'],
-            'y': e['y'],
-            'z': e['z'],
-            'sealL': e['sealL'],
-            }).toList();
+          .map((e) => {
+                'name': e['name'],
+                'id': e['id'],
+                'left': e['left'],
+                'top': e['top'],
+                'right': e['right'],
+                'bottom': e['bottom'],
+                'x': e['x'],
+                'y': e['y'],
+                'z': e['z'],
+                'sealL': e['sealL'],
+                'bLeft': e['bLeft'],
+                'bTop': e['bTop'],
+                'bRight': e['bRight'],
+                'bBottom': e['bBottom'],
+              })
+          .toList();
     }
     Iterable jsonCallOut = json['callOutMap'];
     if (jsonCallOut != null) {
@@ -156,22 +162,28 @@ class Drawing {
                 'x': f['x'],
                 'y': f['y'],
                 'z': f['z'],
+                'bLeft': f['bLeft'],
+                'bTop': f['bTop'],
+                'bRight': f['bRight'],
+                'bBottom': f['bBottom'],
               })
           .toList();
     }
     Iterable jsonDetailInfo = json['detailInfoMap'];
-    if (jsonDetailInfo != null){
-      detailInfoMap = jsonDetailInfo.map((e) => {
-        'name' : e['name'],
-        'category' : e['category'],
-        'left': e['left'],
-        'top': e['top'],
-        'right': e['right'],
-        'bottom': e['bottom'],
-        'x': e['x'],
-        'y': e['y'],
-        'z': e['z'],
-      }).toList();
+    if (jsonDetailInfo != null) {
+      detailInfoMap = jsonDetailInfo
+          .map((e) => {
+                'name': e['name'],
+                'category': e['category'],
+                'left': e['left'],
+                'top': e['top'],
+                'right': e['right'],
+                'bottom': e['bottom'],
+                'x': e['x'],
+                'y': e['y'],
+                'z': e['z'],
+              })
+          .toList();
     }
     // if (jsonRooms != null) {
     //   rooms = jsonRooms.map((e) {
@@ -272,5 +284,4 @@ class Ocr {
   Rect rect;
 
   Ocr({this.name, this.rect});
-
 }

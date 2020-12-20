@@ -381,8 +381,14 @@ class _TimViewState extends State<TimView> {
                                     e['right'].toDouble() / iS,
                                     e['bottom'].toDouble() / iS,
                                   ),
-                                  child: Container(
-                                    color: Color.fromRGBO(0, 0, 255, 0.6),
+                                  child: GestureDetector(
+                                    onLongPress: (){
+
+
+                                    },
+                                    child: Container(
+                                      color: Color.fromRGBO(0, 0, 255, 0.6),
+                                    ),
                                   )))
                               .toList(),
                         ),
@@ -731,6 +737,10 @@ class _TimViewState extends State<TimView> {
                     'top': _selBox.top,
                     'right': _selBox.right,
                     'bottom': _selBox.bottom,
+                    'bLeft': rLeft,
+                    'bTop': rTop,
+                    'bRight': rRight,
+                    'bBottom': rBottom,
                     'x': debugX,
                     'y': debugY,
                     'z': context

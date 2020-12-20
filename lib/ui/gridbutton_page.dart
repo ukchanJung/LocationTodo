@@ -173,6 +173,8 @@ class _GridButtonState extends State<GridButton> {
   double sBottom;
   List<int> count = [];
   List<Offset> tracking = [];
+  bool callOutLayerOn = false;
+  InteriorIndex selectRoom ;
 
 
   // double _lowerValue = DateTime(2020, 6, 1, 0, 0, 0).millisecondsSinceEpoch.toDouble();
@@ -212,6 +214,7 @@ class _GridButtonState extends State<GridButton> {
       setState(() {});
     });
     interiorList=interiorIndex.map((e) => InteriorIndex.fromJson(e)).toList();
+    selectRoom =interiorList[0];
 
   }
 
@@ -257,6 +260,11 @@ class _GridButtonState extends State<GridButton> {
             floatingActionButton: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                FloatingActionButton(onPressed: (){
+                  setState(() {
+                    callOutLayerOn = !callOutLayerOn;
+                  });
+                })
                 // FloatingActionButton(
                 //   heroTag: null,
                 //   onPressed: () {
@@ -316,7 +324,7 @@ class _GridButtonState extends State<GridButton> {
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Card(child: DetiailResult(interiorList[0])),
+                                child: Card(child: DetiailResult(selectRoom)),
                               ),
                             ],
                           ),
@@ -766,35 +774,35 @@ class _GridButtonState extends State<GridButton> {
                     children: [
                       Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
                       ///클릭카운터
-                      StreamBuilder<PhotoViewControllerValue>(
-                        stream: _pContrl.outputStateStream,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-                          return Stack(
-                            children: [
-                              CustomPaint(
-                                painter: CallOutCount(
-                                   tP: tracking,s: snapshot.data.scale),
-                              ),
-                              count != []
-                                  ? Stack(
-                                children: count
-                                    .map((e) => Positioned.fromRect(
-                                    rect: Rect.fromCenter(
-                                        center: tracking[count.indexOf(e)], width: 100, height: 100),
-                                    child: Center(
-                                        child: Text(
-                                          e.toString(),
-                                          style: TextStyle(color: Colors.white),
-                                          textScaleFactor: 1/snapshot.data.scale,
-                                        ))))
-                                    .toList(),
-                              )
-                                  : Container(),
-                            ],
-                          );
-                        }
-                      ),
+                      // StreamBuilder<PhotoViewControllerValue>(
+                      //   stream: _pContrl.outputStateStream,
+                      //   builder: (context, snapshot) {
+                      //     if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                      //     return Stack(
+                      //       children: [
+                      //         CustomPaint(
+                      //           painter: CallOutCount(
+                      //              tP: tracking,s: snapshot.data.scale),
+                      //         ),
+                      //         count != []
+                      //             ? Stack(
+                      //           children: count
+                      //               .map((e) => Positioned.fromRect(
+                      //               rect: Rect.fromCenter(
+                      //                   center: tracking[count.indexOf(e)], width: 100, height: 100),
+                      //               child: Center(
+                      //                   child: Text(
+                      //                     e.toString(),
+                      //                     style: TextStyle(color: Colors.white),
+                      //                     textScaleFactor: 1/snapshot.data.scale,
+                      //                   ))))
+                      //               .toList(),
+                      //         )
+                      //             : Container(),
+                      //       ],
+                      //     );
+                      //   }
+                      // ),
                       ///커스텀페인터 그리드 및 교점
                       // context.watch<Current>().getDrawing().scale != '1'
                       //     ? Container(
@@ -811,115 +819,184 @@ class _GridButtonState extends State<GridButton> {
                       //       )
                       //     : Container(),
                       /// 테스크 바운더리 위젯
-                      // context.watch<Current>().getDrawing().scale != '1'
-                      //     ? Stack(
-                      //         children: tasks
-                      //             .map((e) => Stack(
-                      //                   children: e.boundarys.map(
-                      //                     (b) {
-                      //                       var watch = context.watch<Current>();
-                      //                       return Positioned.fromRect(
-                      //                         rect: Rect.fromPoints(
-                      //                             Offset(
-                      //                               b.bottomRight.dx / (watch.getcordiX() / width) +
-                      //                                   (watch.getDrawing().originX * width),
-                      //                               b.bottomRight.dy / (watch.getcordiY() / heigh) +
-                      //                                   ((watch.getDrawing().originY * heigh)),
-                      //                             ),
-                      //                             Offset(
-                      //                               b.topLeft.dx / (watch.getcordiX() / width) +
-                      //                                   (watch.getDrawing().originX * width),
-                      //                               b.topLeft.dy / (watch.getcordiY() / heigh) +
-                      //                                   ((watch.getDrawing().originY * heigh)),
-                      //                             )),
-                      //                         child: GestureDetector(
-                      //                           onLongPress: () {
-                      //                             List<Task> _tempList =
-                      //                                 tasks.where((e) => e.boundarys.contains(b)).toList();
-                      //                             Navigator.push(
-                      //                               context,
-                      //                               MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
-                      //                             );                       ㅋ
-                      //                           },
-                      //                           child: Container(
-                      //                             color: e.favorite == false
-                      //                                 ? Colors.black12
-                      //                                 : Color.fromRGBO(255, 0, 0, 0.5),
-                      //                             child: Center(
-                      //                               child: AutoSizeText(
-                      //                                 tasks.where((e) => e.boundarys.contains(b)).length.toString(),
-                      //                                 textScaleFactor: 0.7,
-                      //                               ),
-                      //                             ),
-                      //                           ),
-                      //                         ),
-                      //                       );
-                      //                     },
-                      //                   ).toList(),
-                      //                 ))
-                      //             .toList())
-                      //     : Container(),
+                      context.watch<Current>().getDrawing().scale != '1'
+                          ? Stack(
+                              children: tasks
+                                  .map((e) => Stack(
+                                        children: e.boundarys.map(
+                                          (b) {
+                                            var watch = context.watch<Current>();
+                                            return Positioned.fromRect(
+                                              rect: Rect.fromPoints(
+                                                  Offset(
+                                                    b.bottomRight.dx / (watch.getcordiX() / width) +
+                                                        (watch.getDrawing().originX * width),
+                                                    b.bottomRight.dy / (watch.getcordiY() / heigh) +
+                                                        ((watch.getDrawing().originY * heigh)),
+                                                  ),
+                                                  Offset(
+                                                    b.topLeft.dx / (watch.getcordiX() / width) +
+                                                        (watch.getDrawing().originX * width),
+                                                    b.topLeft.dy / (watch.getcordiY() / heigh) +
+                                                        ((watch.getDrawing().originY * heigh)),
+                                                  )),
+                                              child: GestureDetector(
+                                                onLongPress: () {
+                                                  List<Task> _tempList =
+                                                      tasks.where((e) => e.boundarys.contains(b)).toList();
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
+                                                  );                       
+                                                },
+                                                child: Container(
+                                                  color: e.favorite == false
+                                                      ? Colors.black12
+                                                      : Color.fromRGBO(255, 0, 0, 0.5),
+                                                  child: Center(
+                                                    child: AutoSizeText(
+                                                      tasks.where((e) => e.boundarys.contains(b)).length.toString(),
+                                                      textScaleFactor: 0.7,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ).toList(),
+                                      ))
+                                  .toList())
+                          : Container(),
                       /// 선택한 바운더리 위젯
-                      // ...boundarys.map(
-                      //   (e) {
-                      //     var watch = context.watch<Current>();
-                      //     return Positioned.fromRect(
-                      //       rect: Rect.fromPoints(
-                      //           Offset(
-                      //             e.boundary.bottomRight.dx / (watch.getcordiX() / width) +
-                      //                 (watch.getDrawing().originX * width),
-                      //             e.boundary.bottomRight.dy / (watch.getcordiY() / heigh) +
-                      //                 ((watch.getDrawing().originY * heigh)),
-                      //           ),
-                      //           Offset(
-                      //             e.boundary.topLeft.dx / (watch.getcordiX() / width) +
-                      //                 (watch.getDrawing().originX * width),
-                      //             e.boundary.topLeft.dy / (watch.getcordiY() / heigh) +
-                      //                 ((watch.getDrawing().originY * heigh)),
-                      //           )),
-                      //       child: Opacity(
-                      //         opacity: 0.5,
-                      //         child: ElevatedButton(
-                      //           onLongPress: () {
-                      //             setState(() {
-                      //               List<Task> _boundaryTask = e.tasksList;
-                      //               Navigator.push(
-                      //                 context,
-                      //                 MaterialPageRoute(builder: (context) => BoundayDetail(_boundaryTask)),
-                      //               );
-                      //             });
-                      //           },
-                      //           onPressed: () {
-                      //             setState(() {
-                      //               boundarys.remove(e);
-                      //             });
-                      //             print(e.writeTime.toString());
-                      //           },
-                      //           child: null,
-                      //           style: ElevatedButton.styleFrom(
-                      //             primary: Colors.green,
-                      //             shape: RoundedRectangleBorder(
-                      //               borderRadius: BorderRadius.circular(0.0),
-                      //             ),
-                      //           ),
-                      //         ),
-                      //       ),
-                      //     );
-                      //   },
-                      // ),
+                      ...boundarys.map(
+                        (e) {
+                          var watch = context.watch<Current>();
+                          return Positioned.fromRect(
+                            rect: Rect.fromPoints(
+                                Offset(
+                                  e.boundary.bottomRight.dx / (watch.getcordiX() / width) +
+                                      (watch.getDrawing().originX * width),
+                                  e.boundary.bottomRight.dy / (watch.getcordiY() / heigh) +
+                                      ((watch.getDrawing().originY * heigh)),
+                                ),
+                                Offset(
+                                  e.boundary.topLeft.dx / (watch.getcordiX() / width) +
+                                      (watch.getDrawing().originX * width),
+                                  e.boundary.topLeft.dy / (watch.getcordiY() / heigh) +
+                                      ((watch.getDrawing().originY * heigh)),
+                                )),
+                            child: Opacity(
+                              opacity: 0.5,
+                              child: ElevatedButton(
+                                onLongPress: () {
+                                  setState(() {
+                                    List<Task> _boundaryTask = e.tasksList;
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => BoundayDetail(_boundaryTask)),
+                                    );
+                                  });
+                                },
+                                onPressed: () {
+                                  setState(() {
+                                    boundarys.remove(e);
+                                  });
+                                  print(e.writeTime.toString());
+                                },
+                                child: null,
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.green,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(0.0),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
 
                       // 도면 정보 스케일 위젯
                       ///도면 상세정보
-                      StreamBuilder<PhotoViewControllerValue>(
-                          stream: _pContrl.outputStateStream,
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-                            return snapshot.data.scale < 12 ? planInfo(context) : detailInfo(context);
-                          }),
-                      Stack(
-                        // children: context.watch<Current>().getDrawing().callOutMap.map((e) => Positioned.fromRect(rect: ,)).toList(),
+                      // StreamBuilder<PhotoViewControllerValue>(
+                      //     stream: _pContrl.outputStateStream,
+                      //     builder: (context, snapshot) {
+                      //       if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                      //       return snapshot.data.scale < 12 ? planInfo(context) : detailInfo(context);
+                      //     }),
+                      ///CallOut 바운더리 구현
+                      callOutLayerOn == true
+                          ? Stack(
+                              children: context.watch<Current>().getDrawing().callOutMap.map((e) {
+                                double l = e['bLeft'] / context.watch<Current>().getcordiX() * deviceWidth;
+                                double t = e['bTop'] / context.watch<Current>().getcordiX() * deviceWidth;
+                                double r = e['bRight'] / context.watch<Current>().getcordiX() * deviceWidth;
+                                double b = e['bBottom'] / context.watch<Current>().getcordiX() * deviceWidth;
+                                double x = context.watch<Current>().getcordiOffset(width, heigh).dx;
+                                double y = context.watch<Current>().getcordiOffset(width, heigh).dy;
+                                return Positioned.fromRect(
+                                  rect: Rect.fromLTRB(
+                                    l + x,
+                                    t + y,
+                                    r + x,
+                                    b + y,
+                                  ),
+                                  child: GestureDetector(
+                                    onLongPress: () {
+                                      callOutLayerOn =false;
+                                      Drawing select = drawings.singleWhere((v) => v.drawingNum == e['name']);
+                                      context.read<Current>().changePath(select);
+                                      recaculate();
+                                      setState(() {});
+                                    },
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Container(
+                                        color: Color.fromRGBO(255, 0, 0, 0.2),
+                                        child: Center(
+                                            child: AutoSizeText(
+                                          e['name'],
+                                          minFontSize: 20,
+                                        )),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            )
+                          : Container(),
+                      ///RoomTag구현
+                      callOutLayerOn == true
+                          ? Stack(
+                        children: context.watch<Current>().getDrawing().roomMap.map((e) {
+                          double l = e['bLeft'] / context.watch<Current>().getcordiX() * deviceWidth;
+                          double t = e['bTop'] / context.watch<Current>().getcordiX() * deviceWidth;
+                          double r = e['bRight'] / context.watch<Current>().getcordiX() * deviceWidth;
+                          double b = e['bBottom'] / context.watch<Current>().getcordiX() * deviceWidth;
+                          double x = context.watch<Current>().getcordiOffset(width, heigh).dx;
+                          double y = context.watch<Current>().getcordiOffset(width, heigh).dy;
+                          return Positioned.fromRect(
+                            rect: Rect.fromLTRB(
+                              l + x,
+                              t + y,
+                              r + x,
+                              b + y,
+                            ),
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                print(e['name']);
+                                selectRoom = interiorList.singleWhere((r) => r.roomNum.contains(e['id']));
+                                });
+                              },
+                              child: Container(
+                                color: Color.fromRGBO(0, 0, 255, 0.3),
+                              ),
+                            ),
+                          );
+                        }).toList(),
                       )
-
+                          : Container(),
                     ],
                   ),
                 ),
@@ -1117,7 +1194,8 @@ class DetiailResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(children: [
+      child: Column(
+        children: [
         ListTile(
           leading: Text(input.roomNum),
           title: Text(input.roomName),
@@ -1126,19 +1204,24 @@ class DetiailResult extends StatelessWidget {
             children: [
               Card(
                 child: InkWell(
-                  onTap: (){},
+                  onTap: (){
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text('실내재료 마감상세도'),
+                          content: Column(
+                            children: [
+                              Image.asset('asset/detailRoom.png'),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
                   child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text('마감상세도'),
-                ),
-                ),
-              ),
-              Card(
-                child: InkWell(
-                  onTap: (){},
-                  child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('창호입면도'),
                 ),
                 ),
               ),
@@ -1146,47 +1229,50 @@ class DetiailResult extends StatelessWidget {
           ),
         ),
           Divider(),
-          DataTable(
-            columns: [
-              DataColumn(label: Text('구분')),
-              DataColumn(label: Text('바탕')),
-              DataColumn(label: Text('마감')),
-              DataColumn(label: Text('Thk/Level')),
-            ],
-            rows: [
-              DataRow(
-                cells: [
-                  DataCell(Text('바닥')),
-                  DataCell(Text(input.fBackground)),
-                  DataCell(Text(input.fFin)),
-                  DataCell(Text(input.fThk)),
-                ],
-              ),
-              DataRow(
-                cells: [
-                  DataCell(Text('걸레받이')),
-                  DataCell(Text(input.bBBackground)),
-                  DataCell(Text(input.bBFin)),
-                  DataCell(Text(input.bBThk)),
-                ],
-              ),
-              DataRow(
-                cells: [
-                  DataCell(Text('벽')),
-                  DataCell(Text(input.wBackground)),
-                  DataCell(Text(input.wFin)),
-                  DataCell(Text('-')),
-                ],
-              ),
-              DataRow(
-                cells: [
-                  DataCell(Text('천정')),
-                  DataCell(Text(input.cBackground)),
-                  DataCell(Text(input.cFin)),
-                  DataCell(Text(input.cLevel)),
-                ],
-              ),
-            ],
+          Container(
+            width: MediaQuery.of(context).size.width,
+            child: DataTable(
+              columns: [
+                DataColumn(label: Text('구분')),
+                DataColumn(label: Text('바탕')),
+                DataColumn(label: Text('마감')),
+                DataColumn(label: Text('Thk/Level')),
+              ],
+              rows: [
+                DataRow(
+                  cells: [
+                    DataCell(Text('바닥')),
+                    DataCell(Text(input.fBackground)),
+                    DataCell(Text(input.fFin)),
+                    DataCell(Text(input.fThk)),
+                  ],
+                ),
+                DataRow(
+                  cells: [
+                    DataCell(Text('걸레받이')),
+                    DataCell(Text(input.bBBackground)),
+                    DataCell(Text(input.bBFin)),
+                    DataCell(Text(input.bBThk)),
+                  ],
+                ),
+                DataRow(
+                  cells: [
+                    DataCell(Text('벽')),
+                    DataCell(Text(input.wBackground)),
+                    DataCell(Text(input.wFin)),
+                    DataCell(Text('-')),
+                  ],
+                ),
+                DataRow(
+                  cells: [
+                    DataCell(Text('천정')),
+                    DataCell(Text(input.cBackground)),
+                    DataCell(Text(input.cFin)),
+                    DataCell(Text(input.cLevel)),
+                  ],
+                ),
+              ],
+            ),
           )
         ],),
     );
