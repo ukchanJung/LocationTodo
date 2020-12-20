@@ -14,6 +14,7 @@ import 'package:flutter_app_location_todo/ui/originViewer.dart';
 import 'package:flutter_app_location_todo/ui/setting_page.dart';
 import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/ui/todo_detail_page.dart';
+import 'package:flutter_app_location_todo/ui/viewer_page.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -89,7 +90,7 @@ class _LocationTodoState extends State<LocationTodo> {
                   ListTile(
                     title: Text('그리드 버튼 구현'),
                     onTap: () {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) {
                           // context.watch<Current>().changePath(
@@ -145,6 +146,15 @@ class _LocationTodoState extends State<LocationTodo> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => originView()),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    title: Text('도면뷰어기능'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Viewer()),
                       );
                     },
                   ),

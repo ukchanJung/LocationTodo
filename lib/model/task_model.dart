@@ -28,8 +28,8 @@ class Task {
   });
   Task.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
     name = json["name"];
-    start = json["start"];
-    end = json["end"];
+    start = json["start"].toDate();
+    end = json["end"].toDate();
     writeTime = json["writeTime"].toDate();
     memo = json["memo"];
     ischecked = json["ischecked"];

@@ -47,6 +47,7 @@ dependencies:
   calendar_strip: ^1.0.7
   calendar_timeline: ^0.6.3
   date_picker_timeline: ^1.2.1
+  auto_size_text: ^2.1.0
 
 dev_dependencies:
   flutter_test:

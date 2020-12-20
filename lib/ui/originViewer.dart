@@ -67,6 +67,8 @@ class _originViewState extends State<originView> {
   bool ocrLayer = true;
   List<Offset> tracking = [];
   List<int> count = [];
+  String filter = 'A';
+  int selected;
 
   @override
   void initState() {
@@ -137,7 +139,7 @@ class _originViewState extends State<originView> {
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton(
-            onPressed: ()  {
+            onPressed: () {
               setState(() {
                 tracking = [];
                 count = [];
@@ -148,7 +150,9 @@ class _originViewState extends State<originView> {
       ),
       body: Column(
         children: [
-          Container(height: 40,),
+          Container(
+            height: 40,
+          ),
           Divider(),
           AspectRatio(
             aspectRatio: 421 / 297,
@@ -173,23 +177,35 @@ class _originViewState extends State<originView> {
                     child: Stack(
                       children: [
                         Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
-                        CustomPaint(
-                          painter: CallOutBoundary(
-                              setPoint: _origin, left: sLeft, top: sTop, right: sRight, bottom: sBottom, tP: tracking),
+                        StreamBuilder<PhotoViewControllerValue>(
+                          stream: _pContrl.outputStateStream,
+                          builder: (context, snapshot) {
+                            return Stack(
+                              children: [
+                                CustomPaint(
+                                  painter: CallOutBoundary(
+                                      setPoint: _origin, left: sLeft, top: sTop, right: sRight, bottom: sBottom, tP: tracking,s: snapshot.data.scale),
+                                ),
+                                count != []
+                                    ? Stack(
+                                  children: count
+                                      .map((e) => Positioned.fromRect(
+                                      rect: Rect.fromCenter(
+                                          center: tracking[count.indexOf(e)], width: 100, height: 100),
+                                      child: Center(
+                                          child: Text(
+                                            e.toString(),
+                                            style: TextStyle(color: Colors.white),
+                                            textScaleFactor: 1/snapshot.data.scale,
+                                          ))))
+                                      .toList(),
+                                )
+                                    : Container(),
+                              ],
+                            );
+                          }
                         ),
-                        count!=[]?
-                        Stack(
-                          children: count
-                              .map((e) => Positioned.fromRect(
-                                  rect: Rect.fromCenter(center: tracking[count.indexOf(e)], width: 100, height: 100),
-                                  child: Center(
-                                      child: Text(
-                                    e.toString(),
-                                    style: TextStyle(color: Colors.white),
-                                  ))))
-                              .toList(),
-                        )
-                            :Container()
+
                       ],
                     ),
                   ),
@@ -197,6 +213,167 @@ class _originViewState extends State<originView> {
               ),
             ),
           ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: ListView(
+                    children: [
+                      Card(
+                          child: ListTile(
+                        title: Text('프로젝트1'),
+                      )),
+                      Card(
+                          child: ListTile(
+                        title: Text('프로젝트2'),
+                      )),
+                      Card(
+                          child: ListTile(
+                        title: Text('프로젝트3'),
+                      )),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      Card(
+                          child: ListTile(
+                        title: Text('2020.12.01'),
+                      )),
+                      Card(
+                          child: ListTile(
+                        title: Text('2020.09.15'),
+                      )),
+                      Card(
+                          child: ListTile(
+                        title: Text('2020.05.31'),
+                      )),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    children: [
+                      Card(
+                        child: ListTile(
+                          selected: selected ==0,
+                          title: Text('건축'),
+                          onTap: () {
+                            setState(() {
+                              filter = 'A';
+                              selected = 0;
+                            });
+                          },
+                        ),
+                      ),
+                      Card(
+                        child: ListTile(
+                          title: Text('구조'),
+                          selected: selected ==1,
+                          onTap: () {
+                            setState(() {
+                              filter = 'S';
+                              selected =1;
+                            });
+                          },
+                        ),
+                      ),
+                      Card(
+                          child: ListTile(
+                            selected: selected ==2,
+                            onTap: () {
+                              setState(() {
+                                filter = 't';
+                                selected =2;
+                              });
+                            },
+                        title: Text('설비'),
+                      )),
+                      Card(
+                          child: ListTile(
+                            selected: selected ==3,
+                            onTap: () {
+                              setState(() {
+                                filter = 't';
+                                selected =3;
+                              });
+                            },
+                        title: Text('설비'),
+                      )),
+                      Card(
+                          child: ListTile(
+                            selected: selected ==4,
+                            onTap: () {
+                              setState(() {
+                                filter = 't';
+                                selected =4;
+                              });
+                            },
+                        title: Text('전기'),
+                      )),
+                      Card(
+                          child: ListTile(
+                            selected: selected ==5,
+                            onTap: () {
+                              setState(() {
+                                filter = 't';
+                               selected =5;
+                              });
+                            },
+                        title: Text('토목'),
+                      )),
+                      Card(
+                          child: ListTile(
+                            selected: selected ==6,
+                            onTap: () {
+                              setState(() {
+                                filter = 't';
+                                selected =6;
+                              });
+                            },
+                        title: Text('조경'),
+                      )),
+                      Card(
+                          child: ListTile(
+                            selected: selected ==7,
+                            onTap: () {
+                              setState(() {
+                                filter = 't';
+                                selected =7;
+                              });
+                            },
+                        title: Text('소방'),
+                      )),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Scrollbar(
+                    // isAlwaysShown: true,
+                    thickness: 10,
+                    child: ListView(
+                      children: drawings
+                          .where((element) => element.listCategory.startsWith(filter))
+                          .map((e) => Card(
+                                  child: ListTile(
+                                title: Text(e.toString()),
+                                  onTap: () {
+                                      count = [];
+                                      tracking = [];
+                                    setState(() async {
+                                      context.read<Current>().changePath(e);
+                                      iS = decodeImage.width / _keyA.currentContext.size.width;
+                                    });
+                                  })))
+                          .toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );
@@ -229,8 +406,9 @@ class CallOutBoundary extends CustomPainter {
   double left;
   double right;
   List<Offset> tP;
+  double s=1;
 
-  CallOutBoundary({this.left, this.top, this.right, this.bottom, this.setPoint, this.tP});
+  CallOutBoundary({this.left, this.top, this.right, this.bottom, this.setPoint, this.tP,this.s});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -244,11 +422,11 @@ class CallOutBoundary extends CustomPainter {
       ..color = Color.fromRGBO(255, 0, 0, 0.6);
     Paint paint4 = Paint()
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 25.0
+      ..strokeWidth = 25.0/s
       ..color = Color.fromRGBO(255, 0, 0, 1);
     Paint paint5 = Paint()
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 1.0
+      ..strokeWidth = 1.0/s
       ..color = Color.fromRGBO(255, 0, 0, 1);
 
     left == null && top == null && right == null && bottom == null
@@ -264,3 +442,4 @@ class CallOutBoundary extends CustomPainter {
     return false;
   }
 }
+
