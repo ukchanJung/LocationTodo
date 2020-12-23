@@ -21,7 +21,7 @@ class _LabelTextState extends State<LabelText> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         child: Stack(
-          overflow: Overflow.visible,
+          clipBehavior: Clip.none,
           children: [
             // CustomPaint(
             //   painter: Leader(top,left,widget.scale),

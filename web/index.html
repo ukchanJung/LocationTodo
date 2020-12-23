@@ -33,6 +33,36 @@
   <!-- This script installs service_worker.js to provide PWA functionality to
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
+  <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.22.1/firebase-firestore.js"></script>
+  
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+
+<!--  &lt;!&ndash; The core Firebase JS SDK is always required and must be listed first &ndash;&gt;-->
+<!--  <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>-->
+
+<!--  &lt;!&ndash; TODO: Add SDKs for Firebase products that you want to use-->
+<!--       https://firebase.google.com/docs/web/setup#available-libraries &ndash;&gt;-->
+<!--  <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-analytics.js"></script>-->
+
+  <script>
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  var firebaseConfig = {
+    apiKey: "AIzaSyDTnjvKMSZWooBmh4tmvZDGqB80uJkOVUc",
+    authDomain: "locationtodo.firebaseapp.com",
+    databaseURL: "https://locationtodo.firebaseio.com",
+    projectId: "locationtodo",
+    storageBucket: "locationtodo.appspot.com",
+    messagingSenderId: "801258913989",
+    appId: "1:801258913989:web:1e367758eb9319730430ac",
+    measurementId: "G-TTKKYBJ789"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+</script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('flutter-first-frame', function () {
