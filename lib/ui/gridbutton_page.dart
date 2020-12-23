@@ -177,8 +177,6 @@ class _GridButtonState extends State<GridButton> {
   InteriorIndex selectRoom ;
 
 
-  // double _lowerValue = DateTime(2020, 6, 1, 0, 0, 0).millisecondsSinceEpoch.toDouble();
-  // double _upperValue = DateTime(2020, 9, 1, 0, 0, 0).millisecondsSinceEpoch.toDouble();
   @override
   void initState() {
     super.initState();
@@ -329,7 +327,7 @@ class _GridButtonState extends State<GridButton> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Card(
-                                    child: Expanded(child: ListView(
+                                    child: ListView(
                                   children: interiorList
                                       .map((e) => Card(
                                               child: ListTile(
@@ -338,7 +336,7 @@ class _GridButtonState extends State<GridButton> {
                                             trailing: Text(e.cLevel),
                                           )))
                                       .toList(),
-                                ))
+                                )
                                 ),
                               ),
                             ],
@@ -531,80 +529,77 @@ class _GridButtonState extends State<GridButton> {
 
   List<DateTime> calendars = List.generate(21, (index) => DateTime.now().add(Duration(days: -10 + index)));
 
-  Expanded buildTaskAddWidget(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          // buildDatePicker(),
-          SingleChildScrollView(
-            controller: _gantContrl,
-            scrollDirection: Axis.horizontal,
-            //달력간트차트
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: calendars
-                  .map(
-                    (e) => Column(
-                  children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            e.weekday == 7
-                                ? Text(weekfomat.format(e), style: TextStyle(color: Colors.red))
-                                : Container(),
-                            e.weekday == 6
-                                ? Text(weekfomat.format(e), style: TextStyle(color: Colors.blue))
-                                : Container(),
-                            e.weekday != 7 && e.weekday != 6
-                                ? Text(weekfomat.format(e))
-                                : Container(),
-                            Text('${e.month}.${e.day}'),
-                          ],
-                        ),
+  Widget buildTaskAddWidget(BuildContext context) {
+    return Column(
+      children: [
+        SingleChildScrollView(
+          controller: _gantContrl,
+          scrollDirection: Axis.horizontal,
+          //달력간트차트
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: calendars
+                .map(
+                  (e) => Column(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          e.weekday == 7
+                              ? Text(weekfomat.format(e), style: TextStyle(color: Colors.red))
+                              : Container(),
+                          e.weekday == 6
+                              ? Text(weekfomat.format(e), style: TextStyle(color: Colors.blue))
+                              : Container(),
+                          e.weekday != 7 && e.weekday != 6
+                              ? Text(weekfomat.format(e))
+                              : Container(),
+                          Text('${e.month}.${e.day}'),
+                        ],
                       ),
                     ),
-                    tasks.where((element) => element.favorite == true).length == 0
-                    // ?Container(width: 50,height: 10,color: Colors.red,)
-                        ? Container(
-                      width: 50,
-                      height: 10,
-                      color: Colors.blue,
-                    )
-                        : Column(
-                      children: tasks
-                          .where((element) =>
-                      element.favorite == true && element.start != null)
-                          .map(
-                            (t) => Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 3,
-                              color: t.start.isAfter(e) || t.end.isBefore(e)
-                                  ? Colors.transparent
-                                  : Colors.red,
-                            ),
-                            SizedBox(
-                              height: 2,
-                            )
-                          ],
-                        ),
-                      ).toList(),
-                    ),
-                  ],
-                ),
-              ).toList(),
-            ),
+                  ),
+                  tasks.where((element) => element.favorite == true).length == 0
+                  // ?Container(width: 50,height: 10,color: Colors.red,)
+                      ? Container(
+                    width: 50,
+                    height: 10,
+                    color: Colors.blue,
+                  )
+                      : Column(
+                    children: tasks
+                        .where((element) =>
+                    element.favorite == true && element.start != null)
+                        .map(
+                          (t) => Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 50,
+                            height: 3,
+                            color: t.start.isAfter(e) || t.end.isBefore(e)
+                                ? Colors.transparent
+                                : Colors.red,
+                          ),
+                          SizedBox(
+                            height: 2,
+                          )
+                        ],
+                      ),
+                    ).toList(),
+                  ),
+                ],
+              ),
+            ).toList(),
           ),
-          buildTasksList(context),
-        ],
-      ),
+        ),
+        buildTasksList(context),
+      ],
     );
   }
 
@@ -622,42 +617,6 @@ class _GridButtonState extends State<GridButton> {
                     trailing: e.start ==null ? Text('일정을 선택해주세요'):Text('${e.start.month}-${e.start.day} ~ ${e.end.month}-${e.end.day}'),
                     // leading: Text(e.boundarys.length.toString()),
                     selected: e.favorite,
-                    //일정버튼
-                    // trailing: Row(
-                    //   mainAxisSize: MainAxisSize.min,
-                    //   children: [
-                    //     ElevatedButton(
-                    //       onPressed: () {
-                    //         setState(() {
-                    //           showDatePicker(
-                    //               context: context,
-                    //               initialDate: DateTime.now(),
-                    //               firstDate: DateTime(2018),
-                    //               lastDate: DateTime(2021),
-                    //               builder: (context, Widget child) {
-                    //                 return Theme(data: ThemeData.dark(), child: child);
-                    //               }).then((value) => e.start = value);
-                    //         });
-                    //       },
-                    //       child: e.start==null?Text('시작'):Text('${e.start.month}.${e.start.day}'),
-                    //     ),
-                    //     ElevatedButton(
-                    //       onPressed: () {
-                    //         setState(() {
-                    //           showDatePicker(
-                    //               context: context,
-                    //               initialDate: DateTime.now(),
-                    //               firstDate: DateTime(2018),
-                    //               lastDate: DateTime(2021),
-                    //               builder: (context, Widget child) {
-                    //                 return Theme(data: ThemeData.dark(), child: child);
-                    //               }).then((value) => e.end = value);
-                    //         });
-                    //       },
-                    //       child: e.end==null?Text('종료'):Text('${e.end.month}.${e.end.day}'),
-                    //     )
-                    //   ],
-                    // ),
                     onTap: () {
                       setState(() {
                         // tasks.singleWhere((element) => element.favorite == true).favorite = false;
@@ -787,35 +746,35 @@ class _GridButtonState extends State<GridButton> {
                     children: [
                       Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
                       ///클릭카운터
-                      StreamBuilder<PhotoViewControllerValue>(
-                        stream: _pContrl.outputStateStream,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-                          return Stack(
-                            children: [
-                              CustomPaint(
-                                painter: CallOutCount(
-                                   tP: tracking,s: snapshot.data.scale),
-                              ),
-                              count != []
-                                  ? Stack(
-                                children: count
-                                    .map((e) => Positioned.fromRect(
-                                    rect: Rect.fromCenter(
-                                        center: tracking[count.indexOf(e)], width: 100, height: 100),
-                                    child: Center(
-                                        child: Text(
-                                          e.toString(),
-                                          style: TextStyle(color: Colors.white),
-                                          textScaleFactor: 1/snapshot.data.scale,
-                                        ))))
-                                    .toList(),
-                              )
-                                  : Container(),
-                            ],
-                          );
-                        }
-                      ),
+                      // StreamBuilder<PhotoViewControllerValue>(
+                      //   stream: _pContrl.outputStateStream,
+                      //   builder: (context, snapshot) {
+                      //     if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                      //     return Stack(
+                      //       children: [
+                      //         CustomPaint(
+                      //           painter: CallOutCount(
+                      //              tP: tracking,s: snapshot.data.scale),
+                      //         ),
+                      //         count != []
+                      //             ? Stack(
+                      //           children: count
+                      //               .map((e) => Positioned.fromRect(
+                      //               rect: Rect.fromCenter(
+                      //                   center: tracking[count.indexOf(e)], width: 100, height: 100),
+                      //               child: Center(
+                      //                   child: Text(
+                      //                     e.toString(),
+                      //                     style: TextStyle(color: Colors.white),
+                      //                     textScaleFactor: 1/snapshot.data.scale,
+                      //                   ))))
+                      //               .toList(),
+                      //         )
+                      //             : Container(),
+                      //       ],
+                      //     );
+                      //   }
+                      // ),
                       ///커스텀페인터 그리드 및 교점
                       // context.watch<Current>().getDrawing().scale != '1'
                       //     ? Container(
@@ -832,102 +791,102 @@ class _GridButtonState extends State<GridButton> {
                       //       )
                       //     : Container(),
                       /// 테스크 바운더리 위젯
-                      // context.watch<Current>().getDrawing().scale != '1'
-                      //     ? Stack(
-                      //         children: tasks
-                      //             .map((e) => Stack(
-                      //                   children: e.boundarys.map(
-                      //                     (b) {
-                      //                       var watch = context.watch<Current>();
-                      //                       return Positioned.fromRect(
-                      //                         rect: Rect.fromPoints(
-                      //                             Offset(
-                      //                               b.bottomRight.dx / (watch.getcordiX() / width) +
-                      //                                   (watch.getDrawing().originX * width),
-                      //                               b.bottomRight.dy / (watch.getcordiY() / heigh) +
-                      //                                   ((watch.getDrawing().originY * heigh)),
-                      //                             ),
-                      //                             Offset(
-                      //                               b.topLeft.dx / (watch.getcordiX() / width) +
-                      //                                   (watch.getDrawing().originX * width),
-                      //                               b.topLeft.dy / (watch.getcordiY() / heigh) +
-                      //                                   ((watch.getDrawing().originY * heigh)),
-                      //                             )),
-                      //                         child: GestureDetector(
-                      //                           onLongPress: () {
-                      //                             List<Task> _tempList =
-                      //                                 tasks.where((e) => e.boundarys.contains(b)).toList();
-                      //                             Navigator.push(
-                      //                               context,
-                      //                               MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
-                      //                             );
-                      //                           },
-                      //                           child: Container(
-                      //                             color: e.favorite == false
-                      //                                 ? Colors.black12
-                      //                                 : Color.fromRGBO(255, 0, 0, 0.5),
-                      //                             child: Center(
-                      //                               child: AutoSizeText(
-                      //                                 tasks.where((e) => e.boundarys.contains(b)).length.toString(),
-                      //                                 textScaleFactor: 0.7,
-                      //                               ),
-                      //                             ),
-                      //                           ),
-                      //                         ),
-                      //                       );
-                      //                     },
-                      //                   ).toList(),
-                      //                 ))
-                      //             .toList())
-                      //     : Container(),
+                      context.watch<Current>().getDrawing().scale != '1'
+                          ? Stack(
+                              children: tasks
+                                  .map((e) => Stack(
+                                        children: e.boundarys.map(
+                                          (b) {
+                                            var watch = context.watch<Current>();
+                                            return Positioned.fromRect(
+                                              rect: Rect.fromPoints(
+                                                  Offset(
+                                                    b.bottomRight.dx / (watch.getcordiX() / width) +
+                                                        (watch.getDrawing().originX * width),
+                                                    b.bottomRight.dy / (watch.getcordiY() / heigh) +
+                                                        ((watch.getDrawing().originY * heigh)),
+                                                  ),
+                                                  Offset(
+                                                    b.topLeft.dx / (watch.getcordiX() / width) +
+                                                        (watch.getDrawing().originX * width),
+                                                    b.topLeft.dy / (watch.getcordiY() / heigh) +
+                                                        ((watch.getDrawing().originY * heigh)),
+                                                  )),
+                                              child: GestureDetector(
+                                                onLongPress: () {
+                                                  List<Task> _tempList =
+                                                      tasks.where((e) => e.boundarys.contains(b)).toList();
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
+                                                  );
+                                                },
+                                                child: Container(
+                                                  color: e.favorite == false
+                                                      ? Colors.black12
+                                                      : Color.fromRGBO(255, 0, 0, 0.5),
+                                                  child: Center(
+                                                    child: AutoSizeText(
+                                                      tasks.where((e) => e.boundarys.contains(b)).length.toString(),
+                                                      textScaleFactor: 0.7,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ).toList(),
+                                      ))
+                                  .toList())
+                          : Container(),
                       /// 선택한 바운더리 위젯
-                      // ...boundarys.map(
-                      //   (e) {
-                      //     var watch = context.watch<Current>();
-                      //     return Positioned.fromRect(
-                      //       rect: Rect.fromPoints(
-                      //           Offset(
-                      //             e.boundary.bottomRight.dx / (watch.getcordiX() / width) +
-                      //                 (watch.getDrawing().originX * width),
-                      //             e.boundary.bottomRight.dy / (watch.getcordiY() / heigh) +
-                      //                 ((watch.getDrawing().originY * heigh)),
-                      //           ),
-                      //           Offset(
-                      //             e.boundary.topLeft.dx / (watch.getcordiX() / width) +
-                      //                 (watch.getDrawing().originX * width),
-                      //             e.boundary.topLeft.dy / (watch.getcordiY() / heigh) +
-                      //                 ((watch.getDrawing().originY * heigh)),
-                      //           )),
-                      //       child: Opacity(
-                      //         opacity: 0.5,
-                      //         child: ElevatedButton(
-                      //           onLongPress: () {
-                      //             setState(() {
-                      //               List<Task> _boundaryTask = e.tasksList;
-                      //               Navigator.push(
-                      //                 context,
-                      //                 MaterialPageRoute(builder: (context) => BoundayDetail(_boundaryTask)),
-                      //               );
-                      //             });
-                      //           },
-                      //           onPressed: () {
-                      //             setState(() {
-                      //               boundarys.remove(e);
-                      //             });
-                      //             print(e.writeTime.toString());
-                      //           },
-                      //           child: null,
-                      //           style: ElevatedButton.styleFrom(
-                      //             primary: Colors.green,
-                      //             shape: RoundedRectangleBorder(
-                      //               borderRadius: BorderRadius.circular(0.0),
-                      //             ),
-                      //           ),
-                      //         ),
-                      //       ),
-                      //     );
-                      //   },
-                      // ),
+                      ...boundarys.map(
+                        (e) {
+                          var watch = context.watch<Current>();
+                          return Positioned.fromRect(
+                            rect: Rect.fromPoints(
+                                Offset(
+                                  e.boundary.bottomRight.dx / (watch.getcordiX() / width) +
+                                      (watch.getDrawing().originX * width),
+                                  e.boundary.bottomRight.dy / (watch.getcordiY() / heigh) +
+                                      ((watch.getDrawing().originY * heigh)),
+                                ),
+                                Offset(
+                                  e.boundary.topLeft.dx / (watch.getcordiX() / width) +
+                                      (watch.getDrawing().originX * width),
+                                  e.boundary.topLeft.dy / (watch.getcordiY() / heigh) +
+                                      ((watch.getDrawing().originY * heigh)),
+                                )),
+                            child: Opacity(
+                              opacity: 0.5,
+                              child: ElevatedButton(
+                                onLongPress: () {
+                                  setState(() {
+                                    List<Task> _boundaryTask = e.tasksList;
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => BoundayDetail(_boundaryTask)),
+                                    );
+                                  });
+                                },
+                                onPressed: () {
+                                  setState(() {
+                                    boundarys.remove(e);
+                                  });
+                                  print(e.writeTime.toString());
+                                },
+                                child: null,
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.green,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(0.0),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
 
                       // 도면 정보 스케일 위젯
                       ///도면 상세정보
