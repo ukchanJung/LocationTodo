@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
@@ -154,59 +155,71 @@ class _originViewState extends State<originView> {
             height: 40,
           ),
           Divider(),
-          AspectRatio(
-            aspectRatio: 421 / 297,
-            child: ClipRect(
-              child: Container(
-                child: PhotoView.customChild(
-                  key: _keyA,
-                  controller: _pContrl,
-                  minScale: 1.0,
-                  maxScale: 10.0,
-                  backgroundDecoration: BoxDecoration(color: Colors.transparent),
-                  child: PositionedTapDetector(
-                    onTap: (m) {
-                      setState(
-                        () {
-                          _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                          tracking.add(_origin);
-                          count.add(tracking.length);
-                        },
-                      );
-                    },
-                    child: Stack(
-                      children: [
-                        Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
-                        StreamBuilder<PhotoViewControllerValue>(
-                          stream: _pContrl.outputStateStream,
-                          builder: (context, snapshot) {
-                            return Stack(
-                              children: [
-                                CustomPaint(
-                                  painter: CallOutBoundary(
-                                      setPoint: _origin, left: sLeft, top: sTop, right: sRight, bottom: sBottom, tP: tracking,s: snapshot.data.scale),
-                                ),
-                                count != []
-                                    ? Stack(
-                                  children: count
-                                      .map((e) => Positioned.fromRect(
-                                      rect: Rect.fromCenter(
-                                          center: tracking[count.indexOf(e)], width: 100, height: 100),
-                                      child: Center(
-                                          child: Text(
-                                            e.toString(),
-                                            style: TextStyle(color: Colors.white),
-                                            textScaleFactor: 1/snapshot.data.scale,
-                                          ))))
-                                      .toList(),
-                                )
-                                    : Container(),
-                              ],
-                            );
-                          }
-                        ),
+          Listener(
+            onPointerSignal: (m){
+              if(m is PointerScrollEvent) {
+                if(m.scrollDelta.dy>1){
+                  _pContrl.scale = _pContrl.scale +0.2;
+                }else{
+                  _pContrl.scale = _pContrl.scale -0.2;
+                }
+                print(m.scrollDelta);
+              };
+            },
+            child: AspectRatio(
+              aspectRatio: 421 / 297,
+              child: ClipRect(
+                child: Container(
+                  child: PhotoView.customChild(
+                    key: _keyA,
+                    controller: _pContrl,
+                    minScale: 1.0,
+                    maxScale: 10.0,
+                    backgroundDecoration: BoxDecoration(color: Colors.transparent),
+                    child: PositionedTapDetector(
+                      onTap: (m) {
+                        setState(
+                          () {
+                            _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
+                            tracking.add(_origin);
+                            count.add(tracking.length);
+                          },
+                        );
+                      },
+                      child: Stack(
+                        children: [
+                          Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                          StreamBuilder<PhotoViewControllerValue>(
+                            stream: _pContrl.outputStateStream,
+                            builder: (context, snapshot) {
+                              return Stack(
+                                children: [
+                                  CustomPaint(
+                                    painter: CallOutBoundary(
+                                        setPoint: _origin, left: sLeft, top: sTop, right: sRight, bottom: sBottom, tP: tracking,s: snapshot.data.scale),
+                                  ),
+                                  count != []
+                                      ? Stack(
+                                    children: count
+                                        .map((e) => Positioned.fromRect(
+                                        rect: Rect.fromCenter(
+                                            center: tracking[count.indexOf(e)], width: 100, height: 100),
+                                        child: Center(
+                                            child: Text(
+                                              e.toString(),
+                                              style: TextStyle(color: Colors.white),
+                                              textScaleFactor: 1/snapshot.data.scale,
+                                            ))))
+                                        .toList(),
+                                  )
+                                      : Container(),
+                                ],
+                              );
+                            }
+                          ),
 
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

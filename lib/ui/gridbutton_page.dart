@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_location_todo/data/interiorJson.dart';
@@ -183,6 +184,7 @@ class _GridButtonState extends State<GridButton> {
     _controller2.addListener(() {
       _gantContrl.jumpTo(_controller2.offset);
     });
+
     // weekfomat = DateFormat('E');
     // mdformat = DateFormat('MM.dd');
 
@@ -301,11 +303,23 @@ class _GridButtonState extends State<GridButton> {
                           ],
                         ),
                         // calendarStrip(),
-                        Stack(
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            buildViewer(context, snapshot),
-                          ],
+                        Listener(
+                          onPointerSignal: (m){
+                            if(m is PointerScrollEvent) {
+                              if(m.scrollDelta.dy>1){
+                                _pContrl.scale = _pContrl.scale +0.2;
+                              }else{
+                                _pContrl.scale = _pContrl.scale -0.2;
+                              }
+                              print(m.scrollDelta);
+                            };
+                          },
+                          child: Stack(
+                            alignment: Alignment.bottomCenter,
+                            children: [
+                              buildViewer(context, snapshot),
+                            ],
+                          ),
                         ),
 
                         Expanded(
