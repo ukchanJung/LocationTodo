@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
@@ -60,6 +61,16 @@ class _DmapState extends State<Dmap> {
   List<OcrData> ocrDatas;
   OcrData ocrGet;
   bool ocrCheck = false;
+  double sLeft;
+  double sTop;
+  double sRight;
+  double sBottom;
+  int rLeft;
+  int rTop;
+  int rRight;
+  int rBottom;
+  bool sCheck = false;
+  bool ocrLayer = true;
 
   @override
   void initState() {
@@ -249,10 +260,49 @@ class _DmapState extends State<Dmap> {
                               print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
                             });
                           },
+                          onLongPress: (m) {
+                            setState(() {
+                              // _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
+                              if (sCheck == false) {
+                                sLeft = m.relative.dx / _pContrl.scale;
+                                sTop = m.relative.dy / _pContrl.scale;
+                                rLeft = (((m.relative.dx / _pContrl.scale) / width -
+                                            context.read<Current>().getDrawing().originX) *
+                                        context.read<Current>().getcordiX())
+                                    .round();
+                                rTop = (((m.relative.dy / _pContrl.scale) / heigh -
+                                            context.read<Current>().getDrawing().originY) *
+                                        context.read<Current>().getcordiY())
+                                    .round();
+                                sCheck = true;
+                              } else {
+                                sRight = m.relative.dx / _pContrl.scale;
+                                sBottom = m.relative.dy / _pContrl.scale;
+                                rRight = (((m.relative.dx / _pContrl.scale) / width -
+                                            context.read<Current>().getDrawing().originX) *
+                                        context.read<Current>().getcordiX())
+                                    .round();
+                                rBottom = (((m.relative.dy / _pContrl.scale) / heigh -
+                                            context.read<Current>().getDrawing().originY) *
+                                        context.read<Current>().getcordiY())
+                                    .round();
+                                sCheck = false;
+                              }
+                            });
+                          },
                           child: Stack(
                             children: [
                               Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
                               // Image(image: ,),
+                              CustomPaint(
+                                painter: SetInfoDraw(
+                                  setPoint: _origin,
+                                  left: sLeft,
+                                  top: sTop,
+                                  right: sRight,
+                                  bottom: sBottom,
+                                ),
+                              ),
                               ocrGet == null && iS == null
                                   ? Container()
                                   : Stack(
@@ -309,4 +359,50 @@ Future<List<Drawing>> getData(filter) async {
 
   var models = Drawing.fromJsonList(response.data);
   return models;
+}
+
+class SetInfoDraw extends CustomPainter {
+  Offset setPoint;
+  double top;
+  double bottom;
+  double left;
+  double right;
+
+  SetInfoDraw({this.left, this.top, this.right, this.bottom, this.setPoint});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..strokeCap = StrokeCap.square
+      ..strokeWidth = 2.0
+      ..color = Color.fromRGBO(0, 0, 255, 0.5);
+    Paint paint2 = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 5.0
+      ..color = Color.fromRGBO(255, 0, 0, 0.6);
+    Paint paint4 = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 25.0
+      ..color = Color.fromRGBO(255, 0, 0, 1);
+    Paint paint5 = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 5.0
+      ..color = Color.fromRGBO(0, 255, 0, 1);
+
+    left == null && top == null && right == null && bottom == null
+        ? null
+        : canvas.drawRect(Rect.fromLTRB(left, top, right, bottom), paint);
+    left == null && top == null && right == null && bottom == null
+        ? null
+        : canvas.drawPoints(PointMode.points, [Offset(left, top)], paint5);
+    left == null && top == null && right == null && bottom == null
+        ? null
+        : canvas.drawPoints(PointMode.points, [Offset(right, bottom)], paint2);
+    setPoint == null ? null : canvas.drawPoints(PointMode.points, [setPoint], paint2);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
 }
