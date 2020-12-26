@@ -3,7 +3,6 @@ import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'dart:math';
 import 'dart:ui';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:calendar_strip/calendar_strip.dart';
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
@@ -167,7 +166,7 @@ class _GridButtonState extends State<GridButton> {
 
   DateTime startDay;
   DateTime endDay;
-  List<InteriorIndex>interiorList;
+  List<InteriorIndex> interiorList;
   double sLeft;
   double sTop;
   double sRight;
@@ -175,8 +174,7 @@ class _GridButtonState extends State<GridButton> {
   List<int> count = [];
   List<Offset> tracking = [];
   bool callOutLayerOn = false;
-  InteriorIndex selectRoom ;
-
+  InteriorIndex selectRoom;
 
   @override
   void initState() {
@@ -213,9 +211,8 @@ class _GridButtonState extends State<GridButton> {
       drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
       setState(() {});
     });
-    interiorList=interiorIndex.map((e) => InteriorIndex.fromJson(e)).toList();
-    selectRoom =interiorList[0];
-
+    interiorList = interiorIndex.map((e) => InteriorIndex.fromJson(e)).toList();
+    selectRoom = interiorList[0];
   }
 
   void _resetSelectedDate() {
@@ -260,7 +257,7 @@ class _GridButtonState extends State<GridButton> {
             floatingActionButton: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                FloatingActionButton(onPressed: (){
+                FloatingActionButton(onPressed: () {
                   setState(() {
                     callOutLayerOn = !callOutLayerOn;
                   });
@@ -304,15 +301,16 @@ class _GridButtonState extends State<GridButton> {
                         ),
                         // calendarStrip(),
                         Listener(
-                          onPointerSignal: (m){
-                            if(m is PointerScrollEvent) {
-                              if(m.scrollDelta.dy>1){
-                                _pContrl.scale = _pContrl.scale +0.2;
-                              }else{
-                                _pContrl.scale = _pContrl.scale -0.2;
+                          onPointerSignal: (m) {
+                            if (m is PointerScrollEvent) {
+                              if (m.scrollDelta.dy > 1) {
+                                _pContrl.scale = _pContrl.scale + 0.2;
+                              } else {
+                                _pContrl.scale = _pContrl.scale - 0.2;
                               }
                               print(m.scrollDelta);
-                            };
+                            }
+                            ;
                           },
                           child: Stack(
                             alignment: Alignment.bottomCenter,
@@ -350,8 +348,7 @@ class _GridButtonState extends State<GridButton> {
                                             trailing: Text(e.cLevel),
                                           )))
                                       .toList(),
-                                )
-                                ),
+                                )),
                               ),
                             ],
                           ),
@@ -445,9 +442,12 @@ class _GridButtonState extends State<GridButton> {
                             name: _task.text, boundarys: boundarys.map((e) => e.boundary).toList()));
                         FirebaseFirestore _db = FirebaseFirestore.instance;
                         CollectionReference dbGrid = _db.collection('tasks');
-                        dbGrid.doc(_task.text).set(
-                            Task(DateTime.now(), name: _task.text, start:startDay,end:endDay,boundarys: boundarys.map((e) => e.boundary).toList())
-                                .toJson());
+                        dbGrid.doc(_task.text).set(Task(DateTime.now(),
+                                name: _task.text,
+                                start: startDay,
+                                end: endDay,
+                                boundarys: boundarys.map((e) => e.boundary).toList())
+                            .toJson());
                         _task.text = '';
                         boundarys = [];
                       });
@@ -555,61 +555,59 @@ class _GridButtonState extends State<GridButton> {
             children: calendars
                 .map(
                   (e) => Column(
-                children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          e.weekday == 7
-                              ? Text(weekfomat.format(e), style: TextStyle(color: Colors.red))
-                              : Container(),
-                          e.weekday == 6
-                              ? Text(weekfomat.format(e), style: TextStyle(color: Colors.blue))
-                              : Container(),
-                          e.weekday != 7 && e.weekday != 6
-                              ? Text(weekfomat.format(e))
-                              : Container(),
-                          Text('${e.month}.${e.day}'),
-                        ],
-                      ),
-                    ),
-                  ),
-                  tasks.where((element) => element.favorite == true).length == 0
-                  // ?Container(width: 50,height: 10,color: Colors.red,)
-                      ? Container(
-                    width: 50,
-                    height: 10,
-                    color: Colors.blue,
-                  )
-                      : Column(
-                    children: tasks
-                        .where((element) =>
-                    element.favorite == true && element.start != null)
-                        .map(
-                          (t) => Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 50,
-                            height: 3,
-                            color: t.start.isAfter(e) || t.end.isBefore(e)
-                                ? Colors.transparent
-                                : Colors.red,
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              e.weekday == 7
+                                  ? Text(weekfomat.format(e), style: TextStyle(color: Colors.red))
+                                  : Container(),
+                              e.weekday == 6
+                                  ? Text(weekfomat.format(e), style: TextStyle(color: Colors.blue))
+                                  : Container(),
+                              e.weekday != 7 && e.weekday != 6 ? Text(weekfomat.format(e)) : Container(),
+                              Text('${e.month}.${e.day}'),
+                            ],
                           ),
-                          SizedBox(
-                            height: 2,
-                          )
-                        ],
+                        ),
                       ),
-                    ).toList(),
+                      tasks.where((element) => element.favorite == true).length == 0
+                          // ?Container(width: 50,height: 10,color: Colors.red,)
+                          ? Container(
+                              width: 50,
+                              height: 10,
+                              color: Colors.blue,
+                            )
+                          : Column(
+                              children: tasks
+                                  .where((element) => element.favorite == true && element.start != null)
+                                  .map(
+                                    (t) => Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 50,
+                                          height: 3,
+                                          color:
+                                              t.start.isAfter(e) || t.end.isBefore(e) ? Colors.transparent : Colors.red,
+                                        ),
+                                        SizedBox(
+                                          height: 2,
+                                        )
+                                      ],
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                    ],
                   ),
-                ],
-              ),
-            ).toList(),
+                )
+                .toList(),
           ),
         ),
         buildTasksList(context),
@@ -628,7 +626,9 @@ class _GridButtonState extends State<GridButton> {
                   decoration: BoxDecoration(border: Border(bottom: BorderSide())),
                   child: ListTile(
                     title: Text(e.name),
-                    trailing: e.start ==null ? Text('일정을 선택해주세요'):Text('${e.start.month}-${e.start.day} ~ ${e.end.month}-${e.end.day}'),
+                    trailing: e.start == null
+                        ? Text('일정을 선택해주세요')
+                        : Text('${e.start.month}-${e.start.day} ~ ${e.end.month}-${e.end.day}'),
                     // leading: Text(e.boundarys.length.toString()),
                     selected: e.favorite,
                     onTap: () {
@@ -647,22 +647,6 @@ class _GridButtonState extends State<GridButton> {
       ),
     );
   }
-
-  // CalendarStrip calendarStrip() {
-  //   return CalendarStrip(
-  //                 addSwipeGesture: true,
-  //               weekStartsOnSunday: true,
-  //               startDate: startDate,
-  //               endDate: endDate,
-  //               onDateSelected: onSelect,
-  //               onWeekSelected: onWeekSelect,
-  //               dateTileBuilder: dateTileBuilder,
-  //               iconColor: Colors.black87,
-  //               monthNameWidget: _monthNameWidget,
-  //               markedDates: markedDates,
-  //               containerDecoration: BoxDecoration(color: Colors.black12),
-  //             );
-  // }
 
   Padding searchBar(BuildContext context) {
     return Padding(
@@ -759,6 +743,7 @@ class _GridButtonState extends State<GridButton> {
                     key: _key2,
                     children: [
                       Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+
                       ///클릭카운터
                       // StreamBuilder<PhotoViewControllerValue>(
                       //   stream: _pContrl.outputStateStream,
@@ -853,6 +838,7 @@ class _GridButtonState extends State<GridButton> {
                                       ))
                                   .toList())
                           : Container(),
+
                       /// 선택한 바운더리 위젯
                       ...boundarys.map(
                         (e) {
@@ -929,9 +915,9 @@ class _GridButtonState extends State<GridButton> {
                                   ),
                                   child: GestureDetector(
                                     onLongPress: () {
-                                      callOutLayerOn =false;
-                                       count = [];
-                                       tracking = [];
+                                      callOutLayerOn = false;
+                                      count = [];
+                                      tracking = [];
                                       Drawing select = drawings.singleWhere((v) => v.drawingNum == e['name']);
                                       context.read<Current>().changePath(select);
                                       recaculate();
@@ -955,37 +941,38 @@ class _GridButtonState extends State<GridButton> {
                               }).toList(),
                             )
                           : Container(),
+
                       ///RoomTag구현
                       callOutLayerOn == true
                           ? Stack(
-                        children: context.watch<Current>().getDrawing().roomMap.map((e) {
-                          double l = e['bLeft'] / context.watch<Current>().getcordiX() * deviceWidth;
-                          double t = e['bTop'] / context.watch<Current>().getcordiX() * deviceWidth;
-                          double r = e['bRight'] / context.watch<Current>().getcordiX() * deviceWidth;
-                          double b = e['bBottom'] / context.watch<Current>().getcordiX() * deviceWidth;
-                          double x = context.watch<Current>().getcordiOffset(width, heigh).dx;
-                          double y = context.watch<Current>().getcordiOffset(width, heigh).dy;
-                          return Positioned.fromRect(
-                            rect: Rect.fromLTRB(
-                              l + x,
-                              t + y,
-                              r + x,
-                              b + y,
-                            ),
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                print(e['name']);
-                                selectRoom = interiorList.singleWhere((r) => r.roomNum.contains(e['id']));
-                                });
-                              },
-                              child: Container(
-                                color: Color.fromRGBO(0, 0, 255, 0.3),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      )
+                              children: context.watch<Current>().getDrawing().roomMap.map((e) {
+                                double l = e['bLeft'] / context.watch<Current>().getcordiX() * deviceWidth;
+                                double t = e['bTop'] / context.watch<Current>().getcordiX() * deviceWidth;
+                                double r = e['bRight'] / context.watch<Current>().getcordiX() * deviceWidth;
+                                double b = e['bBottom'] / context.watch<Current>().getcordiX() * deviceWidth;
+                                double x = context.watch<Current>().getcordiOffset(width, heigh).dx;
+                                double y = context.watch<Current>().getcordiOffset(width, heigh).dy;
+                                return Positioned.fromRect(
+                                  rect: Rect.fromLTRB(
+                                    l + x,
+                                    t + y,
+                                    r + x,
+                                    b + y,
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        print(e['name']);
+                                        selectRoom = interiorList.singleWhere((r) => r.roomNum.contains(e['id']));
+                                      });
+                                    },
+                                    child: Container(
+                                      color: Color.fromRGBO(0, 0, 255, 0.3),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            )
                           : Container(),
                     ],
                   ),
@@ -1186,38 +1173,38 @@ class DetiailResult extends StatelessWidget {
     return Container(
       child: Column(
         children: [
-        ListTile(
-          leading: Text(input.roomNum),
-          title: Text(input.roomName),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Card(
-                child: InkWell(
-                  onTap: (){
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('실내재료 마감상세도'),
-                          content: Column(
-                            children: [
-                              Image.asset('asset/detailRoom.png'),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('마감상세도'),
+          ListTile(
+            leading: Text(input.roomNum),
+            title: Text(input.roomName),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Card(
+                  child: InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('실내재료 마감상세도'),
+                            content: Column(
+                              children: [
+                                Image.asset('asset/detailRoom.png'),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('마감상세도'),
+                    ),
+                  ),
                 ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
           Divider(),
           Container(
             width: MediaQuery.of(context).size.width,
@@ -1264,27 +1251,27 @@ class DetiailResult extends StatelessWidget {
               ],
             ),
           )
-        ],),
+        ],
+      ),
     );
   }
 }
+
 class CallOutCount extends CustomPainter {
-
   List<Offset> tP;
-  double s=1;
+  double s = 1;
 
-  CallOutCount({ this.tP,this.s});
+  CallOutCount({this.tP, this.s});
 
   @override
   void paint(Canvas canvas, Size size) {
-
     Paint paint4 = Paint()
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 25.0/s
+      ..strokeWidth = 25.0 / s
       ..color = Color.fromRGBO(255, 0, 0, 1);
     Paint paint5 = Paint()
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 1.0/s
+      ..strokeWidth = 1.0 / s
       ..color = Color.fromRGBO(255, 0, 0, 1);
 
     tP == [] ? null : canvas.drawPoints(PointMode.points, tP, paint4);

@@ -23,7 +23,6 @@ import 'package:photo_view/photo_view.dart';
 import 'package:positioned_tap_detector/positioned_tap_detector.dart';
 import 'package:provider/provider.dart';
 
-
 class TimView extends StatefulWidget {
   @override
   _TimViewState createState() => _TimViewState();
@@ -65,13 +64,11 @@ class _TimViewState extends State<TimView> {
   int rTop;
   int rRight;
   int rBottom;
-  bool sCheck=false;
-  bool ocrLayer =true;
-
+  bool sCheck = false;
+  bool ocrLayer = true;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _pContrl = PhotoViewController();
 
@@ -88,6 +85,7 @@ class _TimViewState extends State<TimView> {
       recaculate();
       //TODO 실시간 연동 바운더리
     }
+
     readingGrid();
   }
 
@@ -106,10 +104,7 @@ class _TimViewState extends State<TimView> {
   @override
   Widget build(BuildContext context) {
     setState(() {
-      deviceWidth = MediaQuery
-          .of(context)
-          .size
-          .width;
+      deviceWidth = MediaQuery.of(context).size.width;
       width = deviceWidth;
       heigh = deviceWidth / (421 / 297);
     });
@@ -118,62 +113,144 @@ class _TimViewState extends State<TimView> {
           child: drawings == null
               ? Container()
               : Expanded(
-            child: ListView(
-              children: drawings
-                  .map((e) =>
-                  ListTile(
-                    title: Text(e.title),
-                    onTap: () {
-                      setState(() async {
-                        context.read<Current>().changePath(e);
-                        String tempRoot = 'asset/photos/${context
-                            .read<Current>()
-                            .getDrawing()
-                            .localPath}';
-                        ByteData bytes = await rootBundle.load(tempRoot);
-                        // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
-                        String tempPath = (await getTemporaryDirectory()).path;
-                        String tempName = '$tempPath/${context
-                            .read<Current>()
-                            .getDrawing()
-                            .drawingNum}.png';
-                        File file = File(tempName);
-                        // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
-                        await file
-                            .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+                  child: ListView(
+                    children: drawings
+                        .map((e) => ListTile(
+                              title: Text(e.title),
+                              onTap: () {
+                                setState(() async {
+                                  context.read<Current>().changePath(e);
+                                  String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+                                  ByteData bytes = await rootBundle.load(tempRoot);
+                                  // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
+                                  String tempPath = (await getTemporaryDirectory()).path;
+                                  String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+                                  File file = File(tempName);
+                                  // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
+                                  await file
+                                      .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
 
-                        FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
-                        final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
-                        print(textRecognizer);
+                                  FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+                                  final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+                                  print(textRecognizer);
 
-                        visionText = await textRecognizer.processImage(vIa);
-                        print(visionText);
-                        decodeImage = await decodeImageFromList(file.readAsBytesSync());
+                                  visionText = await textRecognizer.processImage(vIa);
+                                  print(visionText);
+                                  decodeImage = await decodeImageFromList(file.readAsBytesSync());
 
-                        iS = decodeImage.width / _keyA.currentContext.size.width;
-                        setState(() {});
-                      });
-                    },
-                  ))
-                  .toList(),
-            ),
-          )),
+                                  iS = decodeImage.width / _keyA.currentContext.size.width;
+                                  setState(() {});
+                                });
+                              },
+                            ))
+                        .toList(),
+                  ),
+                )),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
       floatingActionButton: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: FloatingActionButton(
-          //     onPressed: () async {
-          //       DocumentSnapshot temp = await FirebaseFirestore.instance.collection('drawing').doc('A31-003').get();
-          //       // print(temp.data());
-          //       Drawing tempD = Drawing.fromJson(temp.data());
-          //       print(tempD.roomMap);
-          //     },
-          //     child: Text('테스트'),
-          //   ),
-          // ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              heroTag: null,
+              onPressed: () async {
+                drawings.forEach((e) async {
+                  String tempRoot = 'asset/photos/${e.localPath}';
+                  ByteData bytes = await rootBundle.load(tempRoot);
+                  String tempPath = (await getTemporaryDirectory()).path;
+                  String tempName = '$tempPath/${e.drawingNum}.png';
+                  File file = File(tempName);
+                  await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+                  FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+                  final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+                  visionText = await textRecognizer.processImage(vIa);
+                  List<Map> tempList = visionText.blocks
+                      .map((v) => {
+                            'text': v.text,
+                            'rect': {
+                              'left': v.boundingBox.left,
+                              'top': v.boundingBox.top,
+                              'right': v.boundingBox.right,
+                              'bottom': v.boundingBox.bottom,
+                            }
+                          })
+                      .toList();
+                  FirebaseFirestore.instance
+                      .collection('ocrData')
+                      .doc(e.drawingNum)
+                      .set({'drawingNum': e.drawingNum, 'dataList': tempList});
+                  print('등록성공');
+                  print(tempList);
+                });
+              },
+              child: Text('전체등록'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              heroTag: null,
+              onPressed: () {
+                context
+                    .read<Current>()
+                    .changePath(drawings.elementAt(drawings.indexOf(context.read<Current>().getDrawing()) - 1));
+              },
+              child: Text('이전'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              heroTag: null,
+              onPressed: () {
+                context
+                    .read<Current>()
+                    .changePath(drawings.elementAt(drawings.indexOf(context.read<Current>().getDrawing()) + 1));
+              },
+              child: Text('다음'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              heroTag: null,
+              onPressed: () {
+                setState(() async {
+                  await currentOcr(context);
+                  print('ocr성공');
+                });
+              },
+              child: Text('OCR'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              heroTag: null,
+              onPressed: () {
+                setState(() {
+                  List<Map> tempList = visionText.blocks
+                      .map((e) => {
+                            'text': e.text,
+                            'rect': {
+                              'left': e.boundingBox.left,
+                              'top': e.boundingBox.top,
+                              'right': e.boundingBox.right,
+                              'bottom': e.boundingBox.bottom,
+                            }
+                          })
+                      .toList();
+                  FirebaseFirestore.instance
+                      .collection('ocrData')
+                      .doc(context.read<Current>().getDrawing().drawingNum)
+                      .set({'dataList': tempList});
+                  print('등록성공');
+                });
+              },
+              child: Text('서버등록'),
+            ),
+          ),
           FloatingActionButton(
             heroTag: null,
             onPressed: () async {
@@ -200,7 +277,9 @@ class _TimViewState extends State<TimView> {
       ),
       body: Column(
         children: [
-          Container(height: 50,),
+          Container(
+            height: 50,
+          ),
           Divider(),
           Padding(
             padding: const EdgeInsets.all(8),
@@ -212,59 +291,23 @@ class _TimViewState extends State<TimView> {
               onChanged: (e) {
                 setState(() async {
                   context.read<Current>().changePath(e);
-                  String tempRoot = 'asset/photos/${context
-                      .read<Current>()
-                      .getDrawing()
-                      .localPath}';
-                  ByteData bytes = await rootBundle.load(tempRoot);
-                  String tempPath = (await getTemporaryDirectory()).path;
-                  String tempName = '$tempPath/${context
-                      .read<Current>()
-                      .getDrawing()
-                      .drawingNum}.png';
-                  File file = File(tempName);
-                  await file
-                      .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-                  FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
-                  final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
-                  visionText = await textRecognizer.processImage(vIa);
-                  decodeImage = await decodeImageFromList(file.readAsBytesSync());
-                  iS = decodeImage.width / _keyA.currentContext.size.width;
-                  ocrFinList = List.filled(visionText.blocks.length, false);
-                  recaculate();
-                  setState(() {});
+                  await currentOcr(context);
                 });
               },
               showSearchBox: true,
             ),
           ),
-          // Row(
-          //   children: [
-          //     Padding(
-          //       padding: const EdgeInsets.all(8.0),
-          //       child: ElevatedButton(
-          //         onPressed: () {
-          //           setState(() {
-          //             favoriteds.add(context.read<Current>().getDrawing());
-          //             },
-          //           );
-          //         },
-          //         child: Text('추가'),
-          //       ),
-          //     ),
-          //
-          //   ],
-          // ),
           Listener(
-            onPointerSignal: (m){
-              if(m is PointerScrollEvent) {
-                if(m.scrollDelta.dy>1){
-                  _pContrl.scale = _pContrl.scale +0.2;
-                }else{
-                  _pContrl.scale = _pContrl.scale -0.2;
+            onPointerSignal: (m) {
+              if (m is PointerScrollEvent) {
+                if (m.scrollDelta.dy > 1) {
+                  _pContrl.scale = _pContrl.scale + 0.2;
+                } else {
+                  _pContrl.scale = _pContrl.scale - 0.2;
                 }
                 print(m.scrollDelta);
-              };
+              }
+              ;
             },
             child: AspectRatio(
               aspectRatio: 421 / 297,
@@ -273,175 +316,144 @@ class _TimViewState extends State<TimView> {
                   child: PhotoView.customChild(
                     key: _keyA,
                     controller: _pContrl,
-                    scaleStateController: PhotoViewScaleStateController(
-
-                    ),
+                    scaleStateController: PhotoViewScaleStateController(),
                     minScale: 1.0,
                     maxScale: 10.0,
                     backgroundDecoration: BoxDecoration(color: Colors.transparent),
                     child: PositionedTapDetector(
                       onTap: (m) {
-                        setState(() {
-                          _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                          debugX = (((m.relative.dx / _pContrl.scale) / width -
-                              context
-                                  .read<Current>()
-                                  .getDrawing()
-                                  .originX) *
-                              context.read<Current>().getcordiX())
-                              .round();
-                          debugY = (((m.relative.dy / _pContrl.scale) / heigh -
-                              context
-                                  .read<Current>()
-                                  .getDrawing()
-                                  .originY) *
-                              context.read<Current>().getcordiY())
-                              .round();
-                          print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
-                          print(' 선택한점은 절대좌표 X: $sLeft, Y: $sTop');
-                          print(' 선택한점은 절대좌표 X: $sRight, Y: $sBottom');
-                        },);
+                        setState(
+                          () {
+                            _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
+                            debugX = (((m.relative.dx / _pContrl.scale) / width -
+                                        context.read<Current>().getDrawing().originX) *
+                                    context.read<Current>().getcordiX())
+                                .round();
+                            debugY = (((m.relative.dy / _pContrl.scale) / heigh -
+                                        context.read<Current>().getDrawing().originY) *
+                                    context.read<Current>().getcordiY())
+                                .round();
+                            print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
+                            print(' 선택한점은 절대좌표 X: $sLeft, Y: $sTop');
+                            print(' 선택한점은 절대좌표 X: $sRight, Y: $sBottom');
+                          },
+                        );
                       },
                       onLongPress: (m) {
                         setState(() {
                           // _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                          if(sCheck==false){
-                            sLeft = m.relative.dx/_pContrl.scale;
-                            sTop = m.relative.dy/_pContrl.scale;
+                          if (sCheck == false) {
+                            sLeft = m.relative.dx / _pContrl.scale;
+                            sTop = m.relative.dy / _pContrl.scale;
                             rLeft = (((m.relative.dx / _pContrl.scale) / width -
-                                context
-                                    .read<Current>()
-                                    .getDrawing()
-                                    .originX) *
-                                context.read<Current>().getcordiX())
+                                        context.read<Current>().getDrawing().originX) *
+                                    context.read<Current>().getcordiX())
                                 .round();
                             rTop = (((m.relative.dy / _pContrl.scale) / heigh -
-                                context
-                                    .read<Current>()
-                                    .getDrawing()
-                                    .originY) *
-                                context.read<Current>().getcordiY())
+                                        context.read<Current>().getDrawing().originY) *
+                                    context.read<Current>().getcordiY())
                                 .round();
-                            sCheck=true;
-                          }
-                          else{
-                            sRight = m.relative.dx/_pContrl.scale;
-                            sBottom = m.relative.dy/_pContrl.scale;
+                            sCheck = true;
+                          } else {
+                            sRight = m.relative.dx / _pContrl.scale;
+                            sBottom = m.relative.dy / _pContrl.scale;
                             rRight = (((m.relative.dx / _pContrl.scale) / width -
-                                context
-                                    .read<Current>()
-                                    .getDrawing()
-                                    .originX) *
-                                context.read<Current>().getcordiX())
+                                        context.read<Current>().getDrawing().originX) *
+                                    context.read<Current>().getcordiX())
                                 .round();
                             rBottom = (((m.relative.dy / _pContrl.scale) / heigh -
-                                context
-                                    .read<Current>()
-                                    .getDrawing()
-                                    .originY) *
-                                context.read<Current>().getcordiY())
+                                        context.read<Current>().getDrawing().originY) *
+                                    context.read<Current>().getcordiY())
                                 .round();
-                            sCheck=false;
+                            sCheck = false;
                           }
-
                         });
                       },
                       child: Stack(
                         children: [
-                          Image.asset('asset/photos/${context
-                              .watch<Current>()
-                              .getDrawing()
-                              .localPath}'),
-                               CustomPaint(
-                            painter: CallOutBoundary(setPoint: _origin,left:sLeft, top:sTop, right:sRight, bottom:sBottom,),
+                          Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                          CustomPaint(
+                            painter: CallOutBoundary(
+                              setPoint: _origin,
+                              left: sLeft,
+                              top: sTop,
+                              right: sRight,
+                              bottom: sBottom,
+                            ),
                           ),
-                          context
-                              .watch<Current>()
-                              .getDrawing()
-                              .roomMap == [] || visionText == null
+                          context.watch<Current>().getDrawing().roomMap == [] || visionText == null
                               ? Container()
                               : Stack(
-                            children: context
-                                .watch<Current>()
-                                .getDrawing()
-                                .roomMap
-                                .map((e) =>
-                                Positioned.fromRect(
-                                    rect: Rect.fromLTRB(
-                                      e['left'].toDouble() / iS,
-                                      e['top'].toDouble() / iS,
-                                      e['right'].toDouble() / iS,
-                                      e['bottom'].toDouble() / iS,
-                                    ),
-                                    child: Container(
-                                      color: Color.fromRGBO(0, 0, 0, 0.6),
-                                    )))
-                                .toList(),
-                          ),
-                          context
-                              .watch<Current>()
-                              .getDrawing()
-                              .callOutMap == [] || visionText == null
+                                  children: context
+                                      .watch<Current>()
+                                      .getDrawing()
+                                      .roomMap
+                                      .map((e) => Positioned.fromRect(
+                                          rect: Rect.fromLTRB(
+                                            e['left'].toDouble() / iS,
+                                            e['top'].toDouble() / iS,
+                                            e['right'].toDouble() / iS,
+                                            e['bottom'].toDouble() / iS,
+                                          ),
+                                          child: Container(
+                                            color: Color.fromRGBO(0, 0, 0, 0.6),
+                                          )))
+                                      .toList(),
+                                ),
+                          context.watch<Current>().getDrawing().callOutMap == [] || visionText == null
                               ? Container()
                               : Stack(
-                            children: context
-                                .watch<Current>()
-                                .getDrawing()
-                                .callOutMap
-                                .map((e) =>
-                                Positioned.fromRect(
-                                    rect: Rect.fromLTRB(
-                                      e['left'].toDouble() / iS,
-                                      e['top'].toDouble() / iS,
-                                      e['right'].toDouble() / iS,
-                                      e['bottom'].toDouble() / iS,
-                                    ),
-                                    child: GestureDetector(
-                                      onLongPress: (){
-
-
-                                      },
-                                      child: Container(
-                                        color: Color.fromRGBO(0, 0, 255, 0.6),
-                                      ),
-                                    )))
-                                .toList(),
-                          ),
-                          context
-                              .watch<Current>()
-                              .getDrawing()
-                              .detailInfoMap == [] || visionText == null
+                                  children: context
+                                      .watch<Current>()
+                                      .getDrawing()
+                                      .callOutMap
+                                      .map((e) => Positioned.fromRect(
+                                          rect: Rect.fromLTRB(
+                                            e['left'].toDouble() / iS,
+                                            e['top'].toDouble() / iS,
+                                            e['right'].toDouble() / iS,
+                                            e['bottom'].toDouble() / iS,
+                                          ),
+                                          child: GestureDetector(
+                                            onLongPress: () {},
+                                            child: Container(
+                                              color: Color.fromRGBO(0, 0, 255, 0.6),
+                                            ),
+                                          )))
+                                      .toList(),
+                                ),
+                          context.watch<Current>().getDrawing().detailInfoMap == [] || visionText == null
                               ? Container()
                               : Stack(
-                            children: context
-                                .watch<Current>()
-                                .getDrawing()
-                                .detailInfoMap
-                                .map((e) =>
-                                Positioned.fromRect(
-                                    rect: Rect.fromLTRB(
-                                      e['left'].toDouble() / iS,
-                                      e['top'].toDouble() / iS,
-                                      e['right'].toDouble() / iS,
-                                      e['bottom'].toDouble() / iS,
-                                    ),
-                                    child: Container(
-                                      color: Color.fromRGBO(0, 255, 0, 0.6),
-                                    )))
-                                .toList(),
-                          ),
+                                  children: context
+                                      .watch<Current>()
+                                      .getDrawing()
+                                      .detailInfoMap
+                                      .map((e) => Positioned.fromRect(
+                                          rect: Rect.fromLTRB(
+                                            e['left'].toDouble() / iS,
+                                            e['top'].toDouble() / iS,
+                                            e['right'].toDouble() / iS,
+                                            e['bottom'].toDouble() / iS,
+                                          ),
+                                          child: Container(
+                                            color: Color.fromRGBO(0, 255, 0, 0.6),
+                                          )))
+                                      .toList(),
+                                ),
                           visionText != null && ocrLayer == true
                               ? Stack(
                                   children: visionText.blocks
                                       .map(
                                         (e) => Positioned.fromRect(
-                                          rect:
-                                              Rect.fromPoints(e.boundingBox.topLeft / iS, e.boundingBox.bottomRight / iS),
+                                          rect: Rect.fromPoints(
+                                              e.boundingBox.topLeft / iS, e.boundingBox.bottomRight / iS),
                                           child: InkWell(
                                             onLongPress: () {
                                               setState(() {
                                                 ocrFinList[visionText.blocks.indexWhere((element) => element == e)] =
-                                                    !ocrFinList[visionText.blocks.indexWhere((element) => element == e)];
+                                                    !ocrFinList[
+                                                        visionText.blocks.indexWhere((element) => element == e)];
                                                 field0.text = e.text;
                                               });
                                             },
@@ -464,7 +476,8 @@ class _TimViewState extends State<TimView> {
                                                                   String tempRoot =
                                                                       'asset/photos/${context.read<Current>().getDrawing().localPath}';
                                                                   ByteData bytes = await rootBundle.load(tempRoot);
-                                                                  String tempPath = (await getTemporaryDirectory()).path;
+                                                                  String tempPath =
+                                                                      (await getTemporaryDirectory()).path;
                                                                   String tempName =
                                                                       '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
                                                                   File file = File(tempName);
@@ -479,8 +492,8 @@ class _TimViewState extends State<TimView> {
                                                                   print(visionText);
                                                                   await decodeImageFromList(file.readAsBytesSync());
 
-                                                                  iS =
-                                                                      decodeImage.width / _keyA.currentContext.size.width;
+                                                                  iS = decodeImage.width /
+                                                                      _keyA.currentContext.size.width;
                                                                   ocrFinList =
                                                                       List.filled(visionText.blocks.length, false);
                                                                   setState(() {});
@@ -496,13 +509,13 @@ class _TimViewState extends State<TimView> {
                                             },
                                             child: Container(
                                               decoration: BoxDecoration(
-                                                  color: ocrFinList[
-                                                              visionText.blocks.indexWhere((element) => element == e)] ==
+                                                  color: ocrFinList[visionText.blocks
+                                                              .indexWhere((element) => element == e)] ==
                                                           false
                                                       ? Color.fromRGBO(255, 0, 0, 0.3)
                                                       : Color.fromRGBO(200, 200, 200, 0.3),
-                                                  border: ocrFinList[
-                                                              visionText.blocks.indexWhere((element) => element == e)] ==
+                                                  border: ocrFinList[visionText.blocks
+                                                              .indexWhere((element) => element == e)] ==
                                                           false
                                                       ? Border.all(color: Colors.red, width: 0.2)
                                                       : Border.all(color: Colors.green, width: 0.5)),
@@ -524,17 +537,47 @@ class _TimViewState extends State<TimView> {
           buildRoomDateField(context),
           buildCallOutDataField(context),
           buildDetailInfoField(context),
-          Text(' 선택한점은 절대좌표 X: $debugX, Y: $debugY', textScaleFactor: 2,),
-          Text(' 선택한점은 절대좌표 X: $rLeft, Y: $rTop', textScaleFactor: 2,),
-          Text(' 선택한점은 절대좌표 X: $rRight, Y: $rBottom', textScaleFactor: 2,),
-          ElevatedButton(onPressed: (){
-            setState(() {
-              ocrLayer = !ocrLayer;
-            });
-          }, child: ocrLayer == true?Text('OCR레이어 끄기'):Text('OCR레이어 켜기'))
+          Text(
+            ' 선택한점은 절대좌표 X: $debugX, Y: $debugY',
+            textScaleFactor: 2,
+          ),
+          Text(
+            ' 선택한점은 절대좌표 X: $rLeft, Y: $rTop',
+            textScaleFactor: 2,
+          ),
+          Text(
+            ' 선택한점은 절대좌표 X: $rRight, Y: $rBottom',
+            textScaleFactor: 2,
+          ),
+          ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  ocrLayer = !ocrLayer;
+                });
+              },
+              child: ocrLayer == true ? Text('OCR레이어 끄기') : Text('OCR레이어 켜기'))
         ],
       ),
     );
+  }
+
+  Future currentOcr(BuildContext context) async {
+    String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+    ByteData bytes = await rootBundle.load(tempRoot);
+    String tempPath = (await getTemporaryDirectory()).path;
+    String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+    File file = File(tempName);
+    await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+    FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+    final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+    visionText = await textRecognizer.processImage(vIa);
+    decodeImage = await decodeImageFromList(file.readAsBytesSync());
+    iS = decodeImage.width / _keyA.currentContext.size.width;
+    ocrFinList = List.filled(visionText.blocks.length, false);
+    print(decodeImage.width);
+    print(_keyA.currentContext.size.width);
+    recaculate();
+    setState(() {});
   }
 
   Row buildDetailInfoField(BuildContext context) {
@@ -570,11 +613,7 @@ class _TimViewState extends State<TimView> {
               onPressed: () {
                 setState(() {
                   Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                  context
-                      .read<Current>()
-                      .getDrawing()
-                      .detailInfoMap
-                      .add(<String, dynamic>{
+                  context.read<Current>().getDrawing().detailInfoMap.add(<String, dynamic>{
                     'name': field0.text,
                     'category': field1.text,
                     'left': _selBox.left,
@@ -583,27 +622,17 @@ class _TimViewState extends State<TimView> {
                     'bottom': _selBox.bottom,
                     'x': debugX,
                     'y': debugY,
-                    'z': context
-                        .read<Current>()
-                        .getDrawing()
-                        .floor,
+                    'z': context.read<Current>().getDrawing().floor,
                   });
-                  context
-                      .read<Current>()
-                      .getDrawing()
-                      .detailInfoMap
-                      .toSet()
-                      .toList();
+                  context.read<Current>().getDrawing().detailInfoMap.toSet().toList();
                   FirebaseFirestore.instance
                       .collection('drawing')
-                      .doc(context
-                      .read<Current>()
-                      .getDrawing()
-                      .drawingNum)
+                      .doc(context.read<Current>().getDrawing().drawingNum)
                       .update(context.read<Current>().getDrawing().toJson());
                   ocrFinList = List.filled(visionText.blocks.length, false);
                 });
-              }, child: Text('DetailInfo 등록')),
+              },
+              child: Text('DetailInfo 등록')),
         )
       ],
     );
@@ -635,7 +664,8 @@ class _TimViewState extends State<TimView> {
               ),
             ),
           ),
-        ), Expanded(
+        ),
+        Expanded(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
@@ -653,11 +683,7 @@ class _TimViewState extends State<TimView> {
               onPressed: () {
                 setState(() {
                   Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                  context
-                      .read<Current>()
-                      .getDrawing()
-                      .callOutMap
-                      .add(<String, dynamic>{
+                  context.read<Current>().getDrawing().callOutMap.add(<String, dynamic>{
                     'name': field0.text,
                     'id': field1.text,
                     'category': field2.text,
@@ -671,27 +697,17 @@ class _TimViewState extends State<TimView> {
                     'bBottom': rBottom,
                     'x': debugX,
                     'y': debugY,
-                    'z': context
-                        .read<Current>()
-                        .getDrawing()
-                        .floor,
+                    'z': context.read<Current>().getDrawing().floor,
                   });
-                  context
-                      .read<Current>()
-                      .getDrawing()
-                      .callOutMap
-                      .toSet()
-                      .toList();
+                  context.read<Current>().getDrawing().callOutMap.toSet().toList();
                   FirebaseFirestore.instance
                       .collection('drawing')
-                      .doc(context
-                      .read<Current>()
-                      .getDrawing()
-                      .drawingNum)
+                      .doc(context.read<Current>().getDrawing().drawingNum)
                       .update(context.read<Current>().getDrawing().toJson());
                   ocrFinList = List.filled(visionText.blocks.length, false);
                 });
-              }, child: Text('CallOut 등록')),
+              },
+              child: Text('CallOut 등록')),
         )
       ],
     );
@@ -742,11 +758,7 @@ class _TimViewState extends State<TimView> {
               onPressed: () {
                 setState(() {
                   Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                  context
-                      .read<Current>()
-                      .getDrawing()
-                      .roomMap
-                      .add(<String, dynamic>{
+                  context.read<Current>().getDrawing().roomMap.add(<String, dynamic>{
                     'name': field0.text,
                     'id': field1.text,
                     'left': _selBox.left,
@@ -759,29 +771,18 @@ class _TimViewState extends State<TimView> {
                     'bBottom': rBottom,
                     'x': debugX,
                     'y': debugY,
-                    'z': context
-                        .read<Current>()
-                        .getDrawing()
-                        .floor
-                        .toDouble(),
+                    'z': context.read<Current>().getDrawing().floor.toDouble(),
                     'sealL': int.parse(field2.text),
                   });
-                  context
-                      .read<Current>()
-                      .getDrawing()
-                      .roomMap
-                      .toSet()
-                      .toList();
+                  context.read<Current>().getDrawing().roomMap.toSet().toList();
                   FirebaseFirestore.instance
                       .collection('drawing')
-                      .doc(context
-                      .read<Current>()
-                      .getDrawing()
-                      .drawingNum)
+                      .doc(context.read<Current>().getDrawing().drawingNum)
                       .update(context.read<Current>().getDrawing().toJson());
                   ocrFinList = List.filled(visionText.blocks.length, false);
                 });
-              }, child: Text('Room 등록')),
+              },
+              child: Text('Room 등록')),
         )
       ],
     );
@@ -797,50 +798,52 @@ class _TimViewState extends State<TimView> {
   }
 
   Row buildOcrCategorySelect() {
-    return Row(children: [
-      Expanded(
-        child: Card(
-          child: RadioListTile(
-            title: Text('Room'),
-            value: OcrCategory.Room,
-            groupValue: _ocrCategory,
-            onChanged: (OcrCategory value) {
-              setState(() {
-                _ocrCategory = value;
-              });
-            },
+    return Row(
+      children: [
+        Expanded(
+          child: Card(
+            child: RadioListTile(
+              title: Text('Room'),
+              value: OcrCategory.Room,
+              groupValue: _ocrCategory,
+              onChanged: (OcrCategory value) {
+                setState(() {
+                  _ocrCategory = value;
+                });
+              },
+            ),
           ),
         ),
-      ),
-      Expanded(
-        child: Card(
-          child: RadioListTile(
-            title: Text('CallOut'),
-            value: OcrCategory.CallOut,
-            groupValue: _ocrCategory,
-            onChanged: (OcrCategory value) {
-              setState(() {
-                _ocrCategory = value;
-              });
-            },
+        Expanded(
+          child: Card(
+            child: RadioListTile(
+              title: Text('CallOut'),
+              value: OcrCategory.CallOut,
+              groupValue: _ocrCategory,
+              onChanged: (OcrCategory value) {
+                setState(() {
+                  _ocrCategory = value;
+                });
+              },
+            ),
           ),
         ),
-      ),
-      Expanded(
-        child: Card(
-          child: RadioListTile(
-            title: Text('DetailInfo'),
-            value: OcrCategory.DetailInfo,
-            groupValue: _ocrCategory,
-            onChanged: (OcrCategory value) {
-              setState(() {
-                _ocrCategory = value;
-              });
-            },
+        Expanded(
+          child: Card(
+            child: RadioListTile(
+              title: Text('DetailInfo'),
+              value: OcrCategory.DetailInfo,
+              groupValue: _ocrCategory,
+              onChanged: (OcrCategory value) {
+                setState(() {
+                  _ocrCategory = value;
+                });
+              },
+            ),
           ),
         ),
-      ),
-    ],);
+      ],
+    );
   }
 }
 
@@ -861,7 +864,7 @@ class CallOutBoundary extends CustomPainter {
   double left;
   double right;
 
-  CallOutBoundary({this.left, this.top, this.right, this.bottom,this.setPoint});
+  CallOutBoundary({this.left, this.top, this.right, this.bottom, this.setPoint});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -882,18 +885,16 @@ class CallOutBoundary extends CustomPainter {
       ..strokeWidth = 5.0
       ..color = Color.fromRGBO(0, 255, 0, 1);
 
-    left==null&&top==null&&right==null&&bottom==null
-        ?null
-        :canvas.drawRect(Rect.fromLTRB(left, top, right, bottom), paint);
-    left==null&&top==null&&right==null&&bottom==null
-        ?null
-        :canvas.drawPoints(PointMode.points, [Offset(left,top)], paint5);
-    left==null&&top==null&&right==null&&bottom==null
-        ?null
-        :canvas.drawPoints(PointMode.points, [Offset(right,bottom)], paint2);
-    setPoint ==null
-        ?null
-        :canvas.drawPoints(PointMode.points, [setPoint], paint2);
+    left == null && top == null && right == null && bottom == null
+        ? null
+        : canvas.drawRect(Rect.fromLTRB(left, top, right, bottom), paint);
+    left == null && top == null && right == null && bottom == null
+        ? null
+        : canvas.drawPoints(PointMode.points, [Offset(left, top)], paint5);
+    left == null && top == null && right == null && bottom == null
+        ? null
+        : canvas.drawPoints(PointMode.points, [Offset(right, bottom)], paint2);
+    setPoint == null ? null : canvas.drawPoints(PointMode.points, [setPoint], paint2);
   }
 
   @override
@@ -901,5 +902,3 @@ class CallOutBoundary extends CustomPainter {
     return false;
   }
 }
-
-
