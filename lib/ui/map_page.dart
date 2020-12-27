@@ -114,12 +114,6 @@ class _DmapState extends State<Dmap> {
 
   @override
   Widget build(BuildContext context) {
-    setState(() {
-      deviceWidth = MediaQuery.of(context).size.width;
-      deviceHeigh = MediaQuery.of(context).size.height;
-      width = deviceWidth;
-      heigh = deviceHeigh;
-    });
     return Scaffold(
       endDrawer: Drawer(
           child: drawings == null
@@ -143,9 +137,6 @@ class _DmapState extends State<Dmap> {
                             File file = File(tempName);
                             await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
                             decodeImage = await decodeImageFromList(file.readAsBytesSync());
-                            print('@@@@@@');
-                            print(decodeImage.width);
-                            print('######');
                             iS = decodeImage.width / _keyA.currentContext.size.width;
                             ocrFinList = List.filled(visionText.blocks.length, false);
                             recaculate();
@@ -190,7 +181,11 @@ class _DmapState extends State<Dmap> {
         children: [
           FloatingActionButton(
             heroTag: null,
-            child: Center(child: Text('+')),
+            child: Center(
+                child: Text(
+              '+',
+              textScaleFactor: 2,
+            )),
             onPressed: () {
               setState(() {
                 _pContrl.scale = _pContrl.scale + 0.2;
@@ -202,7 +197,11 @@ class _DmapState extends State<Dmap> {
           ),
           FloatingActionButton(
             heroTag: null,
-            child: Center(child: Text('-')),
+            child: Center(
+                child: Text(
+              '-',
+              textScaleFactor: 2,
+            )),
             onPressed: () {
               setState(() {
                 _pContrl.scale = _pContrl.scale - 0.2;
@@ -227,116 +226,131 @@ class _DmapState extends State<Dmap> {
           ),
         ],
       ),
-      body: Row(
-        children: [
-          Expanded(
-            flex: 3,
-            child: LayoutBuilder(builder: (context, c) {
-              return Column(
-                children: [
-                  AspectRatio(
-                    aspectRatio: 420 / 297,
-                    child: ClipRect(
-                      child: PhotoView.customChild(
-                        key: _keyA,
-                        controller: _pContrl,
-                        minScale: 1.0,
-                        maxScale: 10.0,
-                        backgroundDecoration: BoxDecoration(color: Colors.transparent),
-                        child: PositionedTapDetector(
-                          onTap: (m) {
-                            List<Point<double>> realParseList = _realIPs.map((e) => Point(e.dx, e.dy)).toList();
-
-                            setState(() {
-                              _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                              debugX = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+      body: RawKeyboardListener(
+        focusNode: FocusNode(),
+        autofocus: true,
+        onKey: (RawKeyEvent event) {
+          if (event.character == '+' || event.character == '=') {
+            setState(() {
+              _pContrl.scale = _pContrl.scale + 0.2;
+            });
+          } else if (event.character == '-') {
+            setState(() {
+              _pContrl.scale = _pContrl.scale - 0.2;
+            });
+          }
+        },
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: LayoutBuilder(builder: (context, c) {
+                return Container(
+                  width: c.maxHeight * (420 / 297),
+                  child: ClipRect(
+                    child: PhotoView.customChild(
+                      key: _keyA,
+                      controller: _pContrl,
+                      minScale: 1.0,
+                      maxScale: 10.0,
+                      backgroundDecoration: BoxDecoration(color: Colors.transparent),
+                      child: PositionedTapDetector(
+                        onTap: (m) {
+                          List<Point<double>> realParseList = _realIPs.map((e) => Point(e.dx, e.dy)).toList();
+                          setState(() {
+                            _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
+                            debugX = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                        context.read<Current>().getDrawing().originX) *
+                                    context.read<Current>().getcordiX())
+                                .round();
+                            debugY = (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
+                                        context.read<Current>().getDrawing().originY) *
+                                    context.read<Current>().getcordiY())
+                                .round();
+                            print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
+                          });
+                        },
+                        onLongPress: (m) {
+                          setState(() {
+                            // _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
+                            if (sCheck == false) {
+                              sLeft = m.relative.dx / _pContrl.scale;
+                              sTop = m.relative.dy / _pContrl.scale;
+                              rLeft = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
                                           context.read<Current>().getDrawing().originX) *
                                       context.read<Current>().getcordiX())
                                   .round();
-                              debugY = (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
+                              rTop = (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
                                           context.read<Current>().getDrawing().originY) *
                                       context.read<Current>().getcordiY())
                                   .round();
-                              print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
-                            });
-                          },
-                          onLongPress: (m) {
-                            setState(() {
-                              // _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                              if (sCheck == false) {
-                                sLeft = m.relative.dx / _pContrl.scale;
-                                sTop = m.relative.dy / _pContrl.scale;
-                                rLeft = (((m.relative.dx / _pContrl.scale) / width -
-                                            context.read<Current>().getDrawing().originX) *
-                                        context.read<Current>().getcordiX())
-                                    .round();
-                                rTop = (((m.relative.dy / _pContrl.scale) / heigh -
-                                            context.read<Current>().getDrawing().originY) *
-                                        context.read<Current>().getcordiY())
-                                    .round();
-                                sCheck = true;
-                              } else {
-                                sRight = m.relative.dx / _pContrl.scale;
-                                sBottom = m.relative.dy / _pContrl.scale;
-                                rRight = (((m.relative.dx / _pContrl.scale) / width -
-                                            context.read<Current>().getDrawing().originX) *
-                                        context.read<Current>().getcordiX())
-                                    .round();
-                                rBottom = (((m.relative.dy / _pContrl.scale) / heigh -
-                                            context.read<Current>().getDrawing().originY) *
-                                        context.read<Current>().getcordiY())
-                                    .round();
-                                sCheck = false;
-                              }
-                            });
-                          },
-                          child: Stack(
-                            children: [
-                              Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
-                              // Image(image: ,),
-                              CustomPaint(
-                                painter: SetInfoDraw(
-                                  setPoint: _origin,
-                                  left: sLeft,
-                                  top: sTop,
-                                  right: sRight,
-                                  bottom: sBottom,
-                                ),
+                              sCheck = true;
+                            } else {
+                              sRight = m.relative.dx / _pContrl.scale;
+                              sBottom = m.relative.dy / _pContrl.scale;
+                              rRight = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                          context.read<Current>().getDrawing().originX) *
+                                      context.read<Current>().getcordiX())
+                                  .round();
+                              rBottom = (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
+                                          context.read<Current>().getDrawing().originY) *
+                                      context.read<Current>().getcordiY())
+                                  .round();
+                              sCheck = false;
+                            }
+                          });
+                        },
+                        child: Stack(
+                          children: [
+                            Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                            // Image(image: ,),
+                            CustomPaint(
+                              painter: SetInfoDraw(
+                                setPoint: _origin,
+                                left: sLeft,
+                                top: sTop,
+                                right: sRight,
+                                bottom: sBottom,
                               ),
-                              ocrGet == null && iS == null
-                                  ? Container()
-                                  : Stack(
-                                      children: ocrGet.dataList
-                                          .map((v) => Positioned.fromRect(
-                                                rect: Rect.fromPoints(
-                                                  Offset(v['rect']['left'], v['rect']['top']) / (5940 / c.maxWidth),
-                                                  Offset(v['rect']['right'], v['rect']['bottom']) / (5940 / c.maxWidth),
-                                                ),
-                                                child: Container(
-                                                  color: Color(0x4AFF0000),
-                                                ),
-                                              ))
-                                          .toList())
-                            ],
-                          ),
+                            ),
+                            ocrGet == null && iS == null
+                                ? Container()
+                                : Stack(
+                                    children: ocrGet.dataList
+                                        .map((v) => Positioned.fromRect(
+                                              rect: Rect.fromPoints(
+                                                Offset(v['rect']['left'], v['rect']['top']) / (5940 / c.maxWidth),
+                                                Offset(v['rect']['right'], v['rect']['bottom']) / (5940 / c.maxWidth),
+                                              ),
+                                              // rect: Rect.fromLTRB(
+                                              //     v['rect']['left'] / (5940 / c.maxWidth),
+                                              //     v['rect']['top'] / (5940 / c.maxHeight),
+                                              //     v['rect']['right'] / (5940 / c.maxWidth),
+                                              //     v['rect']['bottom'] / (5940 / c.maxHeight)),
+                                              child: Container(
+                                                color: Color(0x4AFF0000),
+                                              ),
+                                            ))
+                                        .toList())
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ],
-              );
-            }),
-          ),
-          Expanded(
-            child: ListView(
-              children: [
-                ListTile(
-                  title: Text('테스트'),
-                )
-              ],
+                );
+              }),
             ),
-          ),
-        ],
+            Expanded(
+              child: ListView(
+                children: [
+                  ListTile(
+                    title: Text('테스트'),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

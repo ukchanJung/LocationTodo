@@ -91,7 +91,6 @@ class _TimViewState extends State<TimView> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _pContrl.dispose();
     field0.dispose();
@@ -122,22 +121,17 @@ class _TimViewState extends State<TimView> {
                                   context.read<Current>().changePath(e);
                                   String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
                                   ByteData bytes = await rootBundle.load(tempRoot);
-                                  // ByteData bytes = await rootBundle.load(context.watch<Current>().getPath());
                                   String tempPath = (await getTemporaryDirectory()).path;
                                   String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
                                   File file = File(tempName);
-                                  // File file = File('$tempPath/${context.watch<Current>().getName()}.png');
                                   await file
                                       .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-
                                   FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
                                   final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
                                   print(textRecognizer);
-
                                   visionText = await textRecognizer.processImage(vIa);
                                   print(visionText);
                                   decodeImage = await decodeImageFromList(file.readAsBytesSync());
-
                                   iS = decodeImage.width / _keyA.currentContext.size.width;
                                   setState(() {});
                                 });
@@ -334,7 +328,7 @@ class _TimViewState extends State<TimView> {
                                     context.read<Current>().getcordiY())
                                 .round();
                             print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
-                            print(' 선택한점은 절대좌표 X: $sLeft, Y: $sTop');
+                            print(' 선택한점은 절대좌표 X: $sLeft,  Y: $sTop');
                             print(' 선택한점은 절대좌표 X: $sRight, Y: $sBottom');
                           },
                         );
