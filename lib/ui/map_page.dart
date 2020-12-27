@@ -65,6 +65,8 @@ class _DmapState extends State<Dmap> {
   double sTop;
   double sRight;
   double sBottom;
+  Offset s1 = Offset(0, 0);
+  Offset s2 = Offset(0, 0);
   int rLeft;
   int rTop;
   int rRight;
@@ -117,102 +119,41 @@ class _DmapState extends State<Dmap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      endDrawer: Drawer(
-          child: drawings == null
-              ? Container()
-              : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: DropdownSearch<Drawing>(
-                        items: drawings,
-                        maxHeight: 600,
-                        // onFind: (String filter) => getData(filter),
-                        label: "도면을 선택해주세요",
-                        onChanged: (e) {
-                          setState(() async {
-                            context.read<Current>().changePath(e);
-                            String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
-                            ByteData bytes = await rootBundle.load(tempRoot);
-                            String tempPath = (await getTemporaryDirectory()).path;
-                            String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
-                            File file = File(tempName);
-                            await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-                            decodeImage = await decodeImageFromList(file.readAsBytesSync());
-                            iS = decodeImage.width / _keyA.currentContext.size.width;
-                            ocrFinList = List.filled(visionText.blocks.length, false);
-                            recaculate();
-                            setState(() {});
-                          });
-                        },
-                        showSearchBox: true,
-                      ),
-                    ),
-                    Expanded(
-                      child: ListView(
-                        children: drawings
-                            .map((e) => ListTile(
-                                  title: Text(e.title),
-                                  onTap: () {
-                                    setState(() async {
-                                      context.read<Current>().changePath(e);
-                                      String tempRoot =
-                                          'asset/photos/${context.read<Current>().getDrawing().localPath}';
-                                      ByteData bytes = await rootBundle.load(tempRoot);
-                                      String tempPath = (await getTemporaryDirectory()).path;
-                                      String tempName =
-                                          '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
-                                      File file = File(tempName);
-                                      await file.writeAsBytes(
-                                          bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-
-                                      decodeImage = await decodeImageFromList(file.readAsBytesSync());
-
-                                      iS = decodeImage.width / _keyA.currentContext.size.width;
-                                      setState(() {});
-                                    });
-                                  },
-                                ))
-                            .toList(),
-                      ),
-                    ),
-                  ],
-                )),
       floatingActionButton: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          FloatingActionButton(
-            heroTag: null,
-            child: Center(
-                child: Text(
-              '+',
-              textScaleFactor: 2,
-            )),
-            onPressed: () {
-              setState(() {
-                _pContrl.scale = _pContrl.scale + 0.2;
-              });
-            },
-          ),
-          SizedBox(
-            width: 20,
-          ),
-          FloatingActionButton(
-            heroTag: null,
-            child: Center(
-                child: Text(
-              '-',
-              textScaleFactor: 2,
-            )),
-            onPressed: () {
-              setState(() {
-                _pContrl.scale = _pContrl.scale - 0.2;
-              });
-            },
-          ),
-          SizedBox(
-            width: 20,
-          ),
+          // FloatingActionButton(
+          //   heroTag: null,
+          //   child: Center(
+          //       child: Text(
+          //     '+',
+          //     textScaleFactor: 2,
+          //   )),
+          //   onPressed: () {
+          //     setState(() {
+          //       _pContrl.scale = _pContrl.scale + 0.2;
+          //     });
+          //   },
+          // ),
+          // SizedBox(
+          //   width: 20,
+          // ),
+          // FloatingActionButton(
+          //   heroTag: null,
+          //   child: Center(
+          //       child: Text(
+          //     '-',
+          //     textScaleFactor: 2,
+          //   )),
+          //   onPressed: () {
+          //     setState(() {
+          //       _pContrl.scale = _pContrl.scale - 0.2;
+          //     });
+          //   },
+          // ),
+          // SizedBox(
+          //   width: 20,
+          // ),
           FloatingActionButton(
             heroTag: null,
             onPressed: () {
@@ -302,6 +243,14 @@ class _DmapState extends State<Dmap> {
                                             context.read<Current>().getDrawing().originY) *
                                         context.read<Current>().getcordiY())
                                     .round();
+                                s1 = Offset(
+                                    (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                            context.read<Current>().getDrawing().originX) *
+                                        context.read<Current>().getcordiX()),
+                                    (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
+                                            context.read<Current>().getDrawing().originY) *
+                                        context.read<Current>().getcordiY()));
+                                print(s1);
                                 sCheck = true;
                               } else {
                                 sRight = m.relative.dx / _pContrl.scale;
@@ -314,6 +263,14 @@ class _DmapState extends State<Dmap> {
                                             context.read<Current>().getDrawing().originY) *
                                         context.read<Current>().getcordiY())
                                     .round();
+                                s2 = Offset(
+                                    (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                            context.read<Current>().getDrawing().originX) *
+                                        context.read<Current>().getcordiX()),
+                                    (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
+                                            context.read<Current>().getDrawing().originY) *
+                                        context.read<Current>().getcordiY()));
+                                print(s2);
                                 sCheck = false;
                               }
                             });
@@ -520,6 +477,7 @@ class _DmapState extends State<Dmap> {
                 .watch<Current>()
                 .getDrawing()
                 .callOutMap
+                .reversed
                 .map((e) => Card(
                       child: ListTile(
                         title: Text('[${e['id']}]${e['name']}'),
@@ -532,6 +490,7 @@ class _DmapState extends State<Dmap> {
                 .watch<Current>()
                 .getDrawing()
                 .detailInfoMap
+                .reversed
                 .map((e) => Card(
                       child: ListTile(
                         title: Text('[${e['id']}]${e['name']}'),
@@ -544,6 +503,7 @@ class _DmapState extends State<Dmap> {
                 .watch<Current>()
                 .getDrawing()
                 .roomMap
+                .reversed
                 .map((e) => Card(
                       child: ListTile(
                         title: Text('[${e['id']}]${e['name']}'),
@@ -582,14 +542,14 @@ class _DmapState extends State<Dmap> {
           child: ElevatedButton(
               onPressed: () {
                 setState(() {
-                  Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
+                  Map _selBox = ocrGet.dataList[ocrFinList.indexWhere((bool) => bool == true)]['rect'];
                   context.read<Current>().getDrawing().detailInfoMap.add(<String, dynamic>{
                     'name': field0.text,
                     'category': field1.text,
-                    'left': _selBox.left,
-                    'top': _selBox.top,
-                    'right': _selBox.right,
-                    'bottom': _selBox.bottom,
+                    'left': _selBox['left'],
+                    'top': _selBox['top'],
+                    'right': _selBox['right'],
+                    'bottom': _selBox['bottom'],
                     'x': debugX,
                     'y': debugY,
                     'z': context.read<Current>().getDrawing().floor,
@@ -599,7 +559,7 @@ class _DmapState extends State<Dmap> {
                       .collection('drawing')
                       .doc(context.read<Current>().getDrawing().drawingNum)
                       .update(context.read<Current>().getDrawing().toJson());
-                  ocrFinList = List.filled(visionText.blocks.length, false);
+                  ocrFinList = List.filled(ocrGet.dataList.length, false);
                 });
               },
               child: Text('DetailInfo 등록')),
@@ -647,19 +607,20 @@ class _DmapState extends State<Dmap> {
           child: ElevatedButton(
               onPressed: () {
                 setState(() {
-                  Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
+                  Map _selBox = ocrGet.dataList[ocrFinList.indexWhere((bool) => bool == true)]['rect'];
+                  Rect tempRect = Rect.fromPoints(s1, s2);
                   context.read<Current>().getDrawing().callOutMap.add(<String, dynamic>{
                     'name': field0.text,
                     'id': field1.text,
                     'category': field2.text,
-                    'left': _selBox.left,
-                    'top': _selBox.top,
-                    'right': _selBox.right,
-                    'bottom': _selBox.bottom,
-                    'bLeft': rLeft,
-                    'bTop': rTop,
-                    'bRight': rRight,
-                    'bBottom': rBottom,
+                    'left': _selBox['left'],
+                    'top': _selBox['top'],
+                    'right': _selBox['right'],
+                    'bottom': _selBox['bottom'],
+                    'bLeft': tempRect.left,
+                    'bTop': tempRect.top,
+                    'bRight': tempRect.right,
+                    'bBottom': tempRect.bottom,
                     'x': debugX,
                     'y': debugY,
                     'z': context.read<Current>().getDrawing().floor,
@@ -669,7 +630,7 @@ class _DmapState extends State<Dmap> {
                       .collection('drawing')
                       .doc(context.read<Current>().getDrawing().drawingNum)
                       .update(context.read<Current>().getDrawing().toJson());
-                  ocrFinList = List.filled(visionText.blocks.length, false);
+                  ocrFinList = List.filled(ocrGet.dataList.length, false);
                 });
               },
               child: Text('CallOut 등록')),
@@ -717,18 +678,19 @@ class _DmapState extends State<Dmap> {
           child: ElevatedButton(
               onPressed: () {
                 setState(() {
-                  Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
+                  Map _selBox = ocrGet.dataList[ocrFinList.indexWhere((bool) => bool == true)]['rect'];
+                  Rect tempRect = Rect.fromPoints(s1, s2);
                   context.read<Current>().getDrawing().roomMap.add(<String, dynamic>{
                     'name': field0.text,
                     'id': field1.text,
-                    'left': _selBox.left,
-                    'top': _selBox.top,
-                    'right': _selBox.right,
-                    'bottom': _selBox.bottom,
-                    'bLeft': rLeft,
-                    'bTop': rTop,
-                    'bRight': rRight,
-                    'bBottom': rBottom,
+                    'left': _selBox['left'],
+                    'top': _selBox['top'],
+                    'right': _selBox['right'],
+                    'bottom': _selBox['bottom'],
+                    'bLeft': tempRect.left,
+                    'bTop': tempRect.top,
+                    'bRight': tempRect.right,
+                    'bBottom': tempRect.bottom,
                     'x': debugX,
                     'y': debugY,
                     'z': context.read<Current>().getDrawing().floor.toDouble(),
@@ -739,7 +701,7 @@ class _DmapState extends State<Dmap> {
                       .collection('drawing')
                       .doc(context.read<Current>().getDrawing().drawingNum)
                       .update(context.read<Current>().getDrawing().toJson());
-                  ocrFinList = List.filled(visionText.blocks.length, false);
+                  ocrFinList = List.filled(ocrGet.dataList.length, false);
                 });
               },
               child: Text('Room 등록')),
