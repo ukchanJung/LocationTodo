@@ -76,6 +76,9 @@ class _DmapState extends State<Dmap> {
   bool viewerFocus = true;
   var selectCategory = OcrCategory.Room;
 
+  List<Offset> measurement;
+  List<Offset> rmeasurement;
+
   @override
   void initState() {
     super.initState();
@@ -155,6 +158,15 @@ class _DmapState extends State<Dmap> {
           //   width: 20,
           // ),
           FloatingActionButton(
+              heroTag: null,
+              onPressed: () {
+                measurement = [];
+                rmeasurement = [];
+              }),
+          SizedBox(
+            width: 10,
+          ),
+          FloatingActionButton(
             heroTag: null,
             onPressed: () {
               FirebaseFirestore.instance
@@ -187,264 +199,297 @@ class _DmapState extends State<Dmap> {
             });
           }
         },
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: LayoutBuilder(builder: (context, c) {
-                return Listener(
-                  onPointerSignal: (m) {
-                    if (m is PointerScrollEvent) {
-                      if (m.scrollDelta.dy > 1) {
-                        _pContrl.scale = _pContrl.scale - 0.2;
-                      } else if ((m.scrollDelta.dy < 1)) {
-                        _pContrl.scale = _pContrl.scale + 0.2;
+        child: LayoutBuilder(builder: (context, rowC) {
+          return Row(
+            children: [
+              Container(
+                width: rowC.maxHeight * (420 / 297),
+                height: rowC.maxHeight,
+                child: LayoutBuilder(builder: (context, c) {
+                  return Listener(
+                    onPointerSignal: (m) {
+                      if (m is PointerScrollEvent) {
+                        if (m.scrollDelta.dy > 1 && _pContrl.scale > 1) {
+                          _pContrl.scale = _pContrl.scale - 0.2;
+                        } else if (m.scrollDelta.dy < 1) {
+                          _pContrl.scale = _pContrl.scale + 0.2;
+                        }
                       }
-                    }
-                    ;
-                  },
-                  child: Container(
-                    width: c.maxHeight * (420 / 297),
-                    child: ClipRect(
-                      child: PhotoView.customChild(
-                        key: _keyA,
-                        controller: _pContrl,
-                        minScale: PhotoViewComputedScale.covered,
-                        maxScale: 10.0,
-                        backgroundDecoration: BoxDecoration(color: Colors.transparent),
-                        child: PositionedTapDetector(
-                          onTap: (m) {
-                            viewerFocus = true;
-                            List<Point<double>> realParseList = _realIPs.map((e) => Point(e.dx, e.dy)).toList();
-                            setState(() {
-                              _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                              debugX = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
-                                          context.read<Current>().getDrawing().originX) *
-                                      context.read<Current>().getcordiX())
-                                  .round();
-                              debugY = (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
-                                          context.read<Current>().getDrawing().originY) *
-                                      context.read<Current>().getcordiY())
-                                  .round();
-                              print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
-                            });
-                          },
-                          onLongPress: (m) {
-                            setState(() {
-                              // _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                              if (sCheck == false) {
-                                sLeft = m.relative.dx / _pContrl.scale;
-                                sTop = m.relative.dy / _pContrl.scale;
-                                rLeft = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                      ;
+                    },
+                    child: Container(
+                      child: ClipRect(
+                        child: PhotoView.customChild(
+                          key: _keyA,
+                          controller: _pContrl,
+                          minScale: PhotoViewComputedScale.covered,
+                          maxScale: 10.0,
+                          backgroundDecoration: BoxDecoration(color: Colors.transparent),
+                          child: PositionedTapDetector(
+                            onTap: (m) {
+                              viewerFocus = true;
+                              List<Point<double>> realParseList = _realIPs.map((e) => Point(e.dx, e.dy)).toList();
+                              setState(() {
+                                _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
+                                debugX = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
                                             context.read<Current>().getDrawing().originX) *
                                         context.read<Current>().getcordiX())
                                     .round();
-                                rTop = (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
+                                debugY = (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
                                             context.read<Current>().getDrawing().originY) *
                                         context.read<Current>().getcordiY())
                                     .round();
-                                s1 = Offset(
-                                    (((m.relative.dx / _pContrl.scale) / c.maxWidth -
-                                            context.read<Current>().getDrawing().originX) *
-                                        context.read<Current>().getcordiX()),
-                                    (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
-                                            context.read<Current>().getDrawing().originY) *
-                                        context.read<Current>().getcordiY()));
-                                print(s1);
-                                sCheck = true;
-                              } else {
-                                sRight = m.relative.dx / _pContrl.scale;
-                                sBottom = m.relative.dy / _pContrl.scale;
-                                rRight = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
-                                            context.read<Current>().getDrawing().originX) *
-                                        context.read<Current>().getcordiX())
-                                    .round();
-                                rBottom = (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
-                                            context.read<Current>().getDrawing().originY) *
-                                        context.read<Current>().getcordiY())
-                                    .round();
-                                s2 = Offset(
-                                    (((m.relative.dx / _pContrl.scale) / c.maxWidth -
-                                            context.read<Current>().getDrawing().originX) *
-                                        context.read<Current>().getcordiX()),
-                                    (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
-                                            context.read<Current>().getDrawing().originY) *
-                                        context.read<Current>().getcordiY()));
-                                print(s2);
-                                sCheck = false;
-                              }
-                            });
-                          },
-                          child: Stack(
-                            children: [
-                              Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
-                              // Image(image: ,),
-                              CustomPaint(
-                                painter: SetInfoDraw(
-                                  setPoint: _origin,
-                                  left: sLeft,
-                                  top: sTop,
-                                  right: sRight,
-                                  bottom: sBottom,
+                                measurement.add(_origin);
+                                rmeasurement.add(Offset(debugX.toDouble(), debugY.toDouble()));
+                                print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
+                              });
+                            },
+                            onLongPress: (m) {
+                              setState(() {
+                                // _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
+                                if (sCheck == false) {
+                                  sLeft = m.relative.dx / _pContrl.scale;
+                                  sTop = m.relative.dy / _pContrl.scale;
+                                  rLeft = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                              context.read<Current>().getDrawing().originX) *
+                                          context.read<Current>().getcordiX())
+                                      .round();
+                                  rTop = (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
+                                              context.read<Current>().getDrawing().originY) *
+                                          context.read<Current>().getcordiY())
+                                      .round();
+                                  s1 = Offset(
+                                      (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                              context.read<Current>().getDrawing().originX) *
+                                          context.read<Current>().getcordiX()),
+                                      (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
+                                              context.read<Current>().getDrawing().originY) *
+                                          context.read<Current>().getcordiY()));
+                                  print(s1);
+                                  sCheck = true;
+                                } else {
+                                  sRight = m.relative.dx / _pContrl.scale;
+                                  sBottom = m.relative.dy / _pContrl.scale;
+                                  rRight = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                              context.read<Current>().getDrawing().originX) *
+                                          context.read<Current>().getcordiX())
+                                      .round();
+                                  rBottom = (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
+                                              context.read<Current>().getDrawing().originY) *
+                                          context.read<Current>().getcordiY())
+                                      .round();
+                                  s2 = Offset(
+                                      (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                              context.read<Current>().getDrawing().originX) *
+                                          context.read<Current>().getcordiX()),
+                                      (((m.relative.dy / _pContrl.scale) / (c.maxWidth / (420 / 297)) -
+                                              context.read<Current>().getDrawing().originY) *
+                                          context.read<Current>().getcordiY()));
+                                  print(s2);
+                                  sCheck = false;
+                                }
+                              });
+                            },
+                            child: Stack(
+                              children: [
+                                Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                                CustomPaint(
+                                  painter: SetInfoDraw(
+                                    setPoint: _origin,
+                                    left: sLeft,
+                                    top: sTop,
+                                    right: sRight,
+                                    bottom: sBottom,
+                                    tP: measurement,
+                                  ),
                                 ),
-                              ),
-                              context.watch<Current>().getDrawing().roomMap == []
-                                  ? Container()
-                                  : Stack(
-                                      children: context
-                                          .watch<Current>()
-                                          .getDrawing()
-                                          .roomMap
-                                          .map((e) => Positioned.fromRect(
-                                              rect: Rect.fromLTRB(
-                                                e['left'].toDouble() / (5940 / c.maxWidth),
-                                                e['top'].toDouble() / (5940 / c.maxWidth),
-                                                e['right'].toDouble() / (5940 / c.maxWidth),
-                                                e['bottom'].toDouble() / (5940 / c.maxWidth),
-                                              ),
-                                              child: Container(
-                                                color: Color.fromRGBO(0, 0, 0, 0.6),
-                                              )))
-                                          .toList(),
-                                    ),
-                              context.watch<Current>().getDrawing().callOutMap == []
-                                  ? Container()
-                                  : Stack(
-                                      children: context
-                                          .watch<Current>()
-                                          .getDrawing()
-                                          .callOutMap
-                                          .map((e) => Positioned.fromRect(
-                                              rect: Rect.fromLTRB(
-                                                e['left'].toDouble() / (5940 / c.maxWidth),
-                                                e['top'].toDouble() / (5940 / c.maxWidth),
-                                                e['right'].toDouble() / (5940 / c.maxWidth),
-                                                e['bottom'].toDouble() / (5940 / c.maxWidth),
-                                              ),
-                                              child: GestureDetector(
-                                                onLongPress: () {},
-                                                child: Container(
-                                                  color: Color.fromRGBO(0, 0, 255, 0.6),
+                                measurement != null && measurement.length > 1
+                                    ? Stack(
+                                        children: measurement
+                                            .sublist(1)
+                                            .map((e) => Positioned.fromRect(
+                                                rect: Rect.fromCenter(
+                                                    center: (measurement[measurement.indexOf(e) - 1] +
+                                                            measurement[measurement.indexOf(e)]) /
+                                                        2,
+                                                    width: 100,
+                                                    height: 100),
+                                                child: Center(
+                                                    child: Transform.rotate(
+                                                  angle: pi /
+                                                      (180 /
+                                                          Line(measurement[measurement.indexOf(e) - 1],
+                                                                  measurement[measurement.indexOf(e)])
+                                                              .degree()),
+                                                  child: Text(
+                                                      '${Line(rmeasurement[measurement.indexOf(e) - 1], rmeasurement[measurement.indexOf(e)]).length().round()}'
+                                                      // style: TextStyle(color: Colors.white),
+                                                      ),
+                                                ))))
+                                            .toList(),
+                                      )
+                                    : Container(),
+                                context.watch<Current>().getDrawing().roomMap == []
+                                    ? Container()
+                                    : Stack(
+                                        children: context
+                                            .watch<Current>()
+                                            .getDrawing()
+                                            .roomMap
+                                            .map((e) => Positioned.fromRect(
+                                                rect: Rect.fromLTRB(
+                                                  e['left'].toDouble() / (5940 / c.maxWidth),
+                                                  e['top'].toDouble() / (5940 / c.maxWidth),
+                                                  e['right'].toDouble() / (5940 / c.maxWidth),
+                                                  e['bottom'].toDouble() / (5940 / c.maxWidth),
                                                 ),
-                                              )))
-                                          .toList(),
-                                    ),
-                              context.watch<Current>().getDrawing().detailInfoMap == []
-                                  ? Container()
-                                  : Stack(
-                                      children: context
-                                          .watch<Current>()
-                                          .getDrawing()
-                                          .detailInfoMap
-                                          .map((e) => Positioned.fromRect(
-                                              rect: Rect.fromLTRB(
-                                                e['left'].toDouble() / (5940 / c.maxWidth),
-                                                e['top'].toDouble() / (5940 / c.maxWidth),
-                                                e['right'].toDouble() / (5940 / c.maxWidth),
-                                                e['bottom'].toDouble() / (5940 / c.maxWidth),
-                                              ),
-                                              child: Container(
-                                                color: Color.fromRGBO(0, 255, 0, 0.6),
-                                              )))
-                                          .toList(),
-                                    ),
-                              ocrGet == null && iS == null && ocrFinList != []
-                                  ? Container()
-                                  : Stack(
-                                      children: ocrGet.dataList
-                                          .map(
-                                            (v) => Positioned.fromRect(
-                                              rect: Rect.fromPoints(
-                                                Offset(v['rect']['left'], v['rect']['top']) / (5940 / c.maxWidth),
-                                                Offset(v['rect']['right'], v['rect']['bottom']) / (5940 / c.maxWidth),
-                                              ),
-                                              child: InkWell(
-                                                onTap: () {
-                                                  ocrFinList = List.filled(ocrGet.dataList.length, false);
-                                                  setState(() {
-                                                    ocrFinList[ocrGet.dataList.indexWhere((e) => e == v)] =
-                                                        !ocrFinList[ocrGet.dataList.indexWhere((e) => e == v)];
-                                                    field0.text = v['text'];
-                                                  });
-                                                },
                                                 child: Container(
-                                                  decoration: BoxDecoration(
-                                                    color:
-                                                        ocrFinList[ocrGet.dataList.indexWhere((e) => e == v)] == false
-                                                            ? Color.fromRGBO(255, 0, 0, 0.3)
-                                                            : Color.fromRGBO(200, 200, 200, 0.3),
-                                                    border: ocrFinList[ocrGet.dataList
-                                                                .indexWhere((e) => e.toString() == v.toString())] ==
-                                                            false
-                                                        ? Border.all(color: Colors.red, width: 0.2)
-                                                        : Border.all(color: Colors.green, width: 0.5),
+                                                  color: Color.fromRGBO(0, 0, 0, 0.6),
+                                                )))
+                                            .toList(),
+                                      ),
+                                context.watch<Current>().getDrawing().callOutMap == []
+                                    ? Container()
+                                    : Stack(
+                                        children: context
+                                            .watch<Current>()
+                                            .getDrawing()
+                                            .callOutMap
+                                            .map((e) => Positioned.fromRect(
+                                                rect: Rect.fromLTRB(
+                                                  e['left'].toDouble() / (5940 / c.maxWidth),
+                                                  e['top'].toDouble() / (5940 / c.maxWidth),
+                                                  e['right'].toDouble() / (5940 / c.maxWidth),
+                                                  e['bottom'].toDouble() / (5940 / c.maxWidth),
+                                                ),
+                                                child: GestureDetector(
+                                                  onLongPress: () {},
+                                                  child: Container(
+                                                    color: Color.fromRGBO(0, 0, 255, 0.6),
+                                                  ),
+                                                )))
+                                            .toList(),
+                                      ),
+                                context.watch<Current>().getDrawing().detailInfoMap == []
+                                    ? Container()
+                                    : Stack(
+                                        children: context
+                                            .watch<Current>()
+                                            .getDrawing()
+                                            .detailInfoMap
+                                            .map((e) => Positioned.fromRect(
+                                                rect: Rect.fromLTRB(
+                                                  e['left'].toDouble() / (5940 / c.maxWidth),
+                                                  e['top'].toDouble() / (5940 / c.maxWidth),
+                                                  e['right'].toDouble() / (5940 / c.maxWidth),
+                                                  e['bottom'].toDouble() / (5940 / c.maxWidth),
+                                                ),
+                                                child: Container(
+                                                  color: Color.fromRGBO(0, 255, 0, 0.6),
+                                                )))
+                                            .toList(),
+                                      ),
+                                ocrGet == null && iS == null && ocrFinList != []
+                                    ? Container()
+                                    : Stack(
+                                        children: ocrGet.dataList
+                                            .map(
+                                              (v) => Positioned.fromRect(
+                                                rect: Rect.fromPoints(
+                                                  Offset(v['rect']['left'], v['rect']['top']) / (5940 / c.maxWidth),
+                                                  Offset(v['rect']['right'], v['rect']['bottom']) / (5940 / c.maxWidth),
+                                                ),
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    ocrFinList = List.filled(ocrGet.dataList.length, false);
+                                                    setState(() {
+                                                      ocrFinList[ocrGet.dataList.indexWhere((e) => e == v)] =
+                                                          !ocrFinList[ocrGet.dataList.indexWhere((e) => e == v)];
+                                                      field0.text = v['text'];
+                                                    });
+                                                  },
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          ocrFinList[ocrGet.dataList.indexWhere((e) => e == v)] == false
+                                                              ? Color.fromRGBO(255, 0, 0, 0.3)
+                                                              : Color.fromRGBO(200, 200, 200, 0.3),
+                                                      border: ocrFinList[ocrGet.dataList
+                                                                  .indexWhere((e) => e.toString() == v.toString())] ==
+                                                              false
+                                                          ? Border.all(color: Colors.red, width: 0.2)
+                                                          : Border.all(color: Colors.green, width: 0.5),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          )
-                                          .toList(),
-                                    ),
-                            ],
+                                            )
+                                            .toList(),
+                                      ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              }),
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: DropdownSearch<Drawing>(
-                      items: drawings,
-                      maxHeight: 600,
-                      // onFind: (String filter) => getData(filter),
-                      label: "도면을 선택해주세요",
-                      onChanged: (e) {
-                        setState(() async {
-                          context.read<Current>().changePath(e);
-                          String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
-                          ByteData bytes = await rootBundle.load(tempRoot);
-                          String tempPath = (await getTemporaryDirectory()).path;
-                          String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
-                          File file = File(tempName);
-                          await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-                          decodeImage = await decodeImageFromList(file.readAsBytesSync());
-                          iS = decodeImage.width / _keyA.currentContext.size.width;
-                          ocrFinList = List.filled(visionText.blocks.length, false);
-                          recaculate();
-                          setState(() {});
-                        });
-                      },
-                      showSearchBox: true,
-                    ),
-                  ),
-                  buildOcrCategorySelect(),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            buildEnter(context),
-                          ],
-                        ),
-                        Divider(),
-                        Expanded(
-                          child: buildServerDataView(context),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
+                  );
+                }),
               ),
-            ),
-          ],
-        ),
+              Expanded(
+                child: Column(
+                  children: [
+                    rmeasurement != null && rmeasurement.length > 3
+                        ? Text((computeArea(rmeasurement) / 1000000).toStringAsFixed(2))
+                        : Container(),
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: DropdownSearch<Drawing>(
+                        items: drawings,
+                        maxHeight: 600,
+                        // onFind: (String filter) => getData(filter),
+                        label: "도면을 선택해주세요",
+                        onChanged: (e) {
+                          setState(() async {
+                            context.read<Current>().changePath(e);
+                            String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+                            ByteData bytes = await rootBundle.load(tempRoot);
+                            String tempPath = (await getTemporaryDirectory()).path;
+                            String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+                            File file = File(tempName);
+                            await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+                            decodeImage = await decodeImageFromList(file.readAsBytesSync());
+                            iS = decodeImage.width / _keyA.currentContext.size.width;
+                            ocrFinList = List.filled(visionText.blocks.length, false);
+                            recaculate();
+                            setState(() {});
+                          });
+                        },
+                        showSearchBox: true,
+                      ),
+                    ),
+                    buildOcrCategorySelect(),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              buildEnter(context),
+                            ],
+                          ),
+                          Divider(),
+                          Expanded(
+                            child: buildServerDataView(context),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -711,56 +756,68 @@ class _DmapState extends State<Dmap> {
   }
 
   Widget buildOcrCategorySelect() {
-    return Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: Card(
-            child: RadioListTile(
-              title: Text('Room'),
-              value: OcrCategory.Room,
-              groupValue: _ocrCategory,
-              onChanged: (OcrCategory value) {
-                setState(() {
-                  selectCategory = value;
-                  _ocrCategory = value;
-                });
-              },
-            ),
+        Card(
+          child: RadioListTile(
+            title: Text('Room'),
+            value: OcrCategory.Room,
+            groupValue: _ocrCategory,
+            onChanged: (OcrCategory value) {
+              setState(() {
+                selectCategory = value;
+                _ocrCategory = value;
+              });
+            },
           ),
         ),
-        Expanded(
-          child: Card(
-            child: RadioListTile(
-              title: Text('CallOut'),
-              value: OcrCategory.CallOut,
-              groupValue: _ocrCategory,
-              onChanged: (OcrCategory value) {
-                setState(() {
-                  selectCategory = value;
-                  _ocrCategory = value;
-                });
-              },
-            ),
+        Card(
+          child: RadioListTile(
+            title: Text('CallOut'),
+            value: OcrCategory.CallOut,
+            groupValue: _ocrCategory,
+            onChanged: (OcrCategory value) {
+              setState(() {
+                selectCategory = value;
+                _ocrCategory = value;
+              });
+            },
           ),
         ),
-        Expanded(
-          child: Card(
-            child: RadioListTile(
-              title: Text('DetailInfo'),
-              value: OcrCategory.DetailInfo,
-              groupValue: _ocrCategory,
-              onChanged: (OcrCategory value) {
-                setState(() {
-                  selectCategory = value;
-                  _ocrCategory = value;
-                });
-              },
-            ),
+        Card(
+          child: RadioListTile(
+            title: Text('DetailInfo'),
+            value: OcrCategory.DetailInfo,
+            groupValue: _ocrCategory,
+            onChanged: (OcrCategory value) {
+              setState(() {
+                selectCategory = value;
+                _ocrCategory = value;
+              });
+            },
           ),
         ),
       ],
     );
+  }
+
+  double computeArea(List<Offset> a) {
+    double area = 0;
+    a.sublist(1).forEach((e) {
+      var x1 = a[a.indexOf(e) - 1].dx;
+      var x2 = a[a.indexOf(e)].dx;
+      var y1 = a[a.indexOf(e) - 1].dy;
+      var y2 = a[a.indexOf(e)].dy;
+
+      area += x1 * y2;
+      area -= y1 * x2;
+    });
+    area += a.last.dx * a.first.dy;
+    area -= a.last.dy * a.first.dx;
+    area /= 2.0;
+    area = area.abs();
+    return area;
   }
 }
 
@@ -780,8 +837,9 @@ class SetInfoDraw extends CustomPainter {
   double bottom;
   double left;
   double right;
+  List<Offset> tP;
 
-  SetInfoDraw({this.left, this.top, this.right, this.bottom, this.setPoint});
+  SetInfoDraw({this.left, this.top, this.right, this.bottom, this.setPoint, this.tP});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -800,7 +858,8 @@ class SetInfoDraw extends CustomPainter {
     Paint paint5 = Paint()
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 5.0
-      ..color = Color.fromRGBO(0, 255, 0, 1);
+      ..style = PaintingStyle.fill
+      ..color = Color.fromRGBO(0, 255, 0, 0.5);
 
     left == null && top == null && right == null && bottom == null
         ? null
@@ -811,7 +870,17 @@ class SetInfoDraw extends CustomPainter {
     left == null && top == null && right == null && bottom == null
         ? null
         : canvas.drawPoints(PointMode.points, [Offset(right, bottom)], paint2);
+
+    Path p = Path();
+    p.moveTo(tP[0].dx, tP[0].dy);
+    tP.forEach((e) {
+      p.lineTo(e.dx, e.dy);
+    });
+    p.close();
     setPoint == null ? null : canvas.drawPoints(PointMode.points, [setPoint], paint2);
+    setPoint == null ? null : canvas.drawPath(p, paint5);
+    setPoint == null ? null : canvas.drawPoints(PointMode.points, tP, paint4);
+    // setPoint == null ? null : canvas.drawPoints(PointMode.polygon, tP, paint5);
   }
 
   @override
