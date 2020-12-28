@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/ui/location_todo_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_app_location_todo/ui/planner_page.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -28,7 +29,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.orange,
         // elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.deepOrange) )
       ),
-      home: LocationTodo(),
+      home:Planner(),
+      // home: LocationTodo(),
     );
   }
 }
