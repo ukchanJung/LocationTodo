@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/ui/location_todo_page.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,4 +32,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

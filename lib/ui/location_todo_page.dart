@@ -11,6 +11,7 @@ import 'package:flutter_app_location_todo/ui/label_text_widget.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
 import 'package:flutter_app_location_todo/ui/map_page.dart';
 import 'package:flutter_app_location_todo/ui/originViewer.dart';
+import 'package:flutter_app_location_todo/ui/planner_page.dart';
 import 'package:flutter_app_location_todo/ui/setting_page.dart';
 import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/ui/todo_detail_page.dart';
@@ -31,7 +32,6 @@ class _LocationTodoState extends State<LocationTodo> {
   DateFormat formatter = DateFormat('yy.MM.dd.');
   DateFormat formatter2 = DateFormat('HH:mm:ss');
   List<bool> togleSelect = [true];
-
 
   @override
   void initState() {
@@ -86,7 +86,8 @@ class _LocationTodoState extends State<LocationTodo> {
           children: [
             UserAccountsDrawerHeader(accountName: Text('정욱찬'), accountEmail: null),
             Expanded(
-              child: ListView(children: [
+              child: ListView(
+                children: [
                   ListTile(
                     title: Text('그리드 버튼 구현'),
                     onTap: () {
@@ -109,7 +110,8 @@ class _LocationTodoState extends State<LocationTodo> {
                         }),
                       );
                     },
-                  ),ListTile(
+                  ),
+                  ListTile(
                     title: Text('Setting'),
                     onTap: () {
                       Navigator.push(
@@ -147,8 +149,8 @@ class _LocationTodoState extends State<LocationTodo> {
                       );
                     },
                   ),
-                ListTile(
-                    title: Text('도면맵'),
+                  ListTile(
+                    title: Text('도면문자처리'),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -156,7 +158,17 @@ class _LocationTodoState extends State<LocationTodo> {
                       );
                     },
                   ),
-                ],),
+                  ListTile(
+                    title: Text('공정표'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Planner()),
+                      );
+                    },
+                  ),
+                ],
+              ),
             )
           ],
         ),
@@ -176,8 +188,7 @@ class _LocationTodoState extends State<LocationTodo> {
           ),
           IconButton(
             icon: Icon(Icons.print),
-            onPressed: () {
-            },
+            onPressed: () {},
           ),
           Card(
             child: Container(
@@ -274,7 +285,8 @@ class _LocationTodoState extends State<LocationTodo> {
       child: ListView(
         children: tasks.reversed
             // 검색시 띄어쓰기 및 소문자 대문자 무시
-            .where((search) => search.name.replaceAll(' ', '').toLowerCase().contains(_searchText.replaceAll(' ', '').toLowerCase()))
+            .where((search) =>
+                search.name.replaceAll(' ', '').toLowerCase().contains(_searchText.replaceAll(' ', '').toLowerCase()))
             .where((element) => element.ischecked == false)
             .map(
               (e) => Card(
@@ -354,7 +366,8 @@ class _LocationTodoState extends State<LocationTodo> {
       child: ListView(
         children: tasks.reversed
             // 검색시 띄어쓰기 및 소문자 대문자 무시
-            .where((search) => search.name.replaceAll(' ', '').toLowerCase().contains(_searchText.replaceAll(' ', '').toLowerCase()))
+            .where((search) =>
+                search.name.replaceAll(' ', '').toLowerCase().contains(_searchText.replaceAll(' ', '').toLowerCase()))
             .where((element) => element.ischecked == true)
             .map(
               (e) => Card(

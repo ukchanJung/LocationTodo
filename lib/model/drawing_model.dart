@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/room_model.dart';
 
@@ -276,7 +274,7 @@ class Drawing {
   }
 
   @override
-  String toString() => '[${drawingNum}] $title';
+  String toString() => '[$drawingNum] $title';
 }
 
 class Ocr {

@@ -19,11 +19,13 @@ class _BoundayDetailState extends State<BoundayDetail> {
   void initState() {
     super.initState();
   }
+
   @override
   void dispose() {
     super.dispose();
     _viewController.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +37,11 @@ class _BoundayDetailState extends State<BoundayDetail> {
           TimViewer(viewController: _viewController),
           Expanded(
             child: ListView(
-              children: widget.boundaryTasks.map((e) => ListTile(title: Text(e.name),)).toList(),
+              children: widget.boundaryTasks
+                  .map((e) => ListTile(
+                        title: Text(e.name),
+                      ))
+                  .toList(),
             ),
           )
         ],
@@ -47,8 +53,9 @@ class _BoundayDetailState extends State<BoundayDetail> {
 class TimViewer extends StatelessWidget {
   const TimViewer({
     Key key,
-    @required PhotoViewController viewController,
-  }) : _viewController = viewController, super(key: key);
+    PhotoViewController viewController,
+  })  : _viewController = viewController,
+        super(key: key);
 
   final PhotoViewController _viewController;
 
