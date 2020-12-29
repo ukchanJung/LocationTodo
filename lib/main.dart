@@ -29,8 +29,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.orange,
         // elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.deepOrange) )
       ),
-      home:Planner(),
-      // home: LocationTodo(),
+      home: LocationTodo(),
     );
   }
 }

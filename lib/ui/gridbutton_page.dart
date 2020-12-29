@@ -454,8 +454,8 @@ class _GridButtonState extends State<GridButton> {
                     },
                     icon: Icon(Icons.check),
                     label: Text('작업추가'),
-                  )),
-            )
+                  ),
+            ),),
           ],
         ),
         ListTile(
