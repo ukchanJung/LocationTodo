@@ -54,6 +54,7 @@ class GridMaker extends CustomPainter {
     // canvas.drawPoints(PointMode.points, [_inputP], paint4);
     // canvas.drawRect(Rect.fromPoints(Offset(cpl.first.x, cpl.first.y), Offset(cpl.last.x, cpl.last.y)), stroke);
     canvas.drawPoints(PointMode.points, pointList.map((e) => e * deviceWidth + cordinate).toList(), paint2);
+
   }
 
   @override
