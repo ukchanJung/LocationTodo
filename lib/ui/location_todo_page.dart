@@ -6,6 +6,7 @@ import 'package:flutter_app_location_todo/model/drawing_model.dart';
 import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/calendar_page.dart';
+import 'package:flutter_app_location_todo/ui/general_info_page.dart';
 import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
 import 'package:flutter_app_location_todo/ui/label_text_widget.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_app_location_todo/ui/setting_page.dart';
 import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/ui/todo_detail_page.dart';
 import 'package:flutter_app_location_todo/ui/viewer_page.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -91,24 +93,13 @@ class _LocationTodoState extends State<LocationTodo> {
                   ListTile(
                     title: Text('그리드 버튼 구현'),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) {
-                          // context.watch<Current>().changePath(
-                          //       Drawing(
-                          //         drawingNum: 'A31-003',
-                          //         title: '1층 평면도',
-                          //         scale: '500',
-                          //         localPath: 'A31-003.png',
-                          //         originX: 0.7373979439768359,
-                          //         originY: 0.23113260932198965,
-                          //         witdh: 421,
-                          //         height: 297,
-                          //       ),
-                          //     );
-                          return GridButton();
-                        }),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(builder: (context) {
+                      //     return GridButton();
+                      //   }),
+                      // );
+                          Get.to(GridButton());
                     },
                   ),
                   ListTile(
@@ -164,6 +155,15 @@ class _LocationTodoState extends State<LocationTodo> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => Planner()),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    title: Text('시방서'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => GeneralInfo()),
                       );
                     },
                   ),

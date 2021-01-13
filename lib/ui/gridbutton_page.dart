@@ -177,11 +177,13 @@ class _GridButtonState extends State<GridButton> {
   List<Offset> rmeasurement;
   bool taskAdd = true;
 
+  ScrollController gantControl = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    _controller2.addListener(() {
-      _gantContrl.jumpTo(_controller2.offset);
+    _gantContrl.addListener(() {
+      gantControl.jumpTo(_gantContrl.offset);
     });
 
     // weekfomat = DateFormat('E');
@@ -211,6 +213,7 @@ class _GridButtonState extends State<GridButton> {
     watch.then((v) {
       drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
       setState(() {});
+    context.read<Current>().changePath(drawings.singleWhere((d) =>d.drawingNum =='A31-003'));
     });
     interiorList = interiorIndex.map((e) => InteriorIndex.fromJson(e)).toList();
     selectRoom = interiorList[0];
@@ -485,16 +488,28 @@ class _GridButtonState extends State<GridButton> {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       setState(() {
-                        tasks.add(Task(DateTime.now(),
-                            name: _task.text, boundarys: boundarys.map((e) => e.boundary).toList()));
+                        tasks.add(
+                          Task(
+                            DateTime.now(),
+                            name: _task.text,
+                            start: startDay,
+                            end: endDay,
+                            boundarys: boundarys.map((e) => e.boundary).toList(),
+                            z: context.read<Current>().getDrawing().floor
+                          ),
+                        );
                         FirebaseFirestore _db = FirebaseFirestore.instance;
                         CollectionReference dbGrid = _db.collection('tasks');
-                        dbGrid.doc(_task.text).set(Task(DateTime.now(),
+                        dbGrid.doc(_task.text).set(
+                              Task(
+                                DateTime.now(),
                                 name: _task.text,
                                 start: startDay,
                                 end: endDay,
-                                boundarys: boundarys.map((e) => e.boundary).toList())
-                            .toJson());
+                                boundarys: boundarys.map((e) => e.boundary).toList(),
+                                z: context.read<Current>().getDrawing().floor,
+                              ).toJson(),
+                            );
                         _task.text = '';
                         boundarys = [];
                       });
@@ -602,57 +617,25 @@ class _GridButtonState extends State<GridButton> {
             mainAxisSize: MainAxisSize.min,
             children: calendars
                 .map(
-                  (e) => Column(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              e.weekday == 7
-                                  ? Text(weekfomat.format(e), style: TextStyle(color: Colors.red))
-                                  : Container(),
-                              e.weekday == 6
-                                  ? Text(weekfomat.format(e), style: TextStyle(color: Colors.blue))
-                                  : Container(),
-                              e.weekday != 7 && e.weekday != 6 ? Text(weekfomat.format(e)) : Container(),
-                              Text('${e.month}.${e.day}'),
-                            ],
-                          ),
-                        ),
+                  (e) => Container(
+                    width: 50,
+                    height: 50,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          e.weekday == 7
+                              ? Text(weekfomat.format(e), style: TextStyle(color: Colors.red))
+                              : Container(),
+                          e.weekday == 6
+                              ? Text(weekfomat.format(e), style: TextStyle(color: Colors.blue))
+                              : Container(),
+                          e.weekday != 7 && e.weekday != 6 ? Text(weekfomat.format(e)) : Container(),
+                          Text('${e.month}.${e.day}'),
+                        ],
                       ),
-                      tasks.where((element) => element.favorite == true).length == 0
-                          // ?Container(width: 50,height: 10,color: Colors.red,)
-                          ? Container(
-                              width: 50,
-                              height: 10,
-                              color: Colors.blue,
-                            )
-                          : Column(
-                              children: tasks
-                                  .where((element) => element.favorite == true && element.start != null)
-                                  .map(
-                                    (t) => Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 50,
-                                          height: 3,
-                                          color:
-                                              t.start.isAfter(e) || t.end.isBefore(e) ? Colors.transparent : Colors.red,
-                                        ),
-                                        SizedBox(
-                                          height: 2,
-                                        )
-                                      ],
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                    ],
+                    ),
                   ),
                 )
                 .toList(),
@@ -669,28 +652,51 @@ class _GridButtonState extends State<GridButton> {
         child: Scrollbar(
           child: SingleChildScrollView(
             child: Column(
-              children: tasks.map(
-                (e) {
-                  return Container(
-                    decoration: BoxDecoration(border: Border(bottom: BorderSide())),
-                    child: ListTile(
-                      title: Text(e.name),
-                      trailing: e.start == null
-                          ? Text('일정을 선택해주세요')
-                          : Text('${e.start.month}-${e.start.day} ~ ${e.end.month}-${e.end.day}'),
-                      // leading: Text(e.boundarys.length.toString()),
-                      selected: e.favorite,
-                      onTap: () {
-                        setState(() {
-                          // tasks.singleWhere((element) => element.favorite == true).favorite = false;
-                          e.favorite = !e.favorite;
-                          print(e.favorite);
-                        });
-                      },
-                    ),
-                  );
-                },
-              ).toList(),
+              children: tasks
+                  .where((t) => t.floor == context.watch<Current>().getDrawing().floor)
+                  .map((e) {
+                return Container(
+                  // decoration: BoxDecoration(border: Border(bottom: BorderSide())),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListTile(
+                        title: Text(e.name),
+                        trailing: e.start == null
+                            ? Text('일정을 선택해주세요')
+                            : Text('${e.start.month}-${e.start.day} ~ ${e.end.month}-${e.end.day}'),
+                        // leading: Text(e.boundarys.length.toString()),
+                        selected: e.favorite,
+                        onTap: () {
+                          setState(() {
+                            // tasks.singleWhere((element) => element.favorite == true).favorite = false;
+                            e.favorite = !e.favorite;
+                            print(e.favorite);
+                          });
+                        },
+                      ),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics:NeverScrollableScrollPhysics(),
+                        controller: gantControl,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: calendars
+                              .map(
+                                (d) => Container(
+                                      width: 50,
+                                      height: 3,
+                                      color:
+                                      e.start.isAfter(d.add(Duration(days: 1))) || e.end.isBefore(d) ? Colors.transparent : Colors.red,
+                                    )
+                          ).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ),
@@ -706,10 +712,9 @@ class _GridButtonState extends State<GridButton> {
         child: DropdownSearch<Drawing>(
           validator: (v) => v == null ? "required field" : null,
           showSearchBox: true,
-          mode: Mode.BOTTOM_SHEET,
+          mode: Mode.DIALOG,
           items: drawings,
           maxHeight: 400,
-          onFind: (String filter) => getData(filter),
           label: "도면을 선택해주세요",
           onChanged: (e) {
             setState(() {
@@ -873,6 +878,7 @@ class _GridButtonState extends State<GridButton> {
                     context.watch<Current>().getDrawing().scale != '1'
                         ? Stack(
                             children: tasks
+                                .where((t) => t.floor==context.watch<Current>().getDrawing().floor)
                                 .map((e) => Stack(
                                       children: e.boundarys.map(
                                         (b) {

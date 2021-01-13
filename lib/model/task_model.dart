@@ -14,6 +14,7 @@ class Task {
   double y;
   double z;
   double py;
+  double floor;
   List<Rect> boundarys = [];
 
 
@@ -25,6 +26,7 @@ class Task {
     this.memo,
     this.boundarys,
     this.z,
+    this.floor,
   });
   Task.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
     name = json["name"];
@@ -37,8 +39,12 @@ class Task {
     x = json["x"];
     y = json["y"];
     z = json["z"];
+    floor = json['floor'].toDouble();
     Iterable jsonBoundarys = json["boundarys"];
-    boundarys = jsonBoundarys.map((e) => Rect.fromPoints(Offset(e["firstX"],e["firstY"]), Offset(e["endX"],e["endY"]))).toList();
+    boundarys = jsonBoundarys
+        .map((e) => Rect.fromPoints(
+            Offset(e["firstX"].toDouble(), e["firstY"].toDouble()), Offset(e["endX"].toDouble(), e["endY"].toDouble())))
+        .toList();
   }
 
   Map<String, dynamic> toJson() {
@@ -53,6 +59,7 @@ class Task {
     map["x"] = x;
     map["y"] = y;
     map["z"] = z;
+    map["floor"] = floor;
     // boundarys.map((e){ map["boundarys"] =[e.topLeft.dx, e.topLeft.dy, e.bottomRight.dx, e.bottomRight.dy]; });
     map["boundarys"] = boundarys.map((e) => {
       "firstX": e.topLeft.dx,

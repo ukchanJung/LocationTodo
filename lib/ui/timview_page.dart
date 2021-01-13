@@ -10,6 +10,7 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_location_todo/data/structureJson.dart';
 import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
 import 'package:flutter_app_location_todo/model/boundary_model.dart';
 import 'package:flutter_app_location_todo/model/closest_model.dart';
@@ -144,19 +145,57 @@ class _TimViewState extends State<TimView> {
       floatingActionButton: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Padding(
+          //   padding: const EdgeInsets.all(8.0),
+          //   child: FloatingActionButton(
+          //     heroTag: null,
+          //     onPressed: () async {
+          //       drawings.forEach((e) async {
+          //         String tempRoot = 'asset/photos/${e.localPath}';
+          //         ByteData bytes = await rootBundle.load(tempRoot);
+          //         String tempPath = (await getTemporaryDirectory()).path;
+          //         String tempName = '$tempPath/${e.drawingNum}.png';
+          //         File file = File(tempName);
+          //         await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+          //         FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+          //         final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+          //         visionText = await textRecognizer.processImage(vIa);
+          //         List<Map> tempList = visionText.blocks
+          //             .map((v) => {
+          //                   'text': v.text,
+          //                   'rect': {
+          //                     'left': v.boundingBox.left,
+          //                     'top': v.boundingBox.top,
+          //                     'right': v.boundingBox.right,
+          //                     'bottom': v.boundingBox.bottom,
+          //                   }
+          //                 })
+          //             .toList();
+          //         FirebaseFirestore.instance
+          //             .collection('ocrData')
+          //             .doc(e.drawingNum)
+          //             .set({'drawingNum': e.drawingNum, 'dataList': tempList});
+          //         print('등록성공');
+          //         print(tempList);
+          //       });
+          //     },
+          //     child: Text('전체등록'),
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: FloatingActionButton(
               heroTag: null,
               onPressed: () async {
-                drawings.forEach((e) async {
-                  String tempRoot = 'asset/photos/${e.localPath}';
+                structureJson.forEach((e) async {
+                  String tempRoot = 'asset/structure/${e['path']}';
                   ByteData bytes = await rootBundle.load(tempRoot);
                   String tempPath = (await getTemporaryDirectory()).path;
-                  String tempName = '$tempPath/${e.drawingNum}.png';
+                  String tempName = '$tempPath/${e['path']}';
                   File file = File(tempName);
                   await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
-                  FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+                  FirebaseVisionImage vIa = FirebaseVisionImage.fromFilePath(tempName);
+                  // FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
                   final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
                   visionText = await textRecognizer.processImage(vIa);
                   List<Map> tempList = visionText.blocks
@@ -171,14 +210,16 @@ class _TimViewState extends State<TimView> {
                           })
                       .toList();
                   FirebaseFirestore.instance
-                      .collection('ocrData')
-                      .doc(e.drawingNum)
-                      .set({'drawingNum': e.drawingNum, 'dataList': tempList});
+                      .collection('generalInfo')
+                      .doc(e['path'])
+                      .set({'path': e['path'], 'dataList': tempList,'fulltext':visionText.text});
                   print('등록성공');
                   print(tempList);
-                });
+                }
+                );
+                print('전체등록성공');
               },
-              child: Text('전체등록'),
+              child: Text('시방서등록'),
             ),
           ),
           Padding(

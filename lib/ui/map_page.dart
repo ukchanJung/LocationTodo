@@ -61,10 +61,10 @@ class _DmapState extends State<Dmap> {
   List<OcrData> ocrDatas;
   OcrData ocrGet;
   bool ocrCheck = false;
-  double sLeft;
-  double sTop;
-  double sRight;
-  double sBottom;
+  double sLeft =0;
+  double sTop=0;
+  double sRight=0;
+  double sBottom=0;
   Offset s1 = Offset(0, 0);
   Offset s2 = Offset(0, 0);
   int rLeft;
@@ -157,15 +157,15 @@ class _DmapState extends State<Dmap> {
           // SizedBox(
           //   width: 20,
           // ),
-          FloatingActionButton(
-              heroTag: null,
-              onPressed: () {
-                measurement = [];
-                rmeasurement = [];
-              }),
-          SizedBox(
-            width: 10,
-          ),
+          // FloatingActionButton(
+          //     heroTag: null,
+          //     onPressed: () {
+          //       measurement = [];
+          //       rmeasurement = [];
+          //     }),
+          // SizedBox(
+          //   width: 10,
+          // ),
           FloatingActionButton(
             heroTag: null,
             onPressed: () {
@@ -239,8 +239,8 @@ class _DmapState extends State<Dmap> {
                                             context.read<Current>().getDrawing().originY) *
                                         context.read<Current>().getcordiY())
                                     .round();
-                                measurement.add(_origin);
-                                rmeasurement.add(Offset(debugX.toDouble(), debugY.toDouble()));
+                                // measurement.add(_origin);
+                                // rmeasurement.add(Offset(debugX.toDouble(), debugY.toDouble()));
                                 print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
                               });
                             },
@@ -300,35 +300,35 @@ class _DmapState extends State<Dmap> {
                                     top: sTop,
                                     right: sRight,
                                     bottom: sBottom,
-                                    tP: measurement,
+                                    // tP: measurement,
                                   ),
                                 ),
-                                measurement != null && measurement.length > 1
-                                    ? Stack(
-                                        children: measurement
-                                            .sublist(1)
-                                            .map((e) => Positioned.fromRect(
-                                                rect: Rect.fromCenter(
-                                                    center: (measurement[measurement.indexOf(e) - 1] +
-                                                            measurement[measurement.indexOf(e)]) /
-                                                        2,
-                                                    width: 100,
-                                                    height: 100),
-                                                child: Center(
-                                                    child: Transform.rotate(
-                                                  angle: pi /
-                                                      (180 /
-                                                          Line(measurement[measurement.indexOf(e) - 1],
-                                                                  measurement[measurement.indexOf(e)])
-                                                              .degree()),
-                                                  child: Text(
-                                                      '${Line(rmeasurement[measurement.indexOf(e) - 1], rmeasurement[measurement.indexOf(e)]).length().round()}'
-                                                      // style: TextStyle(color: Colors.white),
-                                                      ),
-                                                ))))
-                                            .toList(),
-                                      )
-                                    : Container(),
+                                // measurement != null && measurement.length > 1
+                                //     ? Stack(
+                                //         children: measurement
+                                //             .sublist(1)
+                                //             .map((e) => Positioned.fromRect(
+                                //                 rect: Rect.fromCenter(
+                                //                     center: (measurement[measurement.indexOf(e) - 1] +
+                                //                             measurement[measurement.indexOf(e)]) /
+                                //                         2,
+                                //                     width: 100,
+                                //                     height: 100),
+                                //                 child: Center(
+                                //                     child: Transform.rotate(
+                                //                   angle: pi /
+                                //                       (180 /
+                                //                           Line(measurement[measurement.indexOf(e) - 1],
+                                //                                   measurement[measurement.indexOf(e)])
+                                //                               .degree()),
+                                //                   child: Text(
+                                //                       '${Line(rmeasurement[measurement.indexOf(e) - 1], rmeasurement[measurement.indexOf(e)]).length().round()}'
+                                //                       // style: TextStyle(color: Colors.white),
+                                //                       ),
+                                //                 ))))
+                                //             .toList(),
+                                //       )
+                                //     : Container(),
                                 context.watch<Current>().getDrawing().roomMap == []
                                     ? Container()
                                     : Stack(
@@ -413,17 +413,17 @@ class _DmapState extends State<Dmap> {
                                                       color:
                                                           ocrFinList[ocrGet.dataList.indexWhere((e) => e == v)] == false
                                                               ? Color.fromRGBO(255, 0, 0, 0.3)
-                                                              : Color.fromRGBO(200, 200, 200, 0.3),
-                                                      border: ocrFinList[ocrGet.dataList
-                                                                  .indexWhere((e) => e.toString() == v.toString())] ==
-                                                              false
-                                                          ? Border.all(color: Colors.red, width: 0.2)
-                                                          : Border.all(color: Colors.green, width: 0.5),
-                                                    ),
+                                                              : Color.fromRGBO(0, 255, 0, 0.3),
+                                                    //   border: ocrFinList[ocrGet.dataList
+                                                    //               .indexWhere((e) => e.toString() == v.toString())] ==
+                                                    //           false
+                                                    //       ? Border.all(color: Colors.red, width: 0.01,)
+                                                    //       : Border.all(color: Colors.green, width: 0.01,
+                                                    // ),
                                                   ),
                                                 ),
                                               ),
-                                            )
+                                            ))
                                             .toList(),
                                       ),
                               ],
@@ -438,9 +438,9 @@ class _DmapState extends State<Dmap> {
               Expanded(
                 child: Column(
                   children: [
-                    rmeasurement != null && rmeasurement.length > 3
-                        ? Text((computeArea(rmeasurement) / 1000000).toStringAsFixed(2))
-                        : Container(),
+                    // rmeasurement != null && rmeasurement.length > 3
+                    //     ? Text((computeArea(rmeasurement) / 1000000).toStringAsFixed(2))
+                    //     : Container(),
                     Padding(
                       padding: const EdgeInsets.all(8),
                       child: DropdownSearch<Drawing>(
@@ -871,15 +871,15 @@ class SetInfoDraw extends CustomPainter {
         ? null
         : canvas.drawPoints(PointMode.points, [Offset(right, bottom)], paint2);
 
-    Path p = Path();
-    p.moveTo(tP[0].dx, tP[0].dy);
-    tP.forEach((e) {
-      p.lineTo(e.dx, e.dy);
-    });
-    p.close();
+    // Path p = Path();
+    // p.moveTo(tP[0].dx, tP[0].dy);
+    // tP.forEach((e) {
+    //   p.lineTo(e.dx, e.dy);
+    // });
+    // p.close();
     setPoint == null ? null : canvas.drawPoints(PointMode.points, [setPoint], paint2);
-    setPoint == null ? null : canvas.drawPath(p, paint5);
-    setPoint == null ? null : canvas.drawPoints(PointMode.points, tP, paint4);
+    // setPoint == null ? null : canvas.drawPath(p, paint5);
+    // setPoint == null ? null : canvas.drawPoints(PointMode.points, tP, paint4);
     // setPoint == null ? null : canvas.drawPoints(PointMode.polygon, tP, paint5);
   }
 

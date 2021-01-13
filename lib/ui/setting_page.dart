@@ -1,6 +1,7 @@
 // import 'dart:js';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/data/local_list.dart';
 import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
@@ -121,49 +122,61 @@ class _SettingPageState extends State<SettingPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Stack(
-                      children: [
-                        Container(
-                          child: AspectRatio(
-                            key: _key,
-                            aspectRatio: 421 / 297,
-                            child: ClipRect(
-                              child: PhotoView.customChild(
-                                minScale: 1.0,
-                                maxScale: 10.0,
-                                initialScale: 1.0,
-                                controller: _pContrl,
-                                backgroundDecoration: BoxDecoration(color: Colors.transparent),
-                                child: Stack(
-                                  children: [
-                                    PositionedTapDetector(
-                                      onLongPress: (m) {
-                                        ///TODO 원점 재지정 좌표 메서드
-                                        setState(() {
-                                          context.read<Current>().getDrawing().originX =
-                                              (m.relative.dx / (width * _pContrl.scale)) -
-                                                  (realIntersect.dx / context.read<Current>().getcordiX());
-                                          context.read<Current>().getDrawing().originY =
-                                              (m.relative.dy / (heigh * _pContrl.scale)) -
-                                                  (realIntersect.dy / context.read<Current>().getcordiY());
-                                          print(
-                                              '${context.read<Current>().getDrawing().originX}, ${context.read<Current>().getDrawing().originY}');
-                                        });
-                                      },
-                                      child: Stack(
-                                        key: _key2,
-                                        children: [
-                                          Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
-                                        ],
+                    Listener(
+                      onPointerSignal: (m) {
+                        if (m is PointerScrollEvent) {
+                          if (m.scrollDelta.dy > 1 && _pContrl.scale > 1) {
+                            _pContrl.scale = _pContrl.scale - 0.2;
+                          } else if (m.scrollDelta.dy < 1) {
+                            _pContrl.scale = _pContrl.scale + 0.2;
+                          }
+                        }
+                        ;
+                      },
+                      child: Stack(
+                        children: [
+                          Container(
+                            child: AspectRatio(
+                              key: _key,
+                              aspectRatio: 421 / 297,
+                              child: ClipRect(
+                                child: PhotoView.customChild(
+                                  minScale: 1.0,
+                                  maxScale: 10.0,
+                                  initialScale: 1.0,
+                                  controller: _pContrl,
+                                  backgroundDecoration: BoxDecoration(color: Colors.transparent),
+                                  child: Stack(
+                                    children: [
+                                      PositionedTapDetector(
+                                        onLongPress: (m) {
+                                          ///TODO 원점 재지정 좌표 메서드
+                                          setState(() {
+                                            context.read<Current>().getDrawing().originX =
+                                                (m.relative.dx / (width * _pContrl.scale)) -
+                                                    (realIntersect.dx / context.read<Current>().getcordiX());
+                                            context.read<Current>().getDrawing().originY =
+                                                (m.relative.dy / (heigh * _pContrl.scale)) -
+                                                    (realIntersect.dy / context.read<Current>().getcordiY());
+                                            print(
+                                                '${context.read<Current>().getDrawing().originX}, ${context.read<Current>().getDrawing().originY}');
+                                          });
+                                        },
+                                        child: Stack(
+                                          key: _key2,
+                                          children: [
+                                            Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     Expanded(
                       child: Column(
@@ -257,7 +270,8 @@ class _SettingPageState extends State<SettingPage> {
                               children: drawings
                                   .map(
                                     (e) => ListTile(
-                                      title: Text(e.toString()),
+                                      title: e.originX ==0?Text(e.toString()):Text(e.toString(),style: TextStyle(color: Colors.redAccent),)
+                                      ,
                                       onTap:()=>context.read<Current>().changePath(e)
                                     ),
                                   )
