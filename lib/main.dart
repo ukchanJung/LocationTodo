@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/counter_model.dart';
 import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
+import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
 import 'package:flutter_app_location_todo/ui/location_todo_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_app_location_todo/ui/planner_page.dart';
@@ -27,11 +28,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Flutter Demo',
+      title: 'TIMWORK',
       theme: ThemeData(
         primarySwatch: Colors.orange,
         // elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.deepOrange) )
       ),
+      // home: GridButton(),
       home: LocationTodo(),
     );
   }

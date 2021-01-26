@@ -6,6 +6,8 @@ import 'package:flutter_app_location_todo/model/drawing_model.dart';
 class Current with ChangeNotifier {
   String _path = 'S01-001.png';
   String _name = 'S01-001.png';
+  List<Drawing> pattern =[];
+  Set<Drawing> favorite ={};
   Drawing _drawing = Drawing(
     drawingNum: 'A31-003',
     title: '1층 평면도',
@@ -28,6 +30,12 @@ class Current with ChangeNotifier {
 
   void changePath(drawing) {
     _drawing = drawing;
+    if(pattern.contains(drawing)==false)
+    pattern.add(drawing);
+    notifyListeners();
+  }
+  void addFavorite(drawing){
+    favorite.add(drawing);
     notifyListeners();
   }
 }

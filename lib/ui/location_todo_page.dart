@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/drawing_model.dart';
 import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
+import 'package:flutter_app_location_todo/simul_test.dart';
+import 'package:flutter_app_location_todo/ui/backup.dart';
 import 'package:flutter_app_location_todo/ui/calendar_page.dart';
 import 'package:flutter_app_location_todo/ui/general_info_page.dart';
 import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_app_location_todo/ui/map_page.dart';
 import 'package:flutter_app_location_todo/ui/originViewer.dart';
 import 'package:flutter_app_location_todo/ui/planner_page.dart';
 import 'package:flutter_app_location_todo/ui/setting_page.dart';
+import 'package:flutter_app_location_todo/ui/simulation_page.dart';
 import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/ui/todo_detail_page.dart';
 import 'package:flutter_app_location_todo/ui/viewer_page.dart';
@@ -91,27 +94,24 @@ class _LocationTodoState extends State<LocationTodo> {
               child: ListView(
                 children: [
                   ListTile(
-                    title: Text('그리드 버튼 구현'),
-                    onTap: () {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(builder: (context) {
-                      //     return GridButton();
-                      //   }),
-                      // );
-                          Get.to(GridButton());
-                    },
+                    title: Text('도면뷰어'),
+                    onTap: () => Get.to(GridButton()),
+                  ),
+                  ListTile(
+                    title: Text('공정관리'),
+                    onTap: () => Get.to(SimulationPage()),
                   ),
                   ListTile(
                     title: Text('Setting'),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) {
-                          return SettingPage();
-                        }),
-                      );
-                    },
+                    onTap: () => Get.to(SettingPage()),
+                  ),
+                  ListTile(
+                    title: Text('Back Up'),
+                    onTap: () => Get.to(BackupPage()),
+                  ),
+                  ListTile(
+                    title: Text('시뮤레이션 테스트'),
+                    onTap: () => Get.to(PlaySimul()),
                   ),
                   ListTile(
                     title: Text('도면뷰어'),

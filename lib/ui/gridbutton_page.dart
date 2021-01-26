@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:community_material_icon/community_material_icon.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
@@ -24,11 +25,14 @@ import 'package:flutter_app_location_todo/model/gridtest_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/boundary_detail_page.dart';
+import 'package:flutter_app_location_todo/ui/crosshair_paint.dart';
 import 'package:flutter_app_location_todo/ui/label_text_widget.dart';
 import 'package:flutter_app_location_todo/ui/task_add_page.dart';
 import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
+import 'package:flutter_app_location_todo/widget/searchdialog_widget.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
@@ -178,6 +182,17 @@ class _GridButtonState extends State<GridButton> {
   bool taskAdd = true;
 
   ScrollController gantControl = ScrollController();
+  List<Drawing> pathDrawings = [];
+  double keyX = 0.0;
+  double keyY = 0.0;
+  PhotoViewScaleStateController _scaleStateController = PhotoViewScaleStateController();
+  bool moving = false;
+  List<GridIcon> bb = [];
+  Offset hover = Offset.zero;
+  Offset _offset =Offset.zero;
+  Offset _origin2 = Offset.zero;
+  bool oribit1 =false;
+  bool oribit2 =false;
 
   @override
   void initState() {
@@ -213,7 +228,8 @@ class _GridButtonState extends State<GridButton> {
     watch.then((v) {
       drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
       setState(() {});
-    context.read<Current>().changePath(drawings.singleWhere((d) =>d.drawingNum =='A31-003'));
+      context.read<Current>().changePath(drawings.singleWhere((d) => d.drawingNum == 'A31-003'));
+      pathDrawings.add(context.read<Current>().getDrawing());
     });
     interiorList = interiorIndex.map((e) => InteriorIndex.fromJson(e)).toList();
     selectRoom = interiorList[0];
@@ -232,6 +248,7 @@ class _GridButtonState extends State<GridButton> {
     _task.dispose();
     _gantContrl.dispose();
     _controller2.dispose();
+    _scaleStateController.dispose();
   }
 
   @override
@@ -239,116 +256,100 @@ class _GridButtonState extends State<GridButton> {
     return MediaQuery.of(context).orientation == Orientation.portrait
         ? Scaffold(
             resizeToAvoidBottomPadding: false,
-            // appBar: AppBar(
-            //   title: Text('그리드 버튼'),
-            // ),
-            floatingActionButton: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FloatingActionButton(
-                  heroTag: null,
-                  child: Text('측정'),
-                  onPressed: () {
-                    setState(() {
-
-                    taskAdd =!taskAdd;
-                    boundarys =[];
-                    tracking = [];
-                    measurement = [];
-                    rmeasurement = [];
-                    });
-                  },),
-                SizedBox(width: 10,),
-                FloatingActionButton(
-                  heroTag: null,
-                  child: Text('필터'),
-                  onPressed: () {
-                    setState(() {
-                      callOutLayerOn = !callOutLayerOn;
-                    });
-                  },
-                ),
-              ],
-            ),
             body: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('origingrid').snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return SafeArea(child: Center(child: CircularProgressIndicator()));
-                return SafeArea(
-                    bottom: false,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // planerSlider(),
-                            searchBar(context),
-                          ],
-                        ),
-                        // calendarStrip(),
-                        LayoutBuilder(builder: (context, colC) {
-                          return Container(
-                            width: colC.maxWidth,
-                            height: colC.maxWidth / (420 / 297),
-                            child: Listener(
-                              onPointerSignal: (m) {
-                                if (m is PointerScrollEvent) {
-                                  if (m.scrollDelta.dy > 1 && _pContrl.scale > 1) {
-                                    _pContrl.scale = _pContrl.scale - 0.2;
-                                  } else if (m.scrollDelta.dy < 1) {
-                                    _pContrl.scale = _pContrl.scale + 0.2;
-                                  }
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    LayoutBuilder(builder: (context, colC) {
+                      return Container(
+                        width: colC.maxWidth,
+                        height: colC.maxWidth / (420 / 297),
+                        child: LayoutBuilder(builder: (context, c) {
+                          _pContrl.addIgnorableListener(() {
+                            keyX = _pContrl.value.position.dx / (c.maxWidth * _pContrl.value.scale);
+                            keyY = _pContrl.value.position.dy / (c.maxHeight * _pContrl.value.scale);
+                          });
+                          return Listener(
+                            onPointerDown: (_){
+                              setState(() {
+                              moving = true;
+                              });
+                            },
+                            onPointerUp: (_){
+                              setState(() {
+                              moving = false;
+                              });
+                            },
+                            onPointerSignal: (m) {
+                              if (m is PointerScrollEvent) {
+                                double tempset = _pContrl.scale - 1;
+                                Offset up = Offset(keyX * c.maxWidth * (_pContrl.scale + 0.2),
+                                    keyY * c.maxHeight * (_pContrl.scale + 0.2));
+                                Offset dn = Offset(keyX * c.maxWidth * (_pContrl.scale - 0.2),
+                                    keyY * c.maxHeight * (_pContrl.scale - 0.2));
+                                if (m.scrollDelta.dy > 1 && _pContrl.scale > 1) {
+                                  _pContrl.value = PhotoViewControllerValue(
+                                      position: dn,
+                                      scale: (_pContrl.scale - 0.2),
+                                      rotation: 0,
+                                      rotationFocusPoint: null);
+                                } else if (m.scrollDelta.dy < 1) {
+                                  _pContrl.value = PhotoViewControllerValue(
+                                      position: up,
+                                      scale: (_pContrl.scale + 0.2),
+                                      rotation: 0,
+                                      rotationFocusPoint: null);
                                 }
-                                ;
-                              },
-                              child: LayoutBuilder(builder: (context, c) {
-                                return Stack(
-                                  alignment: Alignment.bottomCenter,
-                                  children: [
-                                    buildViewer(context, snapshot, c),
-                                  ],
-                                );
-                              }),
-                            ),
+                              }
+                              ;
+                            },
+                            child: buildViewer(context, snapshot, c),
                           );
                         }),
-
-                        Expanded(
-                          child: PageView(
-                            controller: PageController(initialPage: 1),
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Card(child: buildAddTaskPage()),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Card(child: buildTaskAddWidget(context)),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Card(child: DetiailResult(selectRoom)),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Card(
-                                    child: ListView(
-                                  children: interiorList
-                                      .map((e) => Card(
-                                              child: ListTile(
-                                            title: AutoSizeText(e.roomName),
-                                            leading: Text(e.roomNum),
-                                            trailing: Text(e.cLevel),
-                                          )))
-                                      .toList(),
-                                )),
-                              ),
-                            ],
+                      );
+                    }),
+                    Expanded(
+                      child: PageView(
+                        controller: PageController(initialPage: 1),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Card(child: buildAddTaskPage()),
                           ),
-                        ),
-                      ],
-                    ));
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Card(child: buildTaskAddWidget(context)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Card(child: buildDrawingPath()),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Card(child: DetiailResult(selectRoom)),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Card(
+                                child: ListView(
+                              children: interiorList
+                                  .map((e) => Card(
+                                          child: ListTile(
+                                        title: AutoSizeText(e.roomName),
+                                        leading: Text(e.roomNum),
+                                        trailing: Text(e.cLevel),
+                                      )))
+                                  .toList(),
+                            )),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
               },
             ),
           )
@@ -357,34 +358,13 @@ class _GridButtonState extends State<GridButton> {
             // appBar: AppBar(
             //   title: Text('그리드 버튼'),
             // ),
-            floatingActionButton: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FloatingActionButton(
-                    heroTag: null,
-                    child: Text('측정'),
-                    onPressed: () {
-                      setState(() {
-                      taskAdd = !taskAdd;
-                      boundarys =[];
-                      tracking = [];
-                      measurement = [];
-                      rmeasurement = [];
-
-                      });
-                    },),
-                SizedBox(width: 10,),
-                FloatingActionButton(
-                  heroTag: null,
-                  child: Text('필터'),
-                  onPressed: () {
-                    setState(() {
-                      callOutLayerOn = !callOutLayerOn;
-                    });
-                  },
-                ),
-              ],
-            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: (){
+          setState(() {
+            _offset = Offset.zero;
+          });
+        },
+      ),
             body: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('origingrid').snapshots(),
               builder: (context, snapshot) {
@@ -396,18 +376,70 @@ class _GridButtonState extends State<GridButton> {
                         width: rowC.maxHeight * (420 / 297),
                         height: rowC.maxHeight,
                         child: LayoutBuilder(builder: (context, c) {
+                          _pContrl.addIgnorableListener(() {
+                            keyX = _pContrl.value.position.dx / (c.maxWidth * _pContrl.value.scale);
+                            keyY = _pContrl.value.position.dy / (c.maxHeight * _pContrl.value.scale);
+                          });
                           return Listener(
+                            onPointerDown: (_){
+                              setState(() {
+                                moving = true;
+                              });
+                            },
+                            onPointerUp: (_){
+                              setState(() {
+                                moving = false;
+                              });
+                            },
                             onPointerSignal: (m) {
                               if (m is PointerScrollEvent) {
+                                Offset up = Offset(keyX * c.maxWidth * (_pContrl.scale + 0.2),
+                                    keyY * c.maxHeight * (_pContrl.scale + 0.2));
+                                Offset dn = Offset(keyX * c.maxWidth * (_pContrl.scale - 0.2),
+                                    keyY * c.maxHeight * (_pContrl.scale - 0.2));
                                 if (m.scrollDelta.dy > 1 && _pContrl.scale > 1) {
-                                  _pContrl.scale = _pContrl.scale - 0.2;
+                                  _pContrl.value = PhotoViewControllerValue(
+                                      position: dn,
+                                      scale: (_pContrl.scale - 0.2),
+                                      rotation: 0,
+                                      rotationFocusPoint: null);
                                 } else if (m.scrollDelta.dy < 1) {
-                                  _pContrl.scale = _pContrl.scale + 0.2;
+                                  _pContrl.value = PhotoViewControllerValue(
+                                      position: up,
+                                      scale: (_pContrl.scale + 0.2),
+                                      rotation: 0,
+                                      rotationFocusPoint: null);
                                 }
                               }
                               ;
                             },
-                            child: buildViewer(context, snapshot, c),
+                            child: RawKeyboardListener(
+                              autofocus: true,
+                              focusNode: FocusNode(),
+                              onKey: (k){
+                                setState(() {
+                                  oribit1 = k.isShiftPressed;
+                                });
+                              },
+                              child: Listener(
+                                onPointerDown: (o){
+                                  if(oribit1){
+                                    setState(() {
+                                      _origin2 =o.position;
+                                      print('#######$_origin2');
+                                    });
+                                  }
+                                },
+                                onPointerHover: (h){
+                                  if(oribit1){
+                                    setState(() {
+                                      _offset += h.delta;
+                                    });
+                                  }
+                                },
+                                child: buildViewer(context, snapshot, c),
+                              ),
+                            ),
                           );
                         }),
                       );
@@ -415,8 +447,6 @@ class _GridButtonState extends State<GridButton> {
                     Expanded(
                       child: Column(
                         children: [
-                          // planerSlider(),
-                          searchBar(context),
                           Expanded(
                             child: PageView(
                               controller: PageController(initialPage: 1),
@@ -429,6 +459,7 @@ class _GridButtonState extends State<GridButton> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: Card(child: buildTaskAddWidget(context)),
                                 ),
+
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Card(child: DetiailResult(selectRoom)),
@@ -450,6 +481,17 @@ class _GridButtonState extends State<GridButton> {
                               ],
                             ),
                           ),
+                          LayoutBuilder(
+                            builder: (context, keymap) {
+                              return Container(
+                                height: keymap.maxWidth/(420/297)+50,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Card(child: buildDrawingPath()),
+                                ),
+                              );
+                            }
+                          ),
                         ],
                       ),
                     ),
@@ -458,6 +500,86 @@ class _GridButtonState extends State<GridButton> {
               },
             ),
           );
+  }
+
+  Widget buildDrawingPath() {
+    return Container(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: context
+                    .read<Current>()
+                    .pattern
+                    .reversed
+                    .map((e) => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                context.read<Current>().changePath(e);
+                                Get.defaultDialog(title: e.toString(), actions: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      context.read<Current>().addFavorite(e);
+                                    },
+                                    child: Text('즐겨찾기'),
+                                  )
+                                ]);
+                              });
+                            },
+                            onLongPress: () {
+                              setState(() {
+                                context.read<Current>().pattern.remove(e);
+                              });
+                            },
+                            child: Chip(
+                              avatar: CircleAvatar(child: Text(e.drawingNum[0])),
+                              label: Text(e.title),
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ),
+          ),
+          LayoutBuilder(builder: (context, k) {
+            return StreamBuilder<PhotoViewControllerValue>(
+                stream: _pContrl.outputStateStream,
+                initialData: PhotoViewControllerValue(
+                  position: _pContrl.position,
+                  rotation: 0,
+                  rotationFocusPoint: null,
+                  scale: _pContrl.scale,
+                ),
+                builder: (context, snapshot) {
+                  return Stack(
+                    children: [
+                      Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                      Positioned(
+                        left: -keyX * k.maxWidth,
+                        top: -keyY * k.maxWidth / (420 / 297),
+                        child: Transform.scale(
+                            scale: 1 / snapshot.data.scale,
+                            child: Container(
+                              width: k.maxWidth,
+                              height: k.maxWidth / (420 / 297),
+                              color: Color.fromRGBO(255, 0, 0, 0.5),
+                            )),
+                      )
+                    ],
+                  );
+                });
+          }),
+        ],
+      ),
+    );
   }
 
   Widget buildAddTaskPage() {
@@ -489,14 +611,12 @@ class _GridButtonState extends State<GridButton> {
                     onPressed: () {
                       setState(() {
                         tasks.add(
-                          Task(
-                            DateTime.now(),
-                            name: _task.text,
-                            start: startDay,
-                            end: endDay,
-                            boundarys: boundarys.map((e) => e.boundary).toList(),
-                            z: context.read<Current>().getDrawing().floor
-                          ),
+                          Task(DateTime.now(),
+                              name: _task.text,
+                              start: startDay,
+                              end: endDay,
+                              boundarys: boundarys.map((e) => e.boundary).toList(),
+                              z: context.read<Current>().getDrawing().floor),
                         );
                         FirebaseFirestore _db = FirebaseFirestore.instance;
                         CollectionReference dbGrid = _db.collection('tasks');
@@ -603,7 +723,7 @@ class _GridButtonState extends State<GridButton> {
     );
   }
 
-  List<DateTime> calendars = List.generate(21, (index) => DateTime.now().add(Duration(days: -10 + index)));
+  List<DateTime> calendars = List.generate(21, (index) => DateTime.now().add(Duration(days: -20 + index)));
 
   Widget buildTaskAddWidget(BuildContext context) {
     return Column(
@@ -625,9 +745,7 @@ class _GridButtonState extends State<GridButton> {
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          e.weekday == 7
-                              ? Text(weekfomat.format(e), style: TextStyle(color: Colors.red))
-                              : Container(),
+                          e.weekday == 7 ? Text(weekfomat.format(e), style: TextStyle(color: Colors.red)) : Container(),
                           e.weekday == 6
                               ? Text(weekfomat.format(e), style: TextStyle(color: Colors.blue))
                               : Container(),
@@ -652,9 +770,7 @@ class _GridButtonState extends State<GridButton> {
         child: Scrollbar(
           child: SingleChildScrollView(
             child: Column(
-              children: tasks
-                  .where((t) => t.floor == context.watch<Current>().getDrawing().floor)
-                  .map((e) {
+              children: tasks.where((t) => t.floor == context.watch<Current>().getDrawing().floor).map((e) {
                 return Container(
                   // decoration: BoxDecoration(border: Border(bottom: BorderSide())),
                   child: Column(
@@ -677,20 +793,20 @@ class _GridButtonState extends State<GridButton> {
                       ),
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        physics:NeverScrollableScrollPhysics(),
+                        physics: NeverScrollableScrollPhysics(),
                         controller: gantControl,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: calendars
-                              .map(
-                                (d) => Container(
-                                      width: 50,
-                                      height: 3,
-                                      color:
-                                      e.start.isAfter(d.add(Duration(days: 1))) || e.end.isBefore(d) ? Colors.transparent : Colors.red,
-                                    )
-                          ).toList(),
+                              .map((d) => Container(
+                                    width: 50,
+                                    height: 3,
+                                    color: e.start.isAfter(d.add(Duration(days: 1))) || e.end.isBefore(d)
+                                        ? Colors.transparent
+                                        : Colors.red,
+                                  ))
+                              .toList(),
                         ),
                       ),
                     ],
@@ -704,372 +820,582 @@ class _GridButtonState extends State<GridButton> {
     );
   }
 
-  Padding searchBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Container(
-        decoration: BoxDecoration(color: Colors.white24),
-        child: DropdownSearch<Drawing>(
-          validator: (v) => v == null ? "required field" : null,
-          showSearchBox: true,
-          mode: Mode.DIALOG,
-          items: drawings,
-          maxHeight: 400,
-          label: "도면을 선택해주세요",
-          onChanged: (e) {
-            setState(() {
-              context.read<Current>().changePath(e);
-              recaculate();
-              setState(() {});
-            });
-          },
-        ),
-      ),
-    );
-  }
-
   Widget buildViewer(BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot, BoxConstraints c) {
-    return Container(
-      child: ClipRect(
-        child: PhotoView.customChild(
-          minScale: 1.0,
-          maxScale: 20.0,
-          initialScale: 1.0,
-          controller: _pContrl,
-          backgroundDecoration: BoxDecoration(color: Colors.transparent),
-          child: Stack(
-            children: [
-              PositionedTapDetector(
-                onTap: (m) {
-                  List<Point<double>> parseList = _iPs
-                      .map((e) =>
-                          Point(e.dx, e.dy) * c.maxWidth +
-                          Point(context.read<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dx,
-                              context.read<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dy))
-                      .toList();
-                  List<Point<double>> realParseList = _realIPs.map((e) => Point(e.dx, e.dy)).toList();
+    return Stack(
+      children: [
+        Container(
+          child: ClipRect(
+            child: Transform(
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateZ(0)
+                ..rotateX(0.005*_offset.dy)
+                ..rotateY(0),
+              origin: _origin2,
+              child: PhotoView.customChild(
+                minScale: 1.0,
+                maxScale: 20.0,
+                initialScale: 1.0,
+                controller: _pContrl,
+                backgroundDecoration: BoxDecoration(color: Colors.transparent),
+                child: LayoutBuilder(
+                  builder: (context, k) {
+                    return Stack(
+                      children: [
+                        PositionedTapDetector(
+                          key: _key,
+                          onTap: (m) {
+                            List<Point<double>> parseList = _iPs
+                                .map((e) =>
+                                    Point(e.dx, e.dy) * c.maxWidth +
+                                    Point(context.read<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dx,
+                                        context.read<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dy))
+                                .toList();
+                            List<Point<double>> realParseList = _realIPs.map((e) => Point(e.dx, e.dy)).toList();
 
-                  setState(() {
-                    _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                    rectPoint = Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
-                        .minRect(Point(_origin.dx, _origin.dy));
-                    relativeRectPoint = Closet(
-                            selectPoint: Point(
-                                (((m.relative.dx / _pContrl.scale) / c.maxWidth -
-                                        context.read<Current>().getDrawing().originX) *
-                                    context.read<Current>().getcordiX()),
-                                (((m.relative.dy / _pContrl.scale) / c.maxHeight -
-                                        context.read<Current>().getDrawing().originY) *
-                                    context.read<Current>().getcordiY())),
-                            pointList: realParseList)
-                        .minRect(Point(
-                            (((m.relative.dx / _pContrl.scale) / c.maxWidth -
-                                    context.read<Current>().getDrawing().originX) *
-                                context.read<Current>().getcordiX()),
-                            (((m.relative.dy / _pContrl.scale) / c.maxHeight -
-                                    context.read<Current>().getDrawing().originY) *
-                                context.read<Current>().getcordiY())));
-                    print(m.relative / _pContrl.scale);
-                    int debugX = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
-                                context.read<Current>().getDrawing().originX) *
-                            context.read<Current>().getcordiX())
-                        .round();
-                    int debugY = (((m.relative.dy / _pContrl.scale) / c.maxHeight -
-                                context.read<Current>().getDrawing().originY) *
-                            context.read<Current>().getcordiY())
-                        .round();
-                    print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
-                    tracking.add(_origin);
-                    print(count.length);
-                    count.add(tracking.length);
-                    measurement.add(_origin);
-                    rmeasurement.add(Offset(debugX.toDouble(), debugY.toDouble()));
+                            setState(() {
+                              _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
+                              rectPoint = Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
+                                  .minRect(Point(_origin.dx, _origin.dy));
+                              relativeRectPoint = Closet(
+                                      selectPoint: Point(
+                                          (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                                  context.read<Current>().getDrawing().originX) *
+                                              context.read<Current>().getcordiX()),
+                                          (((m.relative.dy / _pContrl.scale) / c.maxHeight -
+                                                  context.read<Current>().getDrawing().originY) *
+                                              context.read<Current>().getcordiY())),
+                                      pointList: realParseList)
+                                  .minRect(Point(
+                                      (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                              context.read<Current>().getDrawing().originX) *
+                                          context.read<Current>().getcordiX()),
+                                      (((m.relative.dy / _pContrl.scale) / c.maxHeight -
+                                              context.read<Current>().getDrawing().originY) *
+                                          context.read<Current>().getcordiY())));
+                              print(m.relative / _pContrl.scale);
+                              int debugX = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                          context.read<Current>().getDrawing().originX) *
+                                      context.read<Current>().getcordiX())
+                                  .round();
+                              int debugY = (((m.relative.dy / _pContrl.scale) / c.maxHeight -
+                                          context.read<Current>().getDrawing().originY) *
+                                      context.read<Current>().getcordiY())
+                                  .round();
+                              print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
+                              tracking.add(_origin);
+                              print(count.length);
+                              count.add(tracking.length);
+                              measurement.add(_origin);
+                              rmeasurement.add(Offset(debugX.toDouble(), debugY.toDouble()));
 
-                    setState(() {
-                      var _wTime = DateTime.now();
-                      boundarys.add(Boundary(_wTime,
-                          boundary: Rect.fromPoints(Offset(relativeRectPoint.first.x, relativeRectPoint.first.y),
-                              Offset(relativeRectPoint.last.x, relativeRectPoint.last.y))));
-                    });
-                  });
-                },
-                child: Stack(
-                  key: _key2,
-                  children: [
-                    Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                              setState(() {
+                                var _wTime = DateTime.now();
+                                boundarys.add(Boundary(_wTime,
+                                    boundary: Rect.fromPoints(Offset(relativeRectPoint.first.x, relativeRectPoint.first.y),
+                                        Offset(relativeRectPoint.last.x, relativeRectPoint.last.y))));
+                              });
+                            });
+                          },
+                          child: Listener(
+                            onPointerHover: (h){
+                              setState(() {
+                                hover = h.localPosition;
+                              });
+                            },
+                            child: Stack(
+                              key: _key2,
+                              children: [
+                                Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
 
-                    ///측정구현
+                                ///측정구현
+                                taskAdd == true
+                                    ? Container()
+                                  : StreamBuilder<PhotoViewControllerValue>(
+                                      stream: _pContrl.outputStateStream,
+                                    initialData: PhotoViewControllerValue(
+                                      position: _pContrl.position,
+                                      rotation: 0,
+                                      rotationFocusPoint: null,
+                                      scale: _pContrl.scale,
+                                    ),
+                                      builder: (context, snapshot) {
+                                        if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                                        return Stack(
+                                          children: [
+                                            CustomPaint(
+                                              painter: CallOutCount(tP: tracking, s: snapshot.data.scale),
+                                            ),
+                                            // count != []
+                                            //     ? Stack(
+                                            //   children: count
+                                            //       .map((e) => Positioned.fromRect(
+                                            //       rect: Rect.fromCenter(
+                                            //           center: tracking[count.indexOf(e)], width: 100, height: 100),
+                                            //       child: Center(
+                                            //           child: Text(
+                                            //             e.toString(),
+                                            //             style: TextStyle(color: Colors.white),
+                                            //             textScaleFactor: 1/snapshot.data.scale,
+                                            //           ))))
+                                            //       .toList(),
+                                            // )
+                                            //     : Container(),
+                                            measurement != null && measurement.length > 1
+                                                ? Stack(
+                                                    children: measurement
+                                                        .sublist(1)
+                                                        .map((e) => Positioned.fromRect(
+                                                            rect: Rect.fromCenter(
+                                                                center: (measurement[measurement.indexOf(e) - 1] +
+                                                                        measurement[measurement.indexOf(e)]) /
+                                                                    2,
+                                                                width: 100,
+                                                                height: 100),
+                                                            child: Center(
+                                                                child: Transform.rotate(
+                                                              angle: pi /
+                                                                  (180 /
+                                                                      Line(measurement[measurement.indexOf(e) - 1],
+                                                                              measurement[measurement.indexOf(e)])
+                                                                          .degree()),
+                                                              child: Text(
+                                                                  '${(Line(rmeasurement[measurement.indexOf(e) - 1], rmeasurement[measurement.indexOf(e)]).length() / 1000).toStringAsFixed(2)}'
+                                                                  // style: TextStyle(color: Colors.white),
+                                                                  ),
+                                                            ))))
+                                                        .toList(),
+                                                  )
+                                                : Container(),
+                                          ],
+                                        );
+                                      }),
 
+                              ///커스텀페인터 그리드 및 교점
+                                // context.watch<Current>().getDrawing().scale != '1'
+                                //     ? Container(
+                                //         child: StreamBuilder<PhotoViewControllerValue>(
+                                //           stream: _pContrl.outputStateStream,
+                                //                 initialData: PhotoViewControllerValue(
+                                //                   position: Offset(0,0),
+                                //                   rotation: 0,
+                                //                   rotationFocusPoint: null,
+                                //                   scale: 1,
+                                //                 ),
+                                //             builder: (context, snapshot2) {
+                                //             return CustomPaint(
+                                //               painter: GridMaker(
+                                //                 snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
+                                //                 double.parse(context.watch<Current>().getDrawing().scale) * 421,
+                                //                 _origin,
+                                //                 pointList: _iPs,
+                                //                 deviceWidth: c.maxWidth,
+                                //                 cordinate: context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight),
+                                //                 sS: snapshot2.data.scale,
+                                //                 x: keyX*c.maxWidth,
+                                //                 y: keyY*c.maxHeight ,
+                                //               ),
+                                //             );
+                                //           }
+                                //         ),
+                                //       )
+                                //     : Container(),
 
-                    ///클릭카운터
-                    taskAdd == true ?Container():
-                    StreamBuilder<PhotoViewControllerValue>(
-                      stream: _pContrl.outputStateStream,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-                        return Stack(
-                          children: [
-                            CustomPaint(
-                              painter: CallOutCount(
-                                 tP: tracking,s: snapshot.data.scale),
-                            ),
-                            // count != []
-                            //     ? Stack(
-                            //   children: count
-                            //       .map((e) => Positioned.fromRect(
-                            //       rect: Rect.fromCenter(
-                            //           center: tracking[count.indexOf(e)], width: 100, height: 100),
-                            //       child: Center(
-                            //           child: Text(
-                            //             e.toString(),
-                            //             style: TextStyle(color: Colors.white),
-                            //             textScaleFactor: 1/snapshot.data.scale,
-                            //           ))))
-                            //       .toList(),
-                            // )
-                            //     : Container(),
-                            measurement != null && measurement.length > 1
-                                ? Stack(
-                              children: measurement
-                                  .sublist(1)
-                                  .map((e) => Positioned.fromRect(
-                                  rect: Rect.fromCenter(
-                                      center: (measurement[measurement.indexOf(e) - 1] +
-                                          measurement[measurement.indexOf(e)]) /
-                                          2,
-                                      width: 100,
-                                      height: 100),
-                                  child: Center(
-                                      child: Transform.rotate(
-                                        angle: pi /
-                                            (180 /
-                                                Line(measurement[measurement.indexOf(e) - 1],
-                                                    measurement[measurement.indexOf(e)])
-                                                    .degree()),
-                                        child: Text(
-                                            '${(Line(rmeasurement[measurement.indexOf(e) - 1], rmeasurement[measurement.indexOf(e)]).length()/1000).toStringAsFixed(2)}'
-                                          // style: TextStyle(color: Colors.white),
-                                        ),
-                                      ))))
-                                  .toList(),
-                            )
-                                : Container(),
-                          ],
-                        );
-                      }
-                    ),
-                    ///커스텀페인터 그리드 및 교점
-                    // context.watch<Current>().getDrawing().scale != '1'
-                    //     ? Container(
-                    //         child: CustomPaint(
-                    //           painter: GridMaker(
-                    //             snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
-                    //             double.parse(context.watch<Current>().getDrawing().scale) * 421,
-                    //             _origin,
-                    //             pointList: _iPs,
-                    //             deviceWidth: c.maxWidth,
-                    //             cordinate: context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight),
-                    //           ),
-                    //         ),
-                    //       )
-                    //     : Container(),
+                                /// 테스크 바운더리 위젯
+                                context.watch<Current>().getDrawing().scale != '1'
+                                    ? Stack(
+                                        children: tasks
+                                            .where((t) => t.floor == context.watch<Current>().getDrawing().floor)
+                                            .map((e) => Stack(
+                                                  children: e.boundarys.map(
+                                                    (b) {
+                                                      var watch = context.watch<Current>();
+                                                      return Positioned.fromRect(
+                                                        rect: Rect.fromPoints(
+                                                            Offset(
+                                                              b.bottomRight.dx / (watch.getcordiX() / c.maxWidth) +
+                                                                  (watch.getDrawing().originX * c.maxWidth),
+                                                              b.bottomRight.dy / (watch.getcordiY() / c.maxHeight) +
+                                                                  ((watch.getDrawing().originY * c.maxHeight)),
+                                                            ),
+                                                            Offset(
+                                                              b.topLeft.dx / (watch.getcordiX() / c.maxWidth) +
+                                                                  (watch.getDrawing().originX * c.maxWidth),
+                                                              b.topLeft.dy / (watch.getcordiY() / c.maxHeight) +
+                                                                  ((watch.getDrawing().originY * c.maxHeight)),
+                                                            )),
+                                                        child: GestureDetector(
+                                                          onLongPress: () {
+                                                            List<Task> _tempList =
+                                                                tasks.where((e) => e.boundarys.contains(b)).toList();
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
+                                                            );
+                                                          },
+                                                          child: Container(
+                                                            color: e.favorite == false
+                                                                ? Colors.black12
+                                                                : Color.fromRGBO(255, 0, 0, 0.5),
+                                                            child: Center(
+                                                              child: AutoSizeText(
+                                                                tasks.where((e) => e.boundarys.contains(b)).length.toString(),
+                                                                textScaleFactor: 0.7,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ).toList(),
+                                                ))
+                                            .toList())
+                                    : Container(),
 
-                    /// 테스크 바운더리 위젯
-                    context.watch<Current>().getDrawing().scale != '1'
-                        ? Stack(
-                            children: tasks
-                                .where((t) => t.floor==context.watch<Current>().getDrawing().floor)
-                                .map((e) => Stack(
-                                      children: e.boundarys.map(
-                                        (b) {
+                                /// 선택한 바운더리 위젯
+                                taskAdd != true
+                                    ? Container()
+                                    : Stack(
+                                        children: boundarys.map(
+                                        (e) {
                                           var watch = context.watch<Current>();
                                           return Positioned.fromRect(
                                             rect: Rect.fromPoints(
                                                 Offset(
-                                                  b.bottomRight.dx / (watch.getcordiX() / c.maxWidth) +
+                                                  e.boundary.bottomRight.dx / (watch.getcordiX() / c.maxWidth) +
                                                       (watch.getDrawing().originX * c.maxWidth),
-                                                  b.bottomRight.dy / (watch.getcordiY() / c.maxHeight) +
+                                                  e.boundary.bottomRight.dy / (watch.getcordiY() / c.maxHeight) +
                                                       ((watch.getDrawing().originY * c.maxHeight)),
                                                 ),
                                                 Offset(
-                                                  b.topLeft.dx / (watch.getcordiX() / c.maxWidth) +
+                                                  e.boundary.topLeft.dx / (watch.getcordiX() / c.maxWidth) +
                                                       (watch.getDrawing().originX * c.maxWidth),
-                                                  b.topLeft.dy / (watch.getcordiY() / c.maxHeight) +
+                                                  e.boundary.topLeft.dy / (watch.getcordiY() / c.maxHeight) +
                                                       ((watch.getDrawing().originY * c.maxHeight)),
                                                 )),
-                                            child: GestureDetector(
-                                              onLongPress: () {
-                                                List<Task> _tempList =
-                                                    tasks.where((e) => e.boundarys.contains(b)).toList();
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
-                                                );
-                                              },
-                                              child: Container(
-                                                color: e.favorite == false
-                                                    ? Colors.black12
-                                                    : Color.fromRGBO(255, 0, 0, 0.5),
-                                                child: Center(
-                                                  child: AutoSizeText(
-                                                    tasks.where((e) => e.boundarys.contains(b)).length.toString(),
-                                                    textScaleFactor: 0.7,
+                                            child: Opacity(
+                                              opacity: 0.5,
+                                              child: ElevatedButton(
+                                                onLongPress: () {
+                                                  setState(() {
+                                                    List<Task> _boundaryTask = e.tasksList;
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(builder: (context) => BoundayDetail(_boundaryTask)),
+                                                    );
+                                                  });
+                                                },
+                                                onPressed: () {
+                                                  setState(() {
+                                                    boundarys.remove(e);
+                                                  });
+                                                  print(e.writeTime.toString());
+                                                },
+                                                child: null,
+                                                style: ElevatedButton.styleFrom(
+                                                  primary: Colors.green,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(0.0),
                                                   ),
                                                 ),
                                               ),
                                             ),
                                           );
                                         },
-                                      ).toList(),
-                                    ))
-                                .toList())
-                        : Container(),
+                                      ).toList()),
 
-                    /// 선택한 바운더리 위젯
-                    taskAdd !=true?Container():
-                        Stack(
-                          children: boundarys.map(
-                                (e) {
-                              var watch = context.watch<Current>();
-                              return Positioned.fromRect(
-                                rect: Rect.fromPoints(
-                                    Offset(
-                                      e.boundary.bottomRight.dx / (watch.getcordiX() / c.maxWidth) +
-                                          (watch.getDrawing().originX * c.maxWidth),
-                                      e.boundary.bottomRight.dy / (watch.getcordiY() / c.maxHeight) +
-                                          ((watch.getDrawing().originY * c.maxHeight)),
-                                    ),
-                                    Offset(
-                                      e.boundary.topLeft.dx / (watch.getcordiX() / c.maxWidth) +
-                                          (watch.getDrawing().originX * c.maxWidth),
-                                      e.boundary.topLeft.dy / (watch.getcordiY() / c.maxHeight) +
-                                          ((watch.getDrawing().originY * c.maxHeight)),
-                                    )),
-                                child: Opacity(
-                                  opacity: 0.5,
-                                  child: ElevatedButton(
-                                    onLongPress: () {
-                                      setState(() {
-                                        List<Task> _boundaryTask = e.tasksList;
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) => BoundayDetail(_boundaryTask)),
-                                        );
-                                      });
-                                    },
-                                    onPressed: () {
-                                      setState(() {
-                                        boundarys.remove(e);
-                                      });
-                                      print(e.writeTime.toString());
-                                    },
-                                    child: null,
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Colors.green,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(0.0),
-                                      ),
-                                    ),
-                                  ),
+                                // 도면 정보 스케일 위젯
+                                ///도면 상세정보
+                                // StreamBuilder<PhotoViewControllerValue>(
+                                //     stream: _pContrl.outputStateStream,
+                                //     builder: (context, snapshot) {
+                                //       if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                                //       return snapshot.data.scale < 12 ? planInfo(context) : detailInfo(context);
+                                //     }),
+                                ///CallOut 바운더리 구현
+                                callOutLayerOn == true
+                                    ? Stack(
+                                        children: context.watch<Current>().getDrawing().callOutMap.map((e) {
+                                          double l = e['bLeft'] / context.watch<Current>().getcordiX() * c.maxWidth;
+                                          double t = e['bTop'] / context.watch<Current>().getcordiX() * c.maxWidth;
+                                          double r = e['bRight'] / context.watch<Current>().getcordiX() * c.maxWidth;
+                                          double b = e['bBottom'] / context.watch<Current>().getcordiX() * c.maxWidth;
+                                          double x = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dx;
+                                          double y = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dy;
+                                          return Positioned.fromRect(
+                                            rect: Rect.fromLTRB(
+                                              l + x,
+                                              t + y,
+                                              r + x,
+                                              b + y,
+                                            ),
+                                            child: GestureDetector(
+                                              onLongPress: () {
+                                                callOutLayerOn = false;
+                                                count = [];
+                                                tracking = [];
+                                                Drawing select = drawings.singleWhere((v) => v.drawingNum == e['name']);
+                                                context.read<Current>().changePath(select);
+                                                recaculate();
+                                                setState(() {});
+                                              },
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(10),
+                                                child: Container(
+                                                  color: Color.fromRGBO(255, 0, 0, 0.15),
+                                                  child: Center(
+                                                      child: AutoSizeText(
+                                                    e['name'],
+                                                    maxLines: 1,
+                                                    minFontSize: 0,
+                                                    // minFontSize: ,
+                                                  )),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      )
+                                    : Container(),
+
+                                ///RoomTag구현
+                                callOutLayerOn == true
+                                    ? Stack(
+                                        children: context.watch<Current>().getDrawing().roomMap.map((e) {
+                                          double l = e['bLeft'] / context.watch<Current>().getcordiX() * c.maxWidth;
+                                          double t = e['bTop'] / context.watch<Current>().getcordiX() * c.maxWidth;
+                                          double r = e['bRight'] / context.watch<Current>().getcordiX() * c.maxWidth;
+                                          double b = e['bBottom'] / context.watch<Current>().getcordiX() * c.maxWidth;
+                                          double x = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dx;
+                                          double y = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dy;
+                                          return Positioned.fromRect(
+                                            rect: Rect.fromLTRB(
+                                              l + x,
+                                              t + y,
+                                              r + x,
+                                              b + y,
+                                            ),
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  print(e['name']);
+                                                  selectRoom = interiorList.singleWhere((r) => r.roomNum.contains(e['id']));
+                                                });
+                                              },
+                                              child: Container(
+                                                color: Color.fromRGBO(0, 0, 255, 0.3),
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      )
+                                    : Container(),
+                                CustomPaint(
+                                  painter: CrossHairPaint(hover),
+                                  // painter: CrossHairPaint(hover,width: context.size.width,height: context.size.height),
                                 ),
-                              );
-                            },
-                          ).toList()
+
+                              ],
+                            ),
+                          ),
                         ),
-
-                    // 도면 정보 스케일 위젯
-                    ///도면 상세정보
-                    // StreamBuilder<PhotoViewControllerValue>(
-                    //     stream: _pContrl.outputStateStream,
-                    //     builder: (context, snapshot) {
-                    //       if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
-                    //       return snapshot.data.scale < 12 ? planInfo(context) : detailInfo(context);
-                    //     }),
-                    ///CallOut 바운더리 구현
-                    callOutLayerOn == true
-                        ? Stack(
-                            children: context.watch<Current>().getDrawing().callOutMap.map((e) {
-                              double l = e['bLeft'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                              double t = e['bTop'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                              double r = e['bRight'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                              double b = e['bBottom'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                              double x = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dx;
-                              double y = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dy;
-                              return Positioned.fromRect(
-                                rect: Rect.fromLTRB(
-                                  l + x,
-                                  t + y,
-                                  r + x,
-                                  b + y,
-                                ),
-                                child: GestureDetector(
-                                  onLongPress: () {
-                                    callOutLayerOn = false;
-                                    count = [];
-                                    tracking = [];
-                                    Drawing select = drawings.singleWhere((v) => v.drawingNum == e['name']);
-                                    context.read<Current>().changePath(select);
-                                    recaculate();
-                                    setState(() {});
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Container(
-                                      color: Color.fromRGBO(255, 0, 0, 0.15),
-                                      child: Center(
-                                          child: AutoSizeText(
-                                        e['name'],
-                                        maxLines: 1,
-                                        minFontSize: 0,
-                                        // minFontSize: ,
-                                      )),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          )
-                        : Container(),
-
-                    ///RoomTag구현
-                    callOutLayerOn == true
-                        ? Stack(
-                            children: context.watch<Current>().getDrawing().roomMap.map((e) {
-                              double l = e['bLeft'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                              double t = e['bTop'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                              double r = e['bRight'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                              double b = e['bBottom'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                              double x = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dx;
-                              double y = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dy;
-                              return Positioned.fromRect(
-                                rect: Rect.fromLTRB(
-                                  l + x,
-                                  t + y,
-                                  r + x,
-                                  b + y,
-                                ),
-                                child: GestureDetector(
+                        StreamBuilder<PhotoViewControllerValue>(
+                          stream: _pContrl.outputStateStream,
+                            initialData: PhotoViewControllerValue(
+                              position: _pContrl.position,
+                              rotation: 0,
+                              rotationFocusPoint: null,
+                              scale: _pContrl.scale,
+                            ),
+                          builder: (context, snapshot) {
+                            gridIntersection(snapshot, c);
+                            return
+                              moving==false&&_offset==Offset.zero?Stack(
+                                children: bb.map((e) {
+                                    return Positioned.fromRect(
+                                      rect: Rect.fromCenter(center: e.p, width: 50, height: 50),
+                                      child: Transform.scale(
+                                        scale: 1 / snapshot.data.scale,
+                                        child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(100),
+                                            child: Container(
+                                                color: Colors.redAccent,
+                                                child: Center(
+                                                    child: Text(
+                                                  e.name.replaceAll('-', ''),
+                                                  style: TextStyle(color: Colors.white),
+                                                )))),
+                                      ),
+                                    );
+                                  }).toList()):Container();
+                          }
+                        )
+                        ///고정그리드 구현중
+                      ],
+                    );
+                  }
+                ),
+              ),
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(80)),
+               color: Colors.white54,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(width: 50,),
+                    IconButton(
+                      icon: Icon(CommunityMaterialIcons.search_web),
+                      iconSize: 48,
+                      tooltip: '검색',
+                      onPressed: () {
+                        Get.defaultDialog(title: '도면검색', content: SearchDialog(drawings));
+                      },),
+                    IconButton(
+                      icon: Icon(CommunityMaterialIcons.star),
+                      iconSize: 48,
+                      tooltip: '즐겨찾기',
+                      onPressed: () {
+                        Get.defaultDialog(
+                            title: '즐겨찾기',
+                            content: Wrap(
+                              children: context
+                                  .read<Current>()
+                                  .favorite
+                                  .map((e) => Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: InkWell(
                                   onTap: () {
                                     setState(() {
-                                      print(e['name']);
-                                      selectRoom = interiorList.singleWhere((r) => r.roomNum.contains(e['id']));
+                                      context.read<Current>().changePath(e);
                                     });
                                   },
-                                  child: Container(
-                                    color: Color.fromRGBO(0, 0, 255, 0.3),
+                                  child: Chip(
+                                    avatar: CircleAvatar(child: Text(e.drawingNum[0])),
+                                    label: Text(e.title),
                                   ),
                                 ),
-                              );
-                            }).toList(),
-                          )
-                        : Container(),
+                              ))
+                                  .toList(),
+                            ));
+                      },),
+                    Tooltip(
+                      message: '도면검색',
+                      child: InkWell(
+                        onLongPress: () {
+                          context.read<Current>().addFavorite(e);
+                        },
+                        onTap: () {
+                          Get.defaultDialog(title: '도면검색', content: SearchDialog(drawings));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            context.read<Current>().getDrawing().toString(),
+                            textScaleFactor: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                        icon: Icon(Icons.keyboard_arrow_down),
+                        iconSize: 72,
+                        tooltip: '아래층',
+                        onPressed: () {
+                          Drawing c = context.read<Current>().getDrawing();
+                          Current temp = context.read<Current>();
+                          List<Drawing> tempcon = drawings
+                              .where((e) =>
+                          e.doc == c.doc &&
+                              e.con == c.con &&
+                              e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
+                              .toList();
+                          temp.changePath(tempcon.elementAt((tempcon.indexOf(c) - 1)));
+                        }),
+                    IconButton(
+                        icon: Icon(Icons.keyboard_arrow_up),
+                        iconSize: 72,
+                        tooltip: '위층',
+                        onPressed: () {
+                          Drawing c = context.read<Current>().getDrawing();
+                          Current temp = context.read<Current>();
+                          List<Drawing> tempcon = drawings
+                              .where((e) =>
+                          e.doc == c.doc &&
+                              e.con == c.con &&
+                              e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
+                              .toList();
+                          temp.changePath(tempcon.elementAt((tempcon.indexOf(c) + 1)));
+                        }),
+                    IconButton(
+                      icon: Icon(Icons.all_inbox_rounded),
+                      iconSize: 48,
+                      tooltip: '공정',
+                      onPressed: () {
+                          Drawing c = context.read<Current>().getDrawing();
+                          Current temp = context.read<Current>();
+                          List<Drawing> tempcon = drawings
+                              .where((e) =>
+                          e.doc == c.doc &&
+                              e.con != c.con &&
+                              e.floor == c.floor &&
+                              e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
+                              .toList();
+                          Get.defaultDialog(
+                              title: '공정이동',
+                              content: Column(
+                                children: tempcon
+                                    .map((e) => ListTile(
+                                  title: Text(e.toString()),
+                                  onTap: (){
+                                    context.read<Current>().changePath(e);
+                                    Navigator.pop(context);
+                                  },
+                                ))
+                                    .toList(),
+                              ));
+                        },),
+                    IconButton(
+                      icon: Icon(CommunityMaterialIcons.ruler),
+                      iconSize: 48,
+                      tooltip: '측정',
+                      onPressed: () {
+                        setState(() {
+                          taskAdd = !taskAdd;
+                          boundarys = [];
+                          tracking = [];
+                          measurement = [];
+                          rmeasurement = [];
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(CommunityMaterialIcons.filter_menu),
+                      iconSize: 48,
+                      tooltip: '필터',
+                      onPressed: () {
+                        setState(() {
+                          callOutLayerOn = !callOutLayerOn;
+                        });
+                      },
+                    ),
+                    SizedBox(width: 50,),
                   ],
                 ),
               ),
+              SizedBox(height: 100,)
             ],
           ),
         ),
-      ),
+
+      ],
     );
   }
 
@@ -1197,7 +1523,7 @@ class _GridButtonState extends State<GridButton> {
   }
 
   void reaSelectIntersect(c) {
-    double _scale = double.parse(context.read<Current>().getDrawing().scale) * 421.0;
+    double _scale = double.parse(context.read<Current>().getDrawing().scale) * 420.0;
     testgrids.where((e) => e.name == _gridX.text || e.name == _gridY.text).forEach((element) {
       print(element.name);
     });
@@ -1212,7 +1538,7 @@ class _GridButtonState extends State<GridButton> {
 
   void recaculate() {
     List<Line> lines = [];
-    double _scale = double.parse(context.read<Current>().getDrawing().scale) * 421.0;
+    double _scale = double.parse(context.read<Current>().getDrawing().scale) * 420.0;
     testgrids.forEach((e) {
       lines.add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble()) / _scale,
           Offset(e.endX.toDouble(), -e.endY.toDouble()) / _scale));
@@ -1224,6 +1550,42 @@ class _GridButtonState extends State<GridButton> {
           .add(Line(Offset(e.startX.toDouble(), -e.startY.toDouble()), Offset(e.endX.toDouble(), -e.endY.toDouble())));
     });
     _realIPs = Intersection().computeLines(realLines).toSet().toList();
+  }
+  List gridIntersection(snapshot, c){
+    Offset cordi = context.read<Current>().getcordiOffset(c.maxWidth, c.maxHeight);
+    double sS = snapshot.data.scale;
+    double scale = double.parse(context.read<Current>().getDrawing().scale) * 420 / c.maxWidth;
+    Rect b = Rect.fromCenter(
+        center: Offset(c.maxWidth / 2 - keyX * c.maxWidth, c.maxHeight / 2 - keyY * c.maxHeight),
+        width: c.maxWidth * 0.95 / sS,
+        height: c.maxHeight * 0.92 / sS);
+    Line aa = Line(b.topLeft, b.topRight);
+    List<Line> ab = [
+      Line(b.topLeft, b.topRight),
+      Line(b.topRight, b.bottomRight),
+      Line(b.bottomRight, b.bottomLeft),
+      Line(b.bottomLeft, b.topLeft),
+    ];
+    List<Line> temp = [];
+    bb = [];
+    testgrids.forEach((e) {
+      Line _line =Line(Offset(e.startX.toDouble(), -e.startY.toDouble()) / scale + cordi,
+          Offset(e.endX.toDouble(), -e.endY.toDouble()) / scale + cordi);
+      ab.forEach((l) {
+        if(Intersection().checkCollision(_line, l) == false){
+        } else {
+          bb.add(GridIcon(Intersection().compute(_line, l), e.name));
+        }
+      });
+
+      // temp.forEach((t) {
+      //   if (Intersection().checkCollision(t, aa) == false) {
+      //   } else {
+      //     bb.add(GridIcon(Intersection().compute(t, aa), e.name));
+      //   }
+      // });
+    });
+    return bb;
   }
 
   customHandler(IconData icon) {
@@ -1249,6 +1611,12 @@ class _GridButtonState extends State<GridButton> {
       ),
     );
   }
+}
+class GridIcon{
+  Offset p;
+  String name;
+
+  GridIcon(this.p, this.name);
 }
 
 class DetiailResult extends StatelessWidget {

@@ -19,6 +19,9 @@ class Drawing {
   num witdh;
   num height;
   num floor;
+  String doc = '미분류';
+  String con = '미분류';
+  bool axis = false;
 
   ///서치기능 활용
   DateTime createdAt;
@@ -104,11 +107,15 @@ class Drawing {
     pointX = json['pointX'].cast<double>();
     pointY = json['pointY'].cast<double>();
     pointName = json['pointName'].cast<String>();
-    originX = json["originX"];
-    originY = json["originY"];
+    originX = json["originX"].toDouble();
+    originY = json["originY"].toDouble();
     floor = json["floor"];
     witdh = json["width"];
     height = json["height"];
+    con = json["con"];
+    doc = json["doc"];
+    axis = json["axis"];
+
 
     ///OCR데이터 Read
     // Iterable jsonOcrRect = json["ocrData"];
@@ -211,6 +218,7 @@ class Drawing {
     //     );
     //   }).toList();
     // }
+    print('$drawingNum$title');
   }
 
   Drawing.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
@@ -234,6 +242,9 @@ class Drawing {
     data["floor"] = this.floor;
     data["width"] = this.witdh;
     data["height"] = this.height;
+    data["con"] = this.con;
+    data["doc"] = this.doc;
+    data["axis"] = this.axis;
     // List<Map>roomsMap = this.roomMap.map((e) =>
     // {
     //   'name': e.name,
