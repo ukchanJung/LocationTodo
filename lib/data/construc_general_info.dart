@@ -75,6 +75,10 @@ class ConGInfo {
 
   @override
   String toString() {
-    return 'ConGInfo{index1: $index1, conType: $conType, page: $page, index2: $index2, index3: $index3, index4: $index4, index5: $index5, index6: $index6, index7: $index7 }';
+    return '${index1}.${conType} ${index2}.${index3} ${index4} ${index5}';
   }
+  // @override
+  // String toString() {
+  //   return 'ConGInfo{index1: $index1, conType: $conType, page: $page, index2: $index2, index3: $index3, index4: $index4, index5: $index5, index6: $index6, index7: $index7 }';
+  // }
 }

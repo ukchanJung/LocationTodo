@@ -30,17 +30,17 @@ class _CrossHairState extends State<CrossHair> {
 
 class CrossHairPaint extends CustomPainter {
   Offset h = Offset.zero;
-  double s;
+  double s=1;
   double width = 10000;
   double height = 10000;
 
-  CrossHairPaint(this.h,{this.width,this.height,});
+  CrossHairPaint(this.h,{this.width,this.height,this.s});
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint crossHair = Paint()
       ..strokeCap = StrokeCap.square
-      ..strokeWidth = 2.0
+      ..strokeWidth = 2.0/s
       ..color = Color.fromRGBO(0, 0, 255, 0.5);
 
     canvas.drawLine(Offset(h.dx,0), Offset(h.dx,100000000), crossHair);

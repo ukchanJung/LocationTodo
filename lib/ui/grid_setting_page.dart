@@ -22,12 +22,12 @@ import 'package:photo_view/photo_view.dart';
 import 'package:positioned_tap_detector/positioned_tap_detector.dart';
 import 'package:provider/provider.dart';
 
-class SettingPage2 extends StatefulWidget {
+class GridSettingPage extends StatefulWidget {
   @override
-  _SettingPage2State createState() => _SettingPage2State();
+  _GridSettingPageState createState() => _GridSettingPageState();
 }
 
-class _SettingPage2State extends State<SettingPage2> {
+class _GridSettingPageState extends State<GridSettingPage> {
   List<Grid> grids = [];
   List<Gridtestmodel> testgrids = [];
   Offset _origin = Offset(0, 0);
@@ -185,7 +185,6 @@ class _SettingPage2State extends State<SettingPage2> {
                                               hover==Offset.zero?Container():CustomPaint(
                                                 painter: CrossHairPaint(hover,s: _pContrl.scale),
                                               ),
-
                                             ],
                                           ),
                                         ),
@@ -212,7 +211,7 @@ class _SettingPage2State extends State<SettingPage2> {
                                   controller: _gridX,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(),
-                                    labelText: 'X그리드',
+                                    labelText: 'TYPE이름',
                                   ),
                                 ),
                               ),
@@ -311,7 +310,7 @@ class _SettingPage2State extends State<SettingPage2> {
     double _scale = double.parse(context.read<Current>().getDrawing().scale) * 420.0;
     List<Line> lines = testgrids
         .map((e) => Line(Offset(e.startX.toDouble(), -e.startY.toDouble()) / _scale,
-            Offset(e.endX.toDouble(), -e.endY.toDouble()) / _scale))
+        Offset(e.endX.toDouble(), -e.endY.toDouble()) / _scale))
         .toList();
     _iPs = Intersection().computeLines(lines).toSet().toList();
     List<Line> realLines = [];

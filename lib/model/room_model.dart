@@ -73,4 +73,4 @@ class DetailInfo{
 
   DetailInfo({this.name, this.category, this.left, this.top, this.right, this.bottom, this.x, this.y, this.z});
 }
-enum OcrCategory { Room, CallOut, DetailInfo }
+enum OcrCategory { Room, CallOut, DetailInfo ,Elevation,Section}

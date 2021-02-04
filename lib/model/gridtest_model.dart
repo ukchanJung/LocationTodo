@@ -6,10 +6,23 @@ class Gridtestmodel {
   String index;
   num startX;
   num startY;
+  num startZ;
   num endX;
   num endY;
+  num endZ;
 
   Gridtestmodel({this.name, this.type, this.index, this.startX, this.startY, this.endX, this.endY});
+  Gridtestmodel.map(Map<String, dynamic>data){
+    name = data["name"];
+    type = data["type"];
+    index = data["index"];
+    startX = data["startX"];
+    startY = data["startY"];
+    startZ = data["startZ"];
+    endX = data["endX"];
+    endY = data["endY"];
+    endZ = data["endZ"];
+  }
 
   Gridtestmodel.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
     name = json["name"];

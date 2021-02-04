@@ -35,6 +35,7 @@ class Drawing {
   List<Room> rooms;
   List<Map> roomMap = [];
   List<Map> callOutMap = [];
+  List<Map> sectionMap = [];
   List<Map> detailInfoMap = [];
 
   Drawing({
@@ -174,6 +175,27 @@ class Drawing {
               })
           .toList();
     }
+    Iterable jsonSection = json['sectionMap'];
+    if (jsonSection != null) {
+      sectionMap = jsonSection
+          .map((f) => {
+                'name': f['name'],
+                'id': f['id'],
+                'category': f['category'],
+                'left': f['left'],
+                'top': f['top'],
+                'right': f['right'],
+                'bottom': f['bottom'],
+                'x': f['x'],
+                'y': f['y'],
+                'z': f['z'],
+                'bLeft': f['bLeft'],
+                'bTop': f['bTop'],
+                'bRight': f['bRight'],
+                'bBottom': f['bBottom'],
+              })
+          .toList();
+    }
     Iterable jsonDetailInfo = json['detailInfoMap'];
     if (jsonDetailInfo != null) {
       detailInfoMap = jsonDetailInfo
@@ -218,7 +240,7 @@ class Drawing {
     //     );
     //   }).toList();
     // }
-    print('$drawingNum$title');
+    // print('$drawingNum$title');
   }
 
   Drawing.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
@@ -278,9 +300,11 @@ class Drawing {
     //           'sealL': e.sealL
     //         })
     //     .toList();
-    data["roomMap"] = roomMap;
+    data["roomMap"] = this.roomMap;
     data["callOutMap"] = this.callOutMap;
+    data["sectionMap"] = this.sectionMap;
     data["detailInfoMap"] = this.detailInfoMap;
+    print(sectionMap);
     return data;
   }
 
