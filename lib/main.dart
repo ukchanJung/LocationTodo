@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       title: 'TIMWORK',
       theme: ThemeData(
-        primarySwatch: Colors.orange,
+        primarySwatch: Colors.deepOrange,
         // elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.deepOrange) )
       ),
       // home: GridButton(),

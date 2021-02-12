@@ -8,184 +8,205 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 
 class GeneralInfo extends StatefulWidget {
+  List<ConGInfo> infos;
+
+  GeneralInfo(this.infos);
+
   @override
   _GeneralInfoState createState() => _GeneralInfoState();
 }
 
 class _GeneralInfoState extends State<GeneralInfo> {
-  List<ConGInfo> infos;
   List infodatas;
   bool a = false;
-  TextEditingController _textEditingController;
+  TextEditingController _textEditingController = TextEditingController();
   List<String> data;
   String aa;
   String search = '일반사항';
-  List category;
+  List<String> category;
+  List<String> category2;
+  List<Map> category3;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _textEditingController = TextEditingController();
-    infos = structureJson.map((e) => ConGInfo.fromMap(e)).toList();
-    void readingInfo() async {
-      FirebaseFirestore _db = FirebaseFirestore.instance;
-      QuerySnapshot read = await _db.collection('generalInfo').get();
-      infodatas = read.docs;
-      infodatas.forEach((e) {});
-      //그리드를 통한 교차점 확인
-      //TODO 실시간 연동 바운더리
-    }
-
-    // readingInfo();
-     category = infos.map((e) => e.conType).toSet().toList();
-    print(category);
-
+    category = widget.infos.map((e) => e.conType).toSet().toList();
+    // category2 = widget.infos.map((e) => e.index7).toSet().toList();
+    // category3 = widget.infos.map((e) => {'index7':e.index7,'Dif':e.toDif()}).toSet().toList();
+    // print(category3);
+    // print(category3.length);
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _textEditingController.dispose();
   }
-Color temp (String t){
-    if(t.contains("#")){
+
+  Color temp(String t) {
+    if (t.contains("#")) {
       return Colors.amber;
-    }else if(t.contains('@')){
+    } else if (t.contains('@')) {
       return Colors.pinkAccent;
-    }else if(t.contains('!')){
+    } else if (t.contains('!')) {
       return Colors.green;
-    } else Colors.grey;
-}
+    } else
+      Colors.grey;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: category.map((c) => ExpansionTile(title: Text(c),
-        children: infos.where((t) => t.conType==c&&t.index7=='text')
-          .map((e) => ExpansionTile(
-        leading: Text('${e.page}p'),
-        title: Text(e.toString()),
-        children: [
-          Container(child: Image.asset('asset/structure/${e.path}'),),
-          Wrap(
-            children: infos
-                .where((c) => c.toString() == e.toString() && c.index7 != 'text')
-                .map((e) => Container(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: InkWell(
-                    onTap: (){Get.defaultDialog(content: Image.asset('asset/structure/${e.path}'));},
-                    child: Chip(
-                      label: Text(e.index7.substring(1)),
-                      backgroundColor: temp(e.index7)
-                    ),
-                  ),
-                )))
-                .toList(),
-          ),
-        ],
-      ))
-          .toList(),)).toList(),
-    );}
-  // }  Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text('LH핸드북'),
-  //     ),
-  //     floatingActionButton: FloatingActionButton(
-  //       onPressed: () {
-  //         infos.forEach(print);
-  //         setState(() {
-  //           data = infodatas
-  //               .map((e) =>
-  //                   "{'path' : '${e['path']}'},{'fulltext' : '${e['fulltext'].replaceAll(' ', '').replaceAll('\n', '')}'}")
-  //               .toList();
-  //           a = true;
-  //           // _textEditingController.text =infodatas.toString();
-  //         });
-  //       },
-  //     ),
-  //     // body: a == false
-  //     //   ?Container()
-  //     // :Column(
-  //     //   children: [
-  //     //     Container(
-  //     //       height: 100,
-  //     //       child: Row(
-  //     //         children: [
-  //     //           Padding(
-  //     //             padding: const EdgeInsets.all(8.0),
-  //     //             child: Container(
-  //     //               width: 300,
-  //     //               height: 80,
-  //     //               child: TextField(controller: _textEditingController,
-  //     //               ),
-  //     //             )
-  //     //           ),
-  //     //           ElevatedButton(onPressed: (){
-  //     //             setState(() {
-  //     //               search = _textEditingController.text;
-  //     //             });
-  //     //           },child: Text('검색'),)
-  //     //         ],
-  //     //       ),
-  //     //     ),
-  //     //     Expanded(
-  //     //       child: ListView(
-  //     //               children: infodatas
-  //     //                   .where((e) => e['fulltext'].replaceAll(' ','').contains(search.replaceAll(' ', '')))
-  //     //                   .map((t) => Column(
-  //     //                 mainAxisSize: MainAxisSize.min,
-  //     //                         children: [
-  //     //                           ListTile(
-  //     //                             title: Text(infos.singleWhere((v) => v.path==t['path']).toString()),
-  //     //                           ),
-  //     //                           Divider(),
-  //     //                           Image.asset('asset/structure/${t['path']}'),
-  //     //                           Divider(),
-  //     //                         ],
-  //     //                       )).toList()
-  //     //       ),
-  //     //     ),
-  //     //   ],
-  //     // ),
-  //     ///테스트
-  //     body: ListView(
-  //       children: infos.where((t) => t.index7=='text')
-  //           .map((e) => ExpansionTile(
-  //                 leading: Text('${e.page}p'),
-  //                 title: Text(e.toString()),
-  //         children: [
-  //           Container(child: Image.asset('asset/structure/${e.path}'),),
-  //                   Wrap(
-  //                     children: infos
-  //                         .where((c) => c.toString() == e.toString() && c.index7 != 'text')
-  //                         .map((e) => Container(
-  //                                 child: Padding(
-  //                                   padding: const EdgeInsets.all(8.0),
-  //                                   child: InkWell(
-  //                                     onTap: (){Get.defaultDialog(content: Image.asset('asset/structure/${e.path}'));},
-  //                                     child: Chip(
-  //                                       label: Text(e.index7),
-  //                             ),
-  //                                   ),
-  //                                 )))
-  //                         .toList(),
-  //                   ),
-  //                   // ...infos.where((c) => c.toString() == e.toString() && c.index7 != 'text').map((e) => Card(
-  //                   //   child: ExpansionTile(
-  //                   //     leading: Text('${e.page.toString()}p'),
-  //                   //         title: Text(e.index7),
-  //                   //     children: [
-  //                   //       Container(child: Image.asset('asset/structure/${e.path}'),),
-  //                   //     ],
-  //                   //       ),
-  //                   // ))
-  //                 ],
-  //               ))
-  //           .toList(),
-  //     ),
-  //   );
-  // }
+    return Builder(
+      builder: (BuildContext ctx) {
+        return ListView(
+          children: category.map((a){
+            List<ConGInfo> subInfo = widget.infos.where((b) => b.conType == a && b.index7 == 'text').toList();
+            List<ConGInfo> Test = widget.infos.where((b) => b.conType == a ).toList();
+        return ExpansionTile(
+          title: Text(a),
+          onExpansionChanged: (_){
+            print(subInfo);
+            print(subInfo.length);
+          },
+          children: subInfo
+              .map(
+                (c) {
+                  bool _temp = false;
+                              List<ConGInfo> _tempG =
+                              Test.where((e) => e.toDif() == c.toDif() && e.index7 != 'text').toList();
+                              List<String> _tempL = Test
+                                  .where((e) => e.toDif() == c.toDif() && e.index7 != 'text')
+                                  .map((e) => e.index7)
+                                  .toSet()
+                                  .toList();
+                  return ExpansionTile(
+                title: Text(c.toString()),
+                children: _temp == true
+                    ? [
+                        Container(
+                          width: 300,
+                          height: 300,
+                          color: Colors.redAccent,
+                        )
+                      ]
+                    : [
+                        Container(
+                          child: Image.asset('asset/structure/${c.path}'),
+                        ),
+                        Wrap(
+                          children: _tempL.map((e) {
+                            return InkWell(
+                              onTap: () {
+                                Get.defaultDialog(
+                                    content: Container(
+                                  height: 800,
+                                  child: SingleChildScrollView(
+                                    child: Wrap(
+                                        children: _tempG
+                                            .where((y) => y.index7 == e)
+                                            .map((z) => Image.asset(
+                                                  'asset/structure/${z.path}',
+                                                  height: 270,
+                                                ))
+                                            .toList()),
+                                  ),
+                                ));
+                              },
+                              child: Chip(
+                                label: Text(e.substring(1)),
+                                backgroundColor: temp(e),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                onExpansionChanged: (_){
+                  setState(() {
+                  _temp = !_temp;
+                  });
+                },
+              );
+            },
+          )
+              .toList(),
+        );
+      }).toList()
+          // children: category
+          //     .map((a) => ExpansionTile(
+          //           title: Text(a),
+          //           children: widget.infos.where((b) => b.conType == a && b.index7 == 'text').map((c) {
+          //             List<ConGInfo> _tempG =
+          //                 widget.infos.where((e) => e.toDif() == c.toDif() && e.index7 != 'text').toList();
+          //             List<String> _tempL = widget.infos
+          //                 .where((e) => e.toDif() == c.toDif() && e.index7 != 'text')
+          //                 .map((e) => e.index7)
+          //                 .toSet()
+          //                 .toList();
+          //             return ExpansionTile(
+          //               leading: Text('${c.page}p'),
+          //               title: Text(c.toString()),
+          //               children: [
+          //                 Container(
+          //                   child: Image.asset('asset/structure/${c.path}'),
+          //                 ),
+          //                 Wrap(
+          //                   children: _tempL.map((e) {
+          //                     return InkWell(
+          //                       onTap: () {
+          //                         Get.defaultDialog(
+          //                             content: Container(
+          //                           height: 800,
+          //                           child: SingleChildScrollView(
+          //                             child: Wrap(
+          //                                 children: _tempG
+          //                                     .where((y) => y.index7 == e)
+          //                                     .map((z) => Image.asset(
+          //                                           'asset/structure/${z.path}',
+          //                                           height: 270,
+          //                                         ))
+          //                                     .toList()),
+          //                           ),
+          //                         ));
+          //                       },
+          //                       child: Chip(
+          //                         label: Text(e.substring(1)),
+          //                         backgroundColor: temp(e),
+          //                       ),
+          //                     );
+          //                   }).toList(),
+          //                 ),
+          //               ],
+          //             );
+          //           }).toList(),
+          //         ))
+          //     .toList(),
+        );
+      }
+    );
+  }
+}
+
+class GeneralInfoDetailPage extends StatefulWidget {
+  List<ConGInfo> temp ;
+
+  GeneralInfoDetailPage({ this.temp });
+
+  @override
+  _GeneralInfoDetailPageState createState() => _GeneralInfoDetailPageState();
+}
+
+class _GeneralInfoDetailPageState extends State<GeneralInfoDetailPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: ListView(
+        children: widget.temp
+            .map(
+              (e) => ExpansionTile(
+                title: Text(e.toString()),
+              ),
+            ).toList(),
+      ),
+    );
+  }
 }

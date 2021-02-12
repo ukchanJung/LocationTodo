@@ -20,6 +20,8 @@ class ConGInfo {
   String index7;
   String path;
   String ocr;
+  String category;
+  String subCategory;
 
   ConGInfo({
       this.index1, 
@@ -76,6 +78,9 @@ class ConGInfo {
   @override
   String toString() {
     return '${index1}.${conType} ${index2}.${index3} ${index4} ${index5}';
+  }
+  String toDif() {
+    return '$conType $index3 $index5';
   }
   // @override
   // String toString() {

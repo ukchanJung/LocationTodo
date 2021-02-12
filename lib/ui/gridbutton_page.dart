@@ -13,27 +13,36 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_location_todo/data/construc_general_info.dart';
+import 'package:flutter_app_location_todo/data/cost_info_data.dart';
 import 'package:flutter_app_location_todo/data/hatch.dart';
 import 'package:flutter_app_location_todo/data/interiorJson.dart';
 import 'package:flutter_app_location_todo/data/interior_index.dart';
 import 'package:flutter_app_location_todo/data/local_list.dart';
+import 'package:flutter_app_location_todo/data/structureJson.dart';
 import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
 import 'package:flutter_app_location_todo/model/boundary_model.dart';
 import 'package:flutter_app_location_todo/model/closest_model.dart';
+import 'package:flutter_app_location_todo/model/cost_info_model.dart';
 import 'package:flutter_app_location_todo/model/drawing_model.dart';
 import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/model/grid_model.dart';
 import 'package:flutter_app_location_todo/model/gridtest_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
+import 'package:flutter_app_location_todo/model/standard_detail_class.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/ui/boundary_detail_page.dart';
+import 'package:flutter_app_location_todo/ui/cost_info_page.dart';
 import 'package:flutter_app_location_todo/ui/crosshair_paint.dart';
+import 'package:flutter_app_location_todo/ui/drawing_list_page.dart';
 import 'package:flutter_app_location_todo/ui/general_info_page.dart';
 import 'package:flutter_app_location_todo/ui/label_text_widget.dart';
+import 'package:flutter_app_location_todo/ui/standard_detail_page.dart';
 import 'package:flutter_app_location_todo/ui/task_add_page.dart';
 import 'package:flutter_app_location_todo/ui/timview_page.dart';
 import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
 import 'package:flutter_app_location_todo/widget/searchdialog_widget.dart';
+import 'package:flutter_speed_dial_material_design/flutter_speed_dial_material_design.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -75,6 +84,7 @@ class _GridButtonState extends State<GridButton> {
   PhotoViewController _pContrl = PhotoViewController();
   PhotoViewController _nContrl = PhotoViewController();
   final GlobalKey _key = GlobalKey();
+  PositionedTapController _positionedTapController = PositionedTapController();
   final GlobalKey _key2 = GlobalKey();
   double deviceWidth2;
   Offset selectIntersect = Offset(0, 0);
@@ -129,13 +139,20 @@ class _GridButtonState extends State<GridButton> {
   bool oribit2 =false;
   ui.Path path = Path();
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  List<bool> toggle =[false,false,false,false];
+  List<bool> toggle =[false,false,false,false,false];
   double pleft=100;
   double ptop=100;
   bool detailPop = false;
   double tleft=100;
   double ttop=100;
   double a3 = 420/297;
+  int bnb =0;
+
+  List<StandardDetail> std=[];
+  List<ConGInfo> infos;
+  List<CostInfo> ci;
+
+  bool pointer = false;
 
 
   @override
@@ -163,7 +180,98 @@ class _GridButtonState extends State<GridButton> {
       QuerySnapshot read = await _db.collection('tasks').get();
       tasks = read.docs.map((e) => Task.fromSnapshot(e)).toList();
     }
+    void readStandardDetail() async {
+      FirebaseFirestore _db = FirebaseFirestore.instance;
+      QuerySnapshot read = await _db.collection('detailData').get();
+      std = read.docs.map((e) => StandardDetail.fromSnapshot(e)).toList();
+      std.forEach((e) {
+        if(e.index1<10)e.category='0. 일반';
+        else if(e.index1>=10&&e.index1<20)e.category='1. 바닥';
+        else if(e.index1>=20&&e.index1<30)e.category='2. 벽';
+        else if(e.index1>=30&&e.index1<40)e.category='3. 천장';
+        else if(e.index1>=40&&e.index1<50)e.category='4. 실별상세';
+        else if(e.index1>=50&&e.index1<60)e.category='5. 지붕, 홈통';
+        else if(e.index1>=60&&e.index1<70)e.category='6. 부분상세 - 단위세대';
+        else if(e.index1>=70&&e.index1<80)e.category='7. 부분상세 - 공용부위';
+        else if(e.index1>=80&&e.index1<90)e.category='8. 기타상세 - 부대시설';
+        else if(e.index1>=90&&e.index1<100)e.category='9. 건구류 - 가구, 창호';
 
+        if(e.index1==10)e.subCategory = '콘크리트';
+        else if (e.index1==12)e.subCategory ='석재';
+        else if (e.index1==13)e.subCategory ='타일';
+        else if (e.index1==14)e.subCategory ='패널히팅';
+        else if (e.index1==15)e.subCategory ='접합부 바닥-벽';
+        else if (e.index1==16)e.subCategory ='드레인 트랜치';
+        else if (e.index1==17)e.subCategory ='부속물';
+        else if (e.index1==19)e.subCategory ='기타';
+        else if (e.index1==20)e.subCategory ='콘크리트';
+        else if (e.index1==21)e.subCategory ='조적';
+        else if (e.index1==22)e.subCategory ='석재';
+        else if (e.index1==23)e.subCategory ='타일';
+        else if (e.index1==24)e.subCategory ='경량칸막이';
+        else if (e.index1==25)e.subCategory ='보온틀';
+        else if (e.index1==27)e.subCategory ='부속물';
+        else if (e.index1==29)e.subCategory ='기타';
+        else if (e.index1==30)e.subCategory ='콘크리트';
+        else if (e.index1==31)e.subCategory ='목재틀';
+        else if (e.index1==32)e.subCategory ='경량철골';
+        else if (e.index1==35)e.subCategory ='접합부 벽-천장';
+        else if (e.index1==36)e.subCategory ='커튼박스';
+        else if (e.index1==37)e.subCategory ='부속물';
+        else if (e.index1==39)e.subCategory ='기타';
+        else if (e.index1==40)e.subCategory ='현관';
+        else if (e.index1==41)e.subCategory ='거실';
+        else if (e.index1==42)e.subCategory ='침실';
+        else if (e.index1==43)e.subCategory ='주방';
+        else if (e.index1==44)e.subCategory ='욕실';
+        else if (e.index1==45)e.subCategory ='수납공간';
+        else if (e.index1==46)e.subCategory ='발코니';
+        else if (e.index1==47)e.subCategory ='고용부위';
+        else if (e.index1==49)e.subCategory ='기타';
+        else if (e.index1==50)e.subCategory ='평지붕';
+        else if (e.index1==51)e.subCategory ='경사지붕';
+        else if (e.index1==52)e.subCategory ='패러핏';
+        else if (e.index1==53)e.subCategory ='지붕드레인 홈통';
+        else if (e.index1==54)e.subCategory ='캐노피';
+        else if (e.index1==55)e.subCategory ='지붕돌출물';
+        else if (e.index1==59)e.subCategory ='기타';
+        else if (e.index1==60)e.subCategory ='단열/결로';
+        else if (e.index1==61)e.subCategory ='발코니 난간 복도 난간';
+        else if (e.index1==62)e.subCategory ='개구부 점검구';
+        else if (e.index1==63)e.subCategory ='표지판';
+        else if (e.index1==65)e.subCategory ='잡철물';
+        else if (e.index1==69)e.subCategory ='기타';
+        else if (e.index1==70)e.subCategory ='계단';
+        else if (e.index1==71)e.subCategory ='난간';
+        else if (e.index1==72)e.subCategory ='진입부';
+        else if (e.index1==73)e.subCategory ='표지판';
+        else if (e.index1==74)e.subCategory ='E/V홀';
+        else if (e.index1==76)e.subCategory ='우수 집수정';
+        else if (e.index1==77)e.subCategory ='잡철물';
+        else if (e.index1==79)e.subCategory ='기타';
+        else if (e.index1==80)e.subCategory ='지하공간 기타상세';
+        else if (e.index1==83)e.subCategory ='지하주차장';
+        else if (e.index1==83)e.subCategory ='창호접합상세';
+        else if (e.index1==89)e.subCategory ='기타';
+        else if (e.index1==90)e.subCategory ='가구 유니트';
+        else if (e.index1==91)e.subCategory ='가구상세';
+        else if (e.index1==92)e.subCategory ='인테리어 시설물';
+        else if (e.index1==93)e.subCategory ='창호일반';
+        else if (e.index1==94)e.subCategory ='창호일람';
+        else if (e.index1==95)e.subCategory ='창호입면';
+        else if (e.index1==96)e.subCategory ='창호접합상세';
+        else if (e.index1==97)e.subCategory ='창호제작';
+        else if (e.index1==98)e.subCategory ='창호부속';
+        else if (e.index1==99)e.subCategory ='기타';
+      });
+    }
+    void readCostInfo(){
+      ci = costInfoData.map((e) => CostInfo.fromMap(e)).toList();
+      // ci.forEach((element) {if(element.index3==null)element.index3})
+    }
+    readCostInfo();
+
+    readStandardDetail();
     readTasks();
     readingGrid();
     print(tasks.length);
@@ -190,11 +298,15 @@ class _GridButtonState extends State<GridButton> {
     // getClip();
     _nContrl.value = PhotoViewControllerValue(
         position: Offset(-301.5, 488.0), scale: 3.600000000000001, rotation: 0, rotationFocusPoint: null);
+
+    infos = structureJson.map((e) => ConGInfo.fromMap(e)).toList();
+
   }
 
   void _resetSelectedDate() {
     _selectedDate = DateTime.now().add(Duration(days: 5));
   }
+
 
   @override
   void dispose() {
@@ -213,65 +325,159 @@ class _GridButtonState extends State<GridButton> {
   Widget build(BuildContext context) {
     double shortestSide = MediaQuery.of(context).size.shortestSide;
     double longestSide = MediaQuery.of(context).size.longestSide;
-    print('$shortestSide, $longestSide');
     if(shortestSide<800){
       return Scaffold(
         resizeToAvoidBottomInset: false,
-        body: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('origingrid').snapshots(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) return SafeArea(child: Center(child: CircularProgressIndicator()));
-            return LayoutBuilder(builder: (context, colC) {
-              return Container(
-                width: colC.maxHeight*a3,
-                height: colC.maxHeight,
-                child: LayoutBuilder(builder: (context, c) {
-                  print('${c.maxWidth}, ${c.maxHeight}');
-                  print(c);
-                  _pContrl.addIgnorableListener(() {
-                    keyX = _pContrl.value.position.dx / (c.maxWidth * _pContrl.value.scale);
-                    keyY = _pContrl.value.position.dy / (c.maxHeight * _pContrl.value.scale);
-                  });
-                  return Listener(
-                    onPointerDown: (_){
-                      setState(() {
-                        moving = true;
-                      });
-                    },
-                    onPointerUp: (_){
-                      setState(() {
-                        moving = false;
-                      });
-                    },
-                    onPointerSignal: (m) {
-                      if (m is PointerScrollEvent) {
-                        double tempset = _pContrl.scale - 1;
-                        Offset up = Offset(keyX * c.maxWidth * (_pContrl.scale + 0.2),
-                            keyY * c.maxHeight * (_pContrl.scale + 0.2));
-                        Offset dn = Offset(keyX * c.maxWidth * (_pContrl.scale - 0.2),
-                            keyY * c.maxHeight * (_pContrl.scale - 0.2));
-                        if (m.scrollDelta.dy > 1 && _pContrl.scale > 1) {
-                          _pContrl.value = PhotoViewControllerValue(
-                              position: dn,
-                              scale: (_pContrl.scale - 0.2),
-                              rotation: 0,
-                              rotationFocusPoint: null);
-                        } else if (m.scrollDelta.dy < 1) {
-                          _pContrl.value = PhotoViewControllerValue(
-                              position: up,
-                              scale: (_pContrl.scale + 0.2),
-                              rotation: 0,
-                              rotationFocusPoint: null);
-                        }
-                      }
-                      ;
-                    },
-                    child: buildViewer(context, snapshot, c,width: c.maxHeight*a3,height: c.maxHeight),
-                  );
-                }),
-              );
+        appBar: AppBar(
+          title: Text(
+            context.watch<Current>().getDrawing().toString(),
+            style: TextStyle(color: Colors.black),
+          ),
+          backgroundColor: Colors.orange,
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: _buildFloatingActionButton(),
+        bottomNavigationBar: BottomNavigationBar(
+          elevation: 5,
+          type: BottomNavigationBarType.fixed,
+          items: [
+            BottomNavigationBarItem(icon: Icon(CommunityMaterialIcons.arrow_up),label: 'Up'),
+            BottomNavigationBarItem(icon: Icon(CommunityMaterialIcons.arrow_down),label:'Dn'),
+            BottomNavigationBarItem(icon: Icon(CommunityMaterialIcons.home),label:'Home'),
+            BottomNavigationBarItem(icon: Icon(CommunityMaterialIcons.check),label:'작업추가'),
+            BottomNavigationBarItem(icon: Opacity(opacity: 0.0,child: Icon(CommunityMaterialIcons.check)),label:''),
+          ],
+          currentIndex: bnb,
+          onTap: (index) {
+            setState(() {
+              bnb = index;
+              if(index==1){
+                  Drawing c = context.read<Current>().getDrawing();
+                  Current temp = context.read<Current>();
+                  List<Drawing> tempcon = drawings
+                      .where((e) =>
+                  e.doc == c.doc &&
+                      e.con == c.con &&
+                      e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
+                      .toList();
+                  temp.changePath(tempcon.elementAt((tempcon.indexOf(c) - 1)));
+              }else if(index==0){
+                Drawing c = context.read<Current>().getDrawing();
+                Current temp = context.read<Current>();
+                List<Drawing> tempcon = drawings
+                    .where((e) =>
+                e.doc == c.doc &&
+                    e.con == c.con &&
+                    e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
+                    .toList();
+                temp.changePath(tempcon.elementAt((tempcon.indexOf(c) + 1)));
+              }
             });
           },
+        ),
+          endDrawer: Drawer(
+            child: Column(
+              children: [
+                LayoutBuilder(
+                    builder: (context, keymap) {
+                      return Container(
+                        height: keymap.maxWidth/(420/297)+50,
+                        child: Card(child: buildDrawingPath()),
+                      );
+                    }
+                ),
+                Expanded(
+                  child: PageView(
+                    controller: PageController(initialPage: 1),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Card(child: buildAddTaskPage()),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Card(child: buildTaskAddWidget(context)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Card(
+                            child: ListView(
+                              children: interiorList
+                                  .map((e) => Card(
+                                  child: ListTile(
+                                    title: AutoSizeText(e.roomName),
+                                    leading: Text(e.roomNum),
+                                    trailing: Text(e.cLevel),
+                                  )))
+                                  .toList(),
+                            )),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: GeneralInfo(infos),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),),
+        body: SafeArea(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection('origingrid').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return SafeArea(child: Center(child: CircularProgressIndicator()));
+              return LayoutBuilder(builder: (context, colC) {
+                return Container(
+                  width: colC.maxWidth,
+                  height: colC.maxHeight,
+                  child: LayoutBuilder(builder: (context, c) {
+                    print('${c.maxWidth}, ${c.maxHeight}');
+                    print(c);
+                    _pContrl.addIgnorableListener(() {
+                      keyX = _pContrl.value.position.dx / (c.maxWidth * _pContrl.value.scale);
+                      keyY = _pContrl.value.position.dy / (c.maxWidth/a3 * _pContrl.value.scale);
+                    });
+                    return Listener(
+                      onPointerDown: (_){
+                        setState(() {
+                          moving = true;
+                        });
+                      },
+                      onPointerUp: (_){
+                        setState(() {
+                          moving = false;
+                        });
+                      },
+                      onPointerSignal: (m) {
+                        if (m is PointerScrollEvent) {
+                          double tempset = _pContrl.scale - 1;
+                          Offset up = Offset(keyX * c.maxWidth * (_pContrl.scale + 0.2),
+                              keyY * c.maxHeight * (_pContrl.scale + 0.2));
+                          Offset dn = Offset(keyX * c.maxWidth * (_pContrl.scale - 0.2),
+                              keyY * c.maxHeight * (_pContrl.scale - 0.2));
+                          if (m.scrollDelta.dy > 1 && _pContrl.scale > 1) {
+                            _pContrl.value = PhotoViewControllerValue(
+                                position: dn,
+                                scale: (_pContrl.scale - 0.2),
+                                rotation: 0,
+                                rotationFocusPoint: null);
+                          } else if (m.scrollDelta.dy < 1) {
+                            _pContrl.value = PhotoViewControllerValue(
+                                position: up,
+                                scale: (_pContrl.scale + 0.2),
+                                rotation: 0,
+                                rotationFocusPoint: null);
+                          }
+                        }
+                        ;
+                      },
+                      child: buildViewer(context, snapshot, c,width: c.maxWidth,height: c.maxWidth/a3),
+                    );
+                  }),
+                );
+              });
+            },
+          ),
         ),
       );
     }else if(shortestSide>800&&shortestSide<1100){
@@ -328,7 +534,7 @@ class _GridButtonState extends State<GridButton> {
                           }
                           ;
                         },
-                        child: buildViewer(context, snapshot, c),
+                        child: buildViewer(context, snapshot, c,width: c.maxWidth,height: c.maxWidth/a3),
                       );
                     }),
                   );
@@ -432,7 +638,11 @@ class _GridButtonState extends State<GridButton> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: GeneralInfo(),
+                      child: GeneralInfo(infos),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: StandardDetailPage(std),
                     ),
                   ],
                 ),
@@ -515,10 +725,11 @@ class _GridButtonState extends State<GridButton> {
                               },
                               child: Stack(
                                 children: [
-                                  buildViewer(context, snapshot, c),
-                                        Positioned(
-                                          left: tleft,
-                                          top:ttop,
+                                        buildViewer(context, snapshot, c,
+                                            width: c.maxWidth, height: c.maxWidth / a3),
+                                        pointer == true ?Positioned(
+                                          left: tleft+16,
+                                          top:ttop+16,
                                           child: Listener(
                                             onPointerMove: (p){
                                               setState(() {
@@ -526,18 +737,35 @@ class _GridButtonState extends State<GridButton> {
                                                 ttop += p.delta.dy;
                                               });
                                             },
-                                            child: Container(
-                                              width: 50,
-                                              height: 50,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white70,
-                                                borderRadius: BorderRadius.circular(100),
-                                                border: Border.all(color: Color.fromRGBO(255, 0, 0, 1),width: 2)
+                                            child: InkWell(
+                                              onTap: (){
+                                                print('@@$tleft, $ttop');
+                                                _positionedTapController.onTapDown(TapDownDetails(
+                                                    localPosition: Offset(tleft + 8, ttop + 8),
+                                                    globalPosition: Offset(tleft + 8, ttop + 8)));
+                                                _positionedTapController.onTap();
+                                              },
+                                              child: Container(
+                                                width: 50,
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white70,
+                                                  borderRadius: BorderRadius.circular(100),
+                                                  border: Border.all(color: Color.fromRGBO(255, 0, 0, 1),width: 2)
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                              Positioned(left: tleft-16,top: ttop-16,child: Icon(CommunityMaterialIcons.arrow_top_left_thick,color: Color.fromRGBO(255, 0, 0, 1),size: 32,)),
+                                        ):Container(),
+                                        pointer == true ?Positioned(
+                                            left: tleft,
+                                            top: ttop,
+                                            child: Icon(
+                                              CommunityMaterialIcons.arrow_top_left_thick,
+                                              color: Color.fromRGBO(255, 0, 0, 1),
+                                              size: 32,
+                                            )):Container(),
+
                                         ///일람표 윈도우
                                   if (toggle[0]) Positioned(
                                     left: pleft,
@@ -566,7 +794,63 @@ class _GridButtonState extends State<GridButton> {
                                         ],
                                       ),
                                     ),
-                                  )else if(toggle[2])Positioned(
+                                  )else if(toggle[1])
+                                    Positioned(
+                                      left: pleft,
+                                      top: ptop,
+                                      child: Card(
+                                        child: Column(
+                                          children: [
+                                            Listener(
+                                                onPointerMove: (p){
+                                                  setState(() {
+                                                    pleft += p.delta.dx;
+                                                    ptop += p.delta.dy;
+                                                  });
+                                                },
+
+                                                child: Container(
+                                                    width: 400,
+                                                    child: ListTile(
+                                                      title: Text('LH상세도'),
+                                                    ))),
+                                            Container(
+                                              width: 400,
+                                              height: 700,
+                                              child: StandardDetailPage(std),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )else if (toggle[3])Positioned(
+                                      left: pleft,
+                                      top: ptop,
+                                      child: Card(
+                                        child: Column(
+                                          children: [
+                                            Listener(
+                                                onPointerMove: (p){
+                                                  setState(() {
+                                                    pleft += p.delta.dx;
+                                                    ptop += p.delta.dy;
+                                                  });
+                                                },
+
+                                                child: Container(
+                                                    width: 600,
+                                                    child: ListTile(
+                                                      title: Text('원가산정지침'),
+                                                    ))),
+                                            Container(
+                                              width: 600,
+                                              height: 700,
+                                              child: CostInfoPage(ci),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  else if(toggle[2])Positioned(
                                     left: pleft,
                                     top: ptop,
                                     child: Card(
@@ -588,12 +872,39 @@ class _GridButtonState extends State<GridButton> {
                                           Container(
                                             width: 400,
                                             height: 700,
-                                            child: GeneralInfo(),
+                                            child: GeneralInfo(infos),
                                           ),
                                         ],
                                       ),
                                     ),
-                                  ) else Container(),
+                                  ) else if (toggle[4])Positioned(
+                                        left: pleft,
+                                        top: ptop,
+                                        child: Card(
+                                          child: Column(
+                                            children: [
+                                              Listener(
+                                                  onPointerMove: (p){
+                                                    setState(() {
+                                                      pleft += p.delta.dx;
+                                                      ptop += p.delta.dy;
+                                                    });
+                                                  },
+
+                                                  child: Container(
+                                                      width: 400,
+                                                      child: ListTile(
+                                                        title: Text('도면목록표'),
+                                                      ))),
+                                              Container(
+                                                width: 400,
+                                                height: 700,
+                                                child: DrawingListPage(drawings),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )else Container(),
                                 ],
                               ),
                             ),
@@ -604,6 +915,15 @@ class _GridButtonState extends State<GridButton> {
                     Container(
                       height:58,
                             child: ListTile(
+                              leading: TextButton(onPressed: (){
+                                setState(() {
+                                  pointer =!pointer;
+                                });
+                                    },
+                                    child: Text(
+                                      'P',
+                                      style: TextStyle(color: pointer == true ? Colors.redAccent : Colors.black),
+                                    )),
                                 title: Text('정보를 선택해주세요'),
                                 trailing: ToggleButtons(
                                   children: [
@@ -613,7 +933,7 @@ class _GridButtonState extends State<GridButton> {
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: Text('상세도'),
+                                      child: Text('LH상세도'),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
@@ -621,7 +941,11 @@ class _GridButtonState extends State<GridButton> {
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: Text('노트'),
+                                      child: Text('LH원가산정지침'),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text('도면목록표'),
                                     ),
                                   ],
                                   onPressed: (int index) {
@@ -694,7 +1018,7 @@ class _GridButtonState extends State<GridButton> {
                               }
                               ;
                             },
-                            child: buildViewer(context, snapshot, c),
+                            child: buildViewer(context, snapshot, c,width: c.maxWidth,height: c.maxHeight/a3),
                           );
                         }),
                       );
@@ -828,7 +1152,7 @@ class _GridButtonState extends State<GridButton> {
                                           });
                                         }
                                       },
-                                      child: buildViewer(context, snapshot, c),
+                                      child: buildViewer(context, snapshot, c,width: c.maxWidth,height: c.maxWidth/a3),
                                     ),
                                   ),
                                 );
@@ -1225,21 +1549,23 @@ class _GridButtonState extends State<GridButton> {
               child: PhotoView.customChild(
                 minScale: 1.0,
                 maxScale: 20.0,
-                initialScale: 1.0,
+                initialScale: PhotoViewComputedScale.covered,
                 controller: _pContrl,
                 backgroundDecoration: BoxDecoration(color: Colors.transparent),
+                childSize: Size(width, width/a3),
                 child: LayoutBuilder(
                   builder: (context, k) {
                     return Stack(
                       children: [
                         PositionedTapDetector(
+                          controller:pointer ==true ?_positionedTapController :null,
                           key: _key,
                           onTap: (m) {
                             List<Point<double>> parseList = _iPs
                                 .map((e) =>
-                                    Point(e.dx, e.dy) * c.maxWidth +
-                                    Point(context.read<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dx,
-                                        context.read<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dy))
+                                    Point(e.dx, e.dy) * width +
+                                    Point(context.read<Current>().getcordiOffset(width, height).dx,
+                                        context.read<Current>().getcordiOffset(width, height).dy))
                                 .toList();
                             List<Point<double>> realParseList = _realIPs.map((e) => Point(e.dx, e.dy)).toList();
 
@@ -1249,33 +1575,31 @@ class _GridButtonState extends State<GridButton> {
                                   .minRect(Point(_origin.dx, _origin.dy));
                               relativeRectPoint = Closet(
                                       selectPoint: Point(
-                                          (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                          (((m.relative.dx / _pContrl.scale) / width -
                                                   context.read<Current>().getDrawing().originX) *
                                               context.read<Current>().getcordiX()),
-                                          (((m.relative.dy / _pContrl.scale) / c.maxHeight -
+                                          (((m.relative.dy / _pContrl.scale) / height -
                                                   context.read<Current>().getDrawing().originY) *
                                               context.read<Current>().getcordiY())),
                                       pointList: realParseList)
                                   .minRect(Point(
-                                      (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                                      (((m.relative.dx / _pContrl.scale) / width -
                                               context.read<Current>().getDrawing().originX) *
                                           context.read<Current>().getcordiX()),
-                                      (((m.relative.dy / _pContrl.scale) / c.maxHeight -
+                                      (((m.relative.dy / _pContrl.scale) / height -
                                               context.read<Current>().getDrawing().originY) *
                                           context.read<Current>().getcordiY())));
                               print(m.relative / _pContrl.scale);
-                              int debugX = (((m.relative.dx / _pContrl.scale) / c.maxWidth -
+                              int debugX = (((m.relative.dx / _pContrl.scale) / width -
                                           context.read<Current>().getDrawing().originX) *
                                       context.read<Current>().getcordiX())
                                   .round();
-                              int debugY = (((m.relative.dy / _pContrl.scale) / c.maxHeight -
+                              int debugY = (((m.relative.dy / _pContrl.scale) / height -
                                           context.read<Current>().getDrawing().originY) *
                                       context.read<Current>().getcordiY())
                                   .round();
                               print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
                               tracking.add(_origin);
-                              print(count.length);
-                              count.add(tracking.length);
                               measurement.add(_origin);
                               rmeasurement.add(Offset(debugX.toDouble(), debugY.toDouble()));
 
@@ -1294,9 +1618,32 @@ class _GridButtonState extends State<GridButton> {
                               });
                             },
                             child: Stack(
+                              overflow: Overflow.visible,
                               key: _key2,
+                              // alignment: Alignment.center,
                               children: [
-                                Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}',width: c.maxWidth,height: c.maxHeight,fit: BoxFit.fitWidth,alignment: Alignment.topLeft,),
+                                // Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                                Container(
+                                    width: width,
+                                    height: c.maxHeight,
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image:
+                                        AssetImage('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                                    alignment:Alignment.topLeft,
+                                    fit: BoxFit.fitWidth,
+                                  ),
+                                ),
+                                  child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 0,sigmaY: 0),child: Container(color: Colors.black.withOpacity(0),),),
+                                ),
+                              // Image.asset(
+                              //   'asset/photos/${context.watch<Current>().getDrawing().localPath}',
+                              //   width: width,
+                              //   height: c.maxHeight,
+                              //   fit: BoxFit.fitWidth,
+                              //   alignment: Alignment.topLeft,
+                              // ),
+
                               ///Level작업중
                               // Container(
                               //   decoration: ShapeDecoration(
@@ -1374,85 +1721,85 @@ class _GridButtonState extends State<GridButton> {
                                       }),
 
                               ///커스텀페인터 그리드 및 교점
-                                // context.watch<Current>().getDrawing().scale != '1'
-                                //     ? Container(
-                                //         child: StreamBuilder<PhotoViewControllerValue>(
-                                //           stream: _pContrl.outputStateStream,
-                                //                 initialData: PhotoViewControllerValue(
-                                //                   position: Offset(0,0),
-                                //                   rotation: 0,
-                                //                   rotationFocusPoint: null,
-                                //                   scale: 1,
-                                //                 ),
-                                //             builder: (context, snapshot2) {
-                                //             return CustomPaint(
-                                //               painter: GridMaker(
-                                //                 snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
-                                //                 double.parse(context.watch<Current>().getDrawing().scale) * 421,
-                                //                 _origin,
-                                //                 pointList: _iPs,
-                                //                 deviceWidth: c.maxWidth,
-                                //                 cordinate: context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight),
-                                //                 sS: snapshot2.data.scale,
-                                //                 x: keyX*c.maxWidth,
-                                //                 y: keyY*c.maxHeight ,
-                                //               ),
-                                //             );
-                                //           }
-                                //         ),
-                                //       )
-                                //     : Container(),
+                              //   context.watch<Current>().getDrawing().scale != '1'
+                              //       ? Container(
+                              //           child: StreamBuilder<PhotoViewControllerValue>(
+                              //             stream: _pContrl.outputStateStream,
+                              //                   initialData: PhotoViewControllerValue(
+                              //                     position: Offset(0,0),
+                              //                     rotation: 0,
+                              //                     rotationFocusPoint: null,
+                              //                     scale: 1,
+                              //                   ),
+                              //               builder: (context, snapshot2) {
+                              //               return CustomPaint(
+                              //                 painter: GridMaker(
+                              //                   snapshot.data.docs.map((e) => Gridtestmodel.fromSnapshot(e)).toList(),
+                              //                   double.parse(context.watch<Current>().getDrawing().scale) * 421,
+                              //                   _origin,
+                              //                   pointList: _iPs,
+                              //                   deviceWidth: width,
+                              //                   cordinate: context.watch<Current>().getcordiOffset(width, height),
+                              //                   sS: snapshot2.data.scale,
+                              //                   x: keyX*width,
+                              //                   y: keyY*height ,
+                              //                 ),
+                              //               );
+                              //             }
+                              //           ),
+                              //         )
+                              //       : Container(),
 
                                 /// 테스크 바운더리 위젯
-                                context.watch<Current>().getDrawing().scale != '1'
-                                    ? Stack(
-                                        children: tasks
-                                            .where((t) => t.floor == context.watch<Current>().getDrawing().floor)
-                                            .map((e) => Stack(
-                                                  children: e.boundarys.map(
-                                                    (b) {
-                                                      var watch = context.watch<Current>();
-                                                      return Positioned.fromRect(
-                                                        rect: Rect.fromPoints(
-                                                            Offset(
-                                                              b.bottomRight.dx / (watch.getcordiX() / c.maxWidth) +
-                                                                  (watch.getDrawing().originX * c.maxWidth),
-                                                              b.bottomRight.dy / (watch.getcordiY() / c.maxHeight) +
-                                                                  ((watch.getDrawing().originY * c.maxHeight)),
-                                                            ),
-                                                            Offset(
-                                                              b.topLeft.dx / (watch.getcordiX() / c.maxWidth) +
-                                                                  (watch.getDrawing().originX * c.maxWidth),
-                                                              b.topLeft.dy / (watch.getcordiY() / c.maxHeight) +
-                                                                  ((watch.getDrawing().originY * c.maxHeight)),
-                                                            )),
-                                                        child: GestureDetector(
-                                                          onLongPress: () {
-                                                            List<Task> _tempList =
-                                                                tasks.where((e) => e.boundarys.contains(b)).toList();
-                                                            Navigator.push(
-                                                              context,
-                                                              MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
-                                                            );
-                                                          },
-                                                          child: Container(
-                                                            color: e.favorite == false
-                                                                ? Colors.black12
-                                                                : Color.fromRGBO(255, 0, 0, 0.5),
-                                                            child: Center(
-                                                              child: AutoSizeText(
-                                                                tasks.where((e) => e.boundarys.contains(b)).length.toString(),
-                                                                textScaleFactor: 0.7,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      );
-                                                    },
-                                                  ).toList(),
-                                                ))
-                                            .toList())
-                                    : Container(),
+                                // context.watch<Current>().getDrawing().scale != '1'
+                                //     ? Stack(
+                                //         children: tasks
+                                //             .where((t) => t.floor == context.watch<Current>().getDrawing().floor)
+                                //             .map((e) => Stack(
+                                //                   children: e.boundarys.map(
+                                //                     (b) {
+                                //                       var watch = context.watch<Current>();
+                                //                       return Positioned.fromRect(
+                                //                         rect: Rect.fromPoints(
+                                //                             Offset(
+                                //                               b.bottomRight.dx / (watch.getcordiX() / width) +
+                                //                                   (watch.getDrawing().originX * width),
+                                //                               b.bottomRight.dy / (watch.getcordiY() / height) +
+                                //                                   ((watch.getDrawing().originY * height)),
+                                //                             ),
+                                //                             Offset(
+                                //                               b.topLeft.dx / (watch.getcordiX() / width) +
+                                //                                   (watch.getDrawing().originX * width),
+                                //                               b.topLeft.dy / (watch.getcordiY() / height) +
+                                //                                   ((watch.getDrawing().originY * height)),
+                                //                             )),
+                                //                         child: GestureDetector(
+                                //                           onLongPress: () {
+                                //                             List<Task> _tempList =
+                                //                                 tasks.where((e) => e.boundarys.contains(b)).toList();
+                                //                             Navigator.push(
+                                //                               context,
+                                //                               MaterialPageRoute(builder: (context) => BoundayDetail(_tempList)),
+                                //                             );
+                                //                           },
+                                //                           child: Container(
+                                //                             color: e.favorite == false
+                                //                                 ? Colors.black12
+                                //                                 : Color.fromRGBO(255, 0, 0, 0.5),
+                                //                             child: Center(
+                                //                               child: AutoSizeText(
+                                //                                 tasks.where((e) => e.boundarys.contains(b)).length.toString(),
+                                //                                 textScaleFactor: 0.7,
+                                //                               ),
+                                //                             ),
+                                //                           ),
+                                //                         ),
+                                //                       );
+                                //                     },
+                                //                   ).toList(),
+                                //                 ))
+                                //             .toList())
+                                //     : Container(),
 
                                 /// 선택한 바운더리 위젯
                                 taskAdd != true
@@ -1464,16 +1811,16 @@ class _GridButtonState extends State<GridButton> {
                                           return Positioned.fromRect(
                                             rect: Rect.fromPoints(
                                                 Offset(
-                                                  e.boundary.bottomRight.dx / (watch.getcordiX() / c.maxWidth) +
-                                                      (watch.getDrawing().originX * c.maxWidth),
-                                                  e.boundary.bottomRight.dy / (watch.getcordiY() / c.maxHeight) +
-                                                      ((watch.getDrawing().originY * c.maxHeight)),
+                                                  e.boundary.bottomRight.dx / (watch.getcordiX() / width) +
+                                                      (watch.getDrawing().originX * width),
+                                                  e.boundary.bottomRight.dy / (watch.getcordiY() / height) +
+                                                      ((watch.getDrawing().originY * height)),
                                                 ),
                                                 Offset(
-                                                  e.boundary.topLeft.dx / (watch.getcordiX() / c.maxWidth) +
-                                                      (watch.getDrawing().originX * c.maxWidth),
-                                                  e.boundary.topLeft.dy / (watch.getcordiY() / c.maxHeight) +
-                                                      ((watch.getDrawing().originY * c.maxHeight)),
+                                                  e.boundary.topLeft.dx / (watch.getcordiX() / width) +
+                                                      (watch.getDrawing().originX * width),
+                                                  e.boundary.topLeft.dy / (watch.getcordiY() / height) +
+                                                      ((watch.getDrawing().originY *height)),
                                                 )),
                                             child: Opacity(
                                               opacity: 0.5,
@@ -1518,12 +1865,12 @@ class _GridButtonState extends State<GridButton> {
                                 callOutLayerOn == true
                                     ? Stack(
                                         children: context.watch<Current>().getDrawing().callOutMap.map((e) {
-                                          double l = e['bLeft'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                                          double t = e['bTop'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                                          double r = e['bRight'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                                          double b = e['bBottom'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                                          double x = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dx;
-                                          double y = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dy;
+                                          double l = e['bLeft'] / context.watch<Current>().getcordiX() * width;
+                                          double t = e['bTop'] / context.watch<Current>().getcordiX() * width;
+                                          double r = e['bRight'] / context.watch<Current>().getcordiX() * width;
+                                          double b = e['bBottom'] / context.watch<Current>().getcordiX() * width;
+                                          double x = context.watch<Current>().getcordiOffset(width, height).dx;
+                                          double y = context.watch<Current>().getcordiOffset(width, height).dy;
                                           return Positioned.fromRect(
                                             rect: Rect.fromLTRB(
                                               l + x,
@@ -1564,12 +1911,12 @@ class _GridButtonState extends State<GridButton> {
                                 callOutLayerOn == true
                                     ? Stack(
                                         children: context.watch<Current>().getDrawing().roomMap.map((e) {
-                                          double l = e['bLeft'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                                          double t = e['bTop'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                                          double r = e['bRight'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                                          double b = e['bBottom'] / context.watch<Current>().getcordiX() * c.maxWidth;
-                                          double x = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dx;
-                                          double y = context.watch<Current>().getcordiOffset(c.maxWidth, c.maxHeight).dy;
+                                          double l = e['bLeft'] / context.watch<Current>().getcordiX() * width;
+                                          double t = e['bTop'] / context.watch<Current>().getcordiX() * width;
+                                          double r = e['bRight'] / context.watch<Current>().getcordiX() * width;
+                                          double b = e['bBottom'] / context.watch<Current>().getcordiX() * width;
+                                          double x = context.watch<Current>().getcordiOffset(width, height).dx;
+                                          double y = context.watch<Current>().getcordiOffset(width, height).dy;
                                           return Positioned.fromRect(
                                             rect: Rect.fromLTRB(
                                               l + x,
@@ -1592,37 +1939,39 @@ class _GridButtonState extends State<GridButton> {
                                         }).toList(),
                                       )
                                     : Container(),
-                                CustomPaint(
+                                pointer == false?CustomPaint(
                                   painter: CrossHairPaint(hover,s: _pContrl.scale),
                                   // painter: CrossHairPaint(hover,width: context.size.width,height: context.size.height),
-                                ),
+                                ):Container(),
 
                               ],
                             ),
                           ),
                         ),
-                        StreamBuilder<PhotoViewControllerValue>(
-                          stream: _pContrl.outputStateStream,
-                            initialData: PhotoViewControllerValue(
-                              position: _pContrl.position,
-                              rotation: 0,
-                              rotationFocusPoint: null,
-                              scale: _pContrl.scale,
-                            ),
-                            builder: (context, snapshot) {
-                            return Positioned.fromRect(rect: Rect.fromCenter(
-                                center: Offset(c.maxWidth / 2 - keyX * c.maxWidth, c.maxHeight / 2 - keyY * c.maxHeight),
-                                width: (c.maxWidth * 0.95+70)/snapshot.data.scale ,
-                                height: (c.maxHeight * 0.92 + 80) / snapshot.data.scale,
-                              ),
-                              child: Container(
-                                width: (c.maxWidth * 0.95+70)/snapshot.data.scale ,
-                                height: (c.maxHeight * 0.92 + 80) / snapshot.data.scale,
-                                decoration: BoxDecoration(border: Border.all(width: 70/snapshot.data.scale,color: Color.fromRGBO(255, 255, 255, 0.0))),
-                              ),
-                            );
-                          }
-                        ),
+
+                        ///외각가리기
+                        // StreamBuilder<PhotoViewControllerValue>(
+                        //   stream: _pContrl.outputStateStream,
+                        //     initialData: PhotoViewControllerValue(
+                        //       position: _pContrl.position,
+                        //       rotation: 0,
+                        //       rotationFocusPoint: null,
+                        //       scale: _pContrl.scale,
+                        //     ),
+                        //     builder: (context, snapshot) {
+                        //     return Positioned.fromRect(rect: Rect.fromCenter(
+                        //         center: Offset(c.maxWidth / 2 - keyX * c.maxWidth, height / 2 - keyY * height),
+                        //         width: (c.maxWidth * 0.95+70)/snapshot.data.scale ,
+                        //         height: (c.maxHeight * 0.92 + 80) / snapshot.data.scale,
+                        //       ),
+                        //       child: Container(
+                        //         width: (c.maxWidth * 0.95+70)/snapshot.data.scale ,
+                        //         height: (c.maxHeight * 0.92 + 80) / snapshot.data.scale,
+                        //         decoration: BoxDecoration(border: Border.all(width: 70/snapshot.data.scale,color: Color.fromRGBO(255, 255, 255, 0.0))),
+                        //       ),
+                        //     );
+                        //   }
+                        // ),
 
 
                         StreamBuilder<PhotoViewControllerValue>(
@@ -1634,26 +1983,27 @@ class _GridButtonState extends State<GridButton> {
                               scale: _pContrl.scale,
                             ),
                           builder: (context, snapshot) {
-                            gridIntersection(snapshot, c);
+                            gridIntersection(snapshot, c,width,c.maxHeight);
                             return
                               moving==false&&_offset==Offset.zero?Stack(
                                 children: bb.map((e) {
                                     return Positioned.fromRect(
-                                      rect: Rect.fromCenter(center: e.p, width: 50, height: 50),
+                                      rect: Rect.fromCenter(center: e.p, width: 40, height: 40),
                                       child: Transform.scale(
                                         scale: 1 / snapshot.data.scale,
                                         child: Container(
                                           width: 50,
                                             height: 50,
                                             decoration: BoxDecoration(
-                                              color: Color.fromRGBO(255, 255, 255, 0.9),
-                                              border: Border.all(color: Color.fromRGBO(255, 0, 0, 1),width: 2),
+                                              color: Color.fromRGBO(0, 0, 0, 0.4),
+                                              // border: Border.all(color: Color.fromRGBO(0, 0, 0, 1.0),width: 1.2),
                                               borderRadius: BorderRadius.circular(100)
                                             ),
                                             child: Center(
                                                 child: Text(
                                               e.name.replaceAll('-', ''),
-                                              style: TextStyle(color: Colors.black),
+                                              textScaleFactor: 0.9,
+                                              style: TextStyle(color:Color.fromRGBO(255, 255, 255, 1)),
                                             ))),
                                       ),
                                     );
@@ -1669,12 +2019,12 @@ class _GridButtonState extends State<GridButton> {
                               scale: _pContrl.scale,
                             ),
                           builder: (context, snapshot) {
-                            gridIntersection(snapshot, c);
+                            gridIntersection(snapshot, c,width,c.maxHeight);
                             return
                               moving==false&&_offset==Offset.zero?Stack(
                                 children: sectionGrid.map((e) {
                                     return Positioned.fromRect(
-                                      rect: Rect.fromCenter(center: e.p, width: 50, height: 50),
+                                      rect: Rect.fromCenter(center: e.p, width: 40, height: 40),
                                       child: Transform.scale(
                                         scale: 1 / snapshot.data.scale,
                                         child: InkWell(
@@ -1687,8 +2037,9 @@ class _GridButtonState extends State<GridButton> {
                                                   color: Colors.blue,
                                                   child: Center(
                                                       child: Text(
-                                                    e.name.replaceAll('-', ''),
-                                                    style: TextStyle(color: Colors.white),
+                                                    e.name,
+                                                        textScaleFactor: 0.5,
+                                                        style: TextStyle(color: Colors.white),
                                                   )))),
                                         ),
                                       ),
@@ -1710,7 +2061,8 @@ class _GridButtonState extends State<GridButton> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Card(
+
+    Card(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(80)),
                color: Colors.white54,
                 child: Row(
@@ -2017,14 +2369,14 @@ class _GridButtonState extends State<GridButton> {
     });
     _realIPs = Intersection().computeLines(realLines).toSet().toList();
   }
-  List gridIntersection(snapshot, c){
-    Offset cordi = context.read<Current>().getcordiOffset(c.maxWidth, c.maxHeight);
+  List gridIntersection(snapshot, c,width,height){
+    Offset cordi = context.read<Current>().getcordiOffset(width, width/a3);
     double sS = snapshot.data.scale;
-    double scale = double.parse(context.read<Current>().getDrawing().scale) * 420 / c.maxWidth;
+    double scale = double.parse(context.read<Current>().getDrawing().scale) * 420 / width;
     Rect b = Rect.fromCenter(
-        center: Offset(c.maxWidth / 2 - keyX * c.maxWidth, c.maxHeight / 2 - keyY * c.maxHeight),
-        width: c.maxWidth * 0.95 / sS,
-        height: c.maxHeight * 0.92 / sS);
+        center: Offset(width / 2 - keyX * width, width/a3 / 2 - keyY * width/a3),
+        width: (width-45) / sS,
+        height: (height-45) / sS);
     List<Line> ab = [
       Line(b.topLeft, b.topRight),
       Line(b.topRight, b.bottomRight),
@@ -2293,6 +2645,17 @@ class CustomClipperImage extends CustomClipper<Path>{
     return false;
   }
 }
+class A3Clipper extends CustomClipper<Rect>{
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromPoints(Offset.zero, Offset(428,428/(420/297)));
+    }
+
+  @override
+  bool shouldReclip( CustomClipper<Rect> oldClipper) {
+    return false;
+  }
+}
 class NoteClipperImage extends CustomClipper<Rect>{
   @override
   Rect getClip(Size size) {
@@ -2329,4 +2692,35 @@ class HatchShape extends ShapeBorder{
   @override void paint(ui.Canvas canvas, ui.Rect rect,{ui.TextDirection textDirection}) {}
   @override ShapeBorder scale(double t) => this;
 
+}
+
+Widget _buildFloatingActionButton() {
+  final TextStyle customStyle = TextStyle(inherit: false, color: Colors.black);
+  final icons = [
+    SpeedDialAction(
+      //backgroundColor: Colors.green,
+      //foregroundColor: Colors.yellow,
+        child: Icon(CommunityMaterialIcons.arrow_up_down),
+        label: Text('공정변경', style: customStyle)),
+    SpeedDialAction(child: Icon(CommunityMaterialIcons.filter), label: Text('필터', style: customStyle)),
+    SpeedDialAction(child: Icon(CommunityMaterialIcons.note), label: Text('메모', style: customStyle)),
+    SpeedDialAction(child: Icon(CommunityMaterialIcons.ruler), label: Text('측정', style: customStyle)),
+  ];
+
+  return SpeedDialFloatingActionButton(
+    actions: icons,
+    childOnFold: Icon(Icons.add, key: UniqueKey()),
+    // screenColor: Colors.black.withOpacity(0.3),
+    childOnUnfold: Icon(CommunityMaterialIcons.minus),
+    useRotateAnimation: false,
+    onAction: _onSpeedDialAction,
+    // controller: _controller,
+    isDismissible: true,
+    //backgroundColor: Colors.yellow,
+    //foregroundColor: Colors.blue,
+  );
+}
+
+_onSpeedDialAction(int selectedActionIndex) {
+  print('$selectedActionIndex Selected');
 }

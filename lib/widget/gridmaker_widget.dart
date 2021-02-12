@@ -51,12 +51,10 @@ class GridMaker extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 10.0 /sS;
 
-    // grids.forEach((e) {
-    //   canvas.drawLine(Offset(e.startX.toDouble(), -e.startY.toDouble()) / scale + cordinate,
-    //       Offset(e.endX.toDouble(), -e.endY.toDouble()) / scale + cordinate, paint);
-    // });
-    // print(pointList.first*deviceWidth);
-    // pointList.forEach((element) {print(element*deviceWidth);});
+    grids.forEach((e) {
+      canvas.drawLine(Offset(e.startX.toDouble(), -e.startY.toDouble()) / scale + cordinate,
+          Offset(e.endX.toDouble(), -e.endY.toDouble()) / scale + cordinate, paint);
+    });
 
     // List<Point<double>> parseList =
     //     pointList.map((e) => Point(e.dx * deviceWidth + cordinate.dx, e.dy * deviceWidth + cordinate.dy)).toList();

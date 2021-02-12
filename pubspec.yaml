@@ -53,6 +53,7 @@ dependencies:
   community_material_icon: ^5.8.55
   carousel_slider: ^2.3.1
   device_info: ^1.0.0
+  flutter_speed_dial_material_design: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,8 @@ flutter:
      - asset/
      - asset/photos/
      - asset/structure/
+     - asset/standarddetail/
+     - asset/costinfo/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

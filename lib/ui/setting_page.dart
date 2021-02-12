@@ -1399,7 +1399,7 @@ class _InfoCategoryState extends State<InfoCategory> {
   ListTile buildInfoDocTile(String e) {
     List<Drawing> filter = widget.drawings.where((d) => d.checked == true).toList();
     return ListTile(
-      onTap: () {
+      onLongPress: () {
         setState(() {
           filter.forEach((d) {
             d.doc = e;
@@ -1415,7 +1415,19 @@ class _InfoCategoryState extends State<InfoCategory> {
       trailing: TextButton(
         child: Text('${widget.drawings.where((d) => d.doc == e).length}'),
         onPressed: () {
-          Get.defaultDialog(title: e);
+          Get.defaultDialog(
+              title: e,
+              content: Container(
+                height: 800,
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    children: widget.drawings.where((d) => d.doc == e).map((a) => Padding(
+                      padding: const EdgeInsets.only(left:8.0),
+                      child: Chip(label: Text(a.toString())),
+                    )).toList(),
+                  ),
+                ),
+              ));
         },
       ),
     );

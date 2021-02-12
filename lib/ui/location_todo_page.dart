@@ -13,6 +13,7 @@ import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
 import 'package:flutter_app_location_todo/ui/label_text_widget.dart';
 import 'package:flutter_app_location_todo/ui/location_image_page.dart';
 import 'package:flutter_app_location_todo/ui/map_page.dart';
+import 'package:flutter_app_location_todo/ui/ocr_setting_page.dart';
 import 'package:flutter_app_location_todo/ui/originViewer.dart';
 import 'package:flutter_app_location_todo/ui/planner_page.dart';
 import 'package:flutter_app_location_todo/ui/setting_page.dart';
@@ -114,6 +115,10 @@ class _LocationTodoState extends State<LocationTodo> {
                     onTap: () => Get.to(PlaySimul()),
                   ),
                   ListTile(
+                    title: Text('상세도 OCR처리페이지'),
+                    onTap: () => Get.to(OcrSettingPage()),
+                  ),
+                  ListTile(
                     title: Text('도면뷰어'),
                     onTap: () {
                       Navigator.push(
@@ -155,15 +160,6 @@ class _LocationTodoState extends State<LocationTodo> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => Planner()),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    title: Text('시방서'),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => GeneralInfo()),
                       );
                     },
                   ),
