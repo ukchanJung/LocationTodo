@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app_location_todo/model/counter_model.dart';
 import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
@@ -33,8 +34,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.deepOrange,
         // elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colors.deepOrange) )
       ),
-      // home: GridButton(),
-      home: LocationTodo(),
+      home: GridButton(),
+      // home: LocationTodo(),
     );
   }
 }

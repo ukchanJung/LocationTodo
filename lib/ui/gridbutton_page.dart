@@ -3,7 +3,6 @@ import 'dart:ui' as ui show Codec, FrameInfo, Image,Path,Rect,TextDirection,Canv
 import 'dart:math';
 import 'dart:ui';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:calendar_timeline/calendar_timeline.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:date_picker_timeline/date_picker_timeline.dart';
@@ -18,7 +17,6 @@ import 'package:flutter_app_location_todo/data/cost_info_data.dart';
 import 'package:flutter_app_location_todo/data/hatch.dart';
 import 'package:flutter_app_location_todo/data/interiorJson.dart';
 import 'package:flutter_app_location_todo/data/interior_index.dart';
-import 'package:flutter_app_location_todo/data/local_list.dart';
 import 'package:flutter_app_location_todo/data/structureJson.dart';
 import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
 import 'package:flutter_app_location_todo/model/boundary_model.dart';
@@ -31,16 +29,22 @@ import 'package:flutter_app_location_todo/model/gridtest_model.dart';
 import 'package:flutter_app_location_todo/model/line_model.dart';
 import 'package:flutter_app_location_todo/model/standard_detail_class.dart';
 import 'package:flutter_app_location_todo/model/task_model.dart';
+import 'package:flutter_app_location_todo/simul_test.dart';
+import 'package:flutter_app_location_todo/ui/backup.dart';
 import 'package:flutter_app_location_todo/ui/boundary_detail_page.dart';
 import 'package:flutter_app_location_todo/ui/cost_info_page.dart';
 import 'package:flutter_app_location_todo/ui/crosshair_paint.dart';
 import 'package:flutter_app_location_todo/ui/drawing_list_page.dart';
 import 'package:flutter_app_location_todo/ui/general_info_page.dart';
-import 'package:flutter_app_location_todo/ui/label_text_widget.dart';
+import 'package:flutter_app_location_todo/ui/map_page.dart';
+import 'package:flutter_app_location_todo/ui/ocr_setting_page.dart';
+import 'package:flutter_app_location_todo/ui/originViewer.dart';
+import 'package:flutter_app_location_todo/ui/planner_page.dart';
+import 'package:flutter_app_location_todo/ui/setting_page.dart';
+import 'package:flutter_app_location_todo/ui/simulation_page.dart';
 import 'package:flutter_app_location_todo/ui/standard_detail_page.dart';
-import 'package:flutter_app_location_todo/ui/task_add_page.dart';
 import 'package:flutter_app_location_todo/ui/timview_page.dart';
-import 'package:flutter_app_location_todo/widget/gridmaker_widget.dart';
+import 'package:flutter_app_location_todo/ui/viewer_page.dart';
 import 'package:flutter_app_location_todo/widget/searchdialog_widget.dart';
 import 'package:flutter_speed_dial_material_design/flutter_speed_dial_material_design.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
@@ -81,6 +85,7 @@ class _GridButtonState extends State<GridButton> {
   List<Point> relativeRectPoint = [];
   List<Boundary> boundarys = [];
   List<Task> tasks = [];
+  List<Task2> tasks2 = [];
   PhotoViewController _pContrl = PhotoViewController();
   PhotoViewController _nContrl = PhotoViewController();
   final GlobalKey _key = GlobalKey();
@@ -90,10 +95,6 @@ class _GridButtonState extends State<GridButton> {
   Offset selectIntersect = Offset(0, 0);
   Offset realIntersect = Offset(0, 0);
   List<Drawing> drawings = [];
-  double _currentSliderValue = 5;
-  DateTime _selectedDate;
-  DateTime _selectedValue = DateTime.now();
-  DatePickerController _controller = DatePickerController();
   ScrollController _controller2 = ScrollController(initialScrollOffset: 560, keepScrollOffset: true);
   ScrollController _gantContrl = ScrollController(initialScrollOffset: 400, keepScrollOffset: true);
   double iS;
@@ -102,11 +103,7 @@ class _GridButtonState extends State<GridButton> {
   DateFormat weekfomat = DateFormat.E();
   DateFormat mdformat = DateFormat('MM.dd');
 
-  double _lowerValue = DateTime.now().millisecondsSinceEpoch.toDouble();
-  double _upperValue = DateTime.now().add(Duration(days: 1)).millisecondsSinceEpoch.toDouble();
   Color trackBarColor;
-  double _minD = DateTime.now().subtract(Duration(days: 10)).millisecondsSinceEpoch.toDouble();
-  double _maxD = DateTime.now().add(Duration(days: 9)).millisecondsSinceEpoch.toDouble();
 
   DateTime startDay;
   DateTime endDay;
@@ -139,7 +136,7 @@ class _GridButtonState extends State<GridButton> {
   bool oribit2 =false;
   ui.Path path = Path();
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  List<bool> toggle =[false,false,false,false,false];
+  List<bool> toggle =[false,false,false,false,false,false];
   double pleft=100;
   double ptop=100;
   bool detailPop = false;
@@ -162,10 +159,6 @@ class _GridButtonState extends State<GridButton> {
       gantControl.jumpTo(_gantContrl.offset);
     });
 
-
-    // weekfomat = DateFormat('E');
-    // mdformat = DateFormat('MM.dd');
-
     void readingGrid() async {
       FirebaseFirestore _db = FirebaseFirestore.instance;
       QuerySnapshot read = await _db.collection('origingrid').get();
@@ -178,7 +171,8 @@ class _GridButtonState extends State<GridButton> {
     void readTasks() async {
       FirebaseFirestore _db = FirebaseFirestore.instance;
       QuerySnapshot read = await _db.collection('tasks').get();
-      tasks = read.docs.map((e) => Task.fromSnapshot(e)).toList();
+      tasks2 = read.docs.map((e) => Task2.fromSnapshot(e)).toList();
+      tasks2.forEach((e) {print(e.toString());});
     }
     void readStandardDetail() async {
       FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -276,7 +270,6 @@ class _GridButtonState extends State<GridButton> {
     readingGrid();
     print(tasks.length);
     print(testgrids.length);
-    _resetSelectedDate();
     Future<QuerySnapshot> watch = FirebaseFirestore.instance.collection('drawing').get();
     watch.then((v) {
       drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
@@ -303,9 +296,6 @@ class _GridButtonState extends State<GridButton> {
 
   }
 
-  void _resetSelectedDate() {
-    _selectedDate = DateTime.now().add(Duration(days: 5));
-  }
 
 
   @override
@@ -317,6 +307,7 @@ class _GridButtonState extends State<GridButton> {
     _gridY.dispose();
     _task.dispose();
     _gantContrl.dispose();
+    gantControl.dispose();
     _controller2.dispose();
     _scaleStateController.dispose();
   }
@@ -326,8 +317,10 @@ class _GridButtonState extends State<GridButton> {
     double shortestSide = MediaQuery.of(context).size.shortestSide;
     double longestSide = MediaQuery.of(context).size.longestSide;
     if(shortestSide<800){
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp,]);
       return Scaffold(
         resizeToAvoidBottomInset: false,
+        drawer: buildDrawerNav(),
         appBar: AppBar(
           title: Text(
             context.watch<Current>().getDrawing().toString(),
@@ -484,6 +477,7 @@ class _GridButtonState extends State<GridButton> {
       return MediaQuery.of(context).orientation == Orientation.portrait
           ? Scaffold(
         resizeToAvoidBottomInset: false,
+        drawer: buildDrawerNav(),
         body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance.collection('origingrid').snapshots(),
           builder: (context, snapshot) {
@@ -597,58 +591,11 @@ class _GridButtonState extends State<GridButton> {
       )
           : Scaffold(
         resizeToAvoidBottomInset: false,
+        drawer: buildDrawerNav(),
         endDrawer: Container(
           width: 500,
           child: Drawer(
-            child: Column(
-            children: [
-              LayoutBuilder(
-                  builder: (context, keymap) {
-                    return Container(
-                      height: keymap.maxWidth/(420/297)+50,
-                      child: Card(child: buildDrawingPath()),
-                    );
-                  }
-              ),
-              Expanded(
-                child: PageView(
-                  controller: PageController(initialPage: 1),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(child: buildAddTaskPage()),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(child: buildTaskAddWidget(context)),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(
-                          child: ListView(
-                            children: interiorList
-                                .map((e) => Card(
-                                child: ListTile(
-                                  title: AutoSizeText(e.roomName),
-                                  leading: Text(e.roomNum),
-                                  trailing: Text(e.cLevel),
-                                )))
-                                .toList(),
-                          )),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: GeneralInfo(infos),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: StandardDetailPage(std),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),),
+            child: buildTIMWORK(context),),
         ),
         body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance.collection('origingrid').snapshots(),
@@ -904,6 +851,33 @@ class _GridButtonState extends State<GridButton> {
                                             ],
                                           ),
                                         ),
+                                      ) else if (toggle[5])Positioned(
+                                        left: pleft,
+                                        top: ptop,
+                                        child: Card(
+                                          child: Column(
+                                            children: [
+                                              Listener(
+                                                  onPointerMove: (p){
+                                                    setState(() {
+                                                      pleft += p.delta.dx;
+                                                      ptop += p.delta.dy;
+                                                    });
+                                                  },
+
+                                                  child: Container(
+                                                      width: 400,
+                                                      child: ListTile(
+                                                        title: Text('TIMWORK'),
+                                                      ))),
+                                              Container(
+                                                width: 400,
+                                                height: 700,
+                                                child: buildTIMWORK(context),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       )else Container(),
                                 ],
                               ),
@@ -947,6 +921,10 @@ class _GridButtonState extends State<GridButton> {
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text('도면목록표'),
                                     ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text('TIMWORK'),
+                                    ),
                                   ],
                                   onPressed: (int index) {
                                     setState(() {
@@ -967,6 +945,7 @@ class _GridButtonState extends State<GridButton> {
     }else
     return MediaQuery.of(context).orientation == Orientation.portrait
         ? Scaffold(
+      drawer: buildDrawerNav(),
             resizeToAvoidBottomInset: false,
             body: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('origingrid').snapshots(),
@@ -1077,6 +1056,7 @@ class _GridButtonState extends State<GridButton> {
           });
         },
       ),
+      drawer: buildDrawerNav(),
             body: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('origingrid').snapshots(),
               builder: (context, snapshot) {
@@ -1216,6 +1196,58 @@ class _GridButtonState extends State<GridButton> {
           );
   }
 
+  Column buildTIMWORK(BuildContext context) {
+    return Column(
+          children: [
+            LayoutBuilder(
+                builder: (context, keymap) {
+                  return Container(
+                    height: keymap.maxWidth/(420/297)+50,
+                    child: Card(child: buildDrawingPath()),
+                  );
+                }
+            ),
+            Expanded(
+              child: PageView(
+                controller: PageController(initialPage: 1),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(child: buildAddTaskPage()),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(child: buildTaskAddWidget(context)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                        child: ListView(
+                          children: interiorList
+                              .map((e) => Card(
+                              child: ListTile(
+                                title: AutoSizeText(e.roomName),
+                                leading: Text(e.roomNum),
+                                trailing: Text(e.cLevel),
+                              )))
+                              .toList(),
+                        )),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: GeneralInfo(infos),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: StandardDetailPage(std),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+  }
+
   Widget buildDrawingPath() {
     return Container(
       child: Column(
@@ -1324,28 +1356,28 @@ class _GridButtonState extends State<GridButton> {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       setState(() {
-                        tasks.add(
-                          Task(DateTime.now(),
+                        tasks2.add(
+                          Task2(DateTime.now(),
                               name: _task.text,
                               start: startDay,
                               end: endDay,
-                              boundarys: boundarys.map((e) => e.boundary).toList(),
-                              z: context.read<Current>().getDrawing().floor),
+                              boundarys: rmeasurement,
+                              floor: context.read<Current>().getDrawing().floor.toDouble()),
                         );
                         FirebaseFirestore _db = FirebaseFirestore.instance;
                         CollectionReference dbGrid = _db.collection('tasks');
                         dbGrid.doc(_task.text).set(
-                              Task(
+                              Task2(
                                 DateTime.now(),
                                 name: _task.text,
                                 start: startDay,
                                 end: endDay,
-                                boundarys: boundarys.map((e) => e.boundary).toList(),
-                                z: context.read<Current>().getDrawing().floor,
+                                boundarys: rmeasurement,
+                                floor: context.read<Current>().getDrawing().floor.toDouble(),
                               ).toJson(),
                             );
                         _task.text = '';
-                        boundarys = [];
+                        rmeasurement = [];
                       });
                     },
                     icon: Icon(Icons.check),
@@ -1384,7 +1416,6 @@ class _GridButtonState extends State<GridButton> {
               mode: Mode.BOTTOM_SHEET,
               items: drawings,
               maxHeight: 400,
-              onFind: (String filter) => getData(filter),
               label: "작업자 선택",
               onChanged: (e) {
                 setState(() {
@@ -1406,7 +1437,6 @@ class _GridButtonState extends State<GridButton> {
               mode: Mode.BOTTOM_SHEET,
               items: drawings,
               maxHeight: 400,
-              onFind: (String filter) => getData(filter),
               label: "작업입력",
               onChanged: (e) {
                 setState(() {
@@ -1437,7 +1467,7 @@ class _GridButtonState extends State<GridButton> {
     );
   }
 
-  List<DateTime> calendars = List.generate(21, (index) => DateTime.now().add(Duration(days: -20 + index)));
+  List<DateTime> calendars = List.generate(21, (index) => DateTime.now().add(Duration(days: -14 + index)));
 
   Widget buildTaskAddWidget(BuildContext context) {
     return Column(
@@ -1484,7 +1514,7 @@ class _GridButtonState extends State<GridButton> {
         child: Scrollbar(
           child: SingleChildScrollView(
             child: Column(
-              children: tasks.where((t) => t.floor == context.watch<Current>().getDrawing().floor).map((e) {
+              children: tasks2.where((t) => t.floor == context.watch<Current>().getDrawing().floor).map((e) {
                 return Container(
                   // decoration: BoxDecoration(border: Border(bottom: BorderSide())),
                   child: Column(
@@ -1499,7 +1529,6 @@ class _GridButtonState extends State<GridButton> {
                         selected: e.favorite,
                         onTap: () {
                           setState(() {
-                            // tasks.singleWhere((element) => element.favorite == true).favorite = false;
                             e.favorite = !e.favorite;
                             print(e.favorite);
                           });
@@ -1571,24 +1600,24 @@ class _GridButtonState extends State<GridButton> {
 
                             setState(() {
                               _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                              rectPoint = Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
-                                  .minRect(Point(_origin.dx, _origin.dy));
-                              relativeRectPoint = Closet(
-                                      selectPoint: Point(
-                                          (((m.relative.dx / _pContrl.scale) / width -
-                                                  context.read<Current>().getDrawing().originX) *
-                                              context.read<Current>().getcordiX()),
-                                          (((m.relative.dy / _pContrl.scale) / height -
-                                                  context.read<Current>().getDrawing().originY) *
-                                              context.read<Current>().getcordiY())),
-                                      pointList: realParseList)
-                                  .minRect(Point(
-                                      (((m.relative.dx / _pContrl.scale) / width -
-                                              context.read<Current>().getDrawing().originX) *
-                                          context.read<Current>().getcordiX()),
-                                      (((m.relative.dy / _pContrl.scale) / height -
-                                              context.read<Current>().getDrawing().originY) *
-                                          context.read<Current>().getcordiY())));
+                              // rectPoint = Closet(selectPoint: Point(_origin.dx, _origin.dy), pointList: parseList)
+                              //     .minRect(Point(_origin.dx, _origin.dy));
+                              // relativeRectPoint = Closet(
+                              //         selectPoint: Point(
+                              //             (((m.relative.dx / _pContrl.scale) / width -
+                              //                     context.read<Current>().getDrawing().originX) *
+                              //                 context.read<Current>().getcordiX()),
+                              //             (((m.relative.dy / _pContrl.scale) / height -
+                              //                     context.read<Current>().getDrawing().originY) *
+                              //                 context.read<Current>().getcordiY())),
+                              //         pointList: realParseList)
+                              //     .minRect(Point(
+                              //         (((m.relative.dx / _pContrl.scale) / width -
+                              //                 context.read<Current>().getDrawing().originX) *
+                              //             context.read<Current>().getcordiX()),
+                              //         (((m.relative.dy / _pContrl.scale) / height -
+                              //                 context.read<Current>().getDrawing().originY) *
+                              //             context.read<Current>().getcordiY())));
                               print(m.relative / _pContrl.scale);
                               int debugX = (((m.relative.dx / _pContrl.scale) / width -
                                           context.read<Current>().getDrawing().originX) *
@@ -1602,7 +1631,6 @@ class _GridButtonState extends State<GridButton> {
                               tracking.add(_origin);
                               measurement.add(_origin);
                               rmeasurement.add(Offset(debugX.toDouble(), debugY.toDouble()));
-
                               setState(() {
                                 var _wTime = DateTime.now();
                                 boundarys.add(Boundary(_wTime,
@@ -1618,7 +1646,7 @@ class _GridButtonState extends State<GridButton> {
                               });
                             },
                             child: Stack(
-                              overflow: Overflow.visible,
+                              clipBehavior: Clip.none,
                               key: _key2,
                               // alignment: Alignment.center,
                               children: [
@@ -1657,7 +1685,7 @@ class _GridButtonState extends State<GridButton> {
                               //           Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}')),
                               // ),
 
-                              ///측정구현
+                              ///TaskBoundary 구현
                                 taskAdd == true
                                     ? Container()
                                   : StreamBuilder<PhotoViewControllerValue>(
@@ -1673,52 +1701,118 @@ class _GridButtonState extends State<GridButton> {
                                         return Stack(
                                           children: [
                                             CustomPaint(
-                                              painter: CallOutCount(tP: tracking, s: snapshot.data.scale),
+                                              painter: TaskBoundaryPaint(tP: tracking, s: snapshot.data.scale),
                                             ),
-                                            // count != []
-                                            //     ? Stack(
-                                            //   children: count
-                                            //       .map((e) => Positioned.fromRect(
-                                            //       rect: Rect.fromCenter(
-                                            //           center: tracking[count.indexOf(e)], width: 100, height: 100),
-                                            //       child: Center(
-                                            //           child: Text(
-                                            //             e.toString(),
-                                            //             style: TextStyle(color: Colors.white),
-                                            //             textScaleFactor: 1/snapshot.data.scale,
-                                            //           ))))
-                                            //       .toList(),
-                                            // )
-                                            //     : Container(),
-                                            measurement != null && measurement.length > 1
-                                                ? Stack(
-                                                    children: measurement
-                                                        .sublist(1)
-                                                        .map((e) => Positioned.fromRect(
-                                                            rect: Rect.fromCenter(
-                                                                center: (measurement[measurement.indexOf(e) - 1] +
-                                                                        measurement[measurement.indexOf(e)]) /
-                                                                    2,
-                                                                width: 100,
-                                                                height: 100),
-                                                            child: Center(
-                                                                child: Transform.rotate(
-                                                              angle: pi /
-                                                                  (180 /
-                                                                      Line(measurement[measurement.indexOf(e) - 1],
-                                                                              measurement[measurement.indexOf(e)])
-                                                                          .degree()),
-                                                              child: Text(
-                                                                  '${(Line(rmeasurement[measurement.indexOf(e) - 1], rmeasurement[measurement.indexOf(e)]).length() / 1000).toStringAsFixed(2)}'
-                                                                  // style: TextStyle(color: Colors.white),
-                                                                  ),
-                                                            ))))
-                                                        .toList(),
-                                                  )
-                                                : Container(),
                                           ],
                                         );
                                       }),
+                                ///서버 바운더리 Read
+                                context.watch<Current>().getDrawing().scale != '1'
+                                  ? Stack(
+                                      children: tasks2
+                                          .where((t) => t.floor == context.watch<Current>().getDrawing().floor)
+                                          .map((e) {
+                                      var watch = context.watch<Current>();
+                                      List<Offset> data = e.boundarys;
+                                      List<Offset> parse = data
+                                          .map((e) => Offset(
+                                              e.dx / (watch.getcordiX() / width) + (watch.getDrawing().originX * width),
+                                              e.dy / (watch.getcordiY() / height) +
+                                                  ((watch.getDrawing().originY * height))))
+                                          .toList();
+                                      return StreamBuilder<PhotoViewControllerValue>(
+                                          stream: _pContrl.outputStateStream,
+                                          initialData: PhotoViewControllerValue(
+                                            position: _pContrl.position,
+                                            rotation: 0,
+                                            rotationFocusPoint: null,
+                                            scale: _pContrl.scale,
+                                          ),
+                                          builder: (context, snapshot) {
+                                            if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                                            return Stack(
+                                              children: [
+                                                CustomPaint(
+                                                  painter: TaskBoundaryPaint(tP: parse, s: snapshot.data.scale,select: e.favorite),
+                                                ),
+                                                taskAdd == true
+                                                    ?ClipPath(
+                                                  clipper: TaskClip(parse),
+                                                  child: Container(
+                                                    child: Material(
+                                                      child: InkWell(
+                                                        splashColor: Colors.deepOrange.withOpacity(0.5),
+                                                        onLongPress: (){
+                                                          print('클릭');
+                                                          Get.defaultDialog(title: e.name);
+                                                        },
+                                                      ),
+                                                      color: Colors.transparent,
+                                                    ),
+                                                    color: Colors.transparent,
+                                                  ),
+                                                )
+                                                    :Container(),
+                                              ],
+                                            );
+                                          });
+                                    }).toList())
+                                  : Container(),
+
+                                ///측정구현
+                                // taskAdd == true
+                                //     ? Container()
+                                //   : StreamBuilder<PhotoViewControllerValue>(
+                                //       stream: _pContrl.outputStateStream,
+                                //     initialData: PhotoViewControllerValue(
+                                //       position: _pContrl.position,
+                                //       rotation: 0,
+                                //       rotationFocusPoint: null,
+                                //       scale: _pContrl.scale,
+                                //     ),
+                                //       builder: (context, snapshot) {
+                                //         if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                                //         return Stack(
+                                //           children: [
+                                //             CustomPaint(
+                                //               painter: CallOutCount(tP: tracking, s: snapshot.data.scale),
+                                //             ),
+                                //             rmeasurement != null && rmeasurement.length > 2
+                                //                 ? Center(
+                                //                     child: Text(
+                                //                     '${(computeArea(rmeasurement) / 1000000).toStringAsFixed(2)}m3',
+                                //                     textScaleFactor: 5,
+                                //                   ))
+                                //                 : Container(),
+                                //             measurement != null && measurement.length > 1
+                                //                 ? Stack(
+                                //                     children: measurement
+                                //                         .sublist(1)
+                                //                         .map((e) => Positioned.fromRect(
+                                //                             rect: Rect.fromCenter(
+                                //                                 center: (measurement[measurement.indexOf(e) - 1] +
+                                //                                         measurement[measurement.indexOf(e)]) /
+                                //                                     2,
+                                //                                 width: 100,
+                                //                                 height: 100),
+                                //                             child: Center(
+                                //                                 child: Transform.rotate(
+                                //                               angle: pi /
+                                //                                   (180 /
+                                //                                       Line(measurement[measurement.indexOf(e) - 1],
+                                //                                               measurement[measurement.indexOf(e)])
+                                //                                           .degree()),
+                                //                               child: Text(
+                                //                                   '${(Line(rmeasurement[measurement.indexOf(e) - 1], rmeasurement[measurement.indexOf(e)]).length() / 1000).toStringAsFixed(2)}'
+                                //                                   // style: TextStyle(color: Colors.white),
+                                //                                   ),
+                                //                             ))))
+                                //                         .toList(),
+                                //                   )
+                                //                 : Container(),
+                                //           ],
+                                //         );
+                                //       }),
 
                               ///커스텀페인터 그리드 및 교점
                               //   context.watch<Current>().getDrawing().scale != '1'
@@ -1800,7 +1894,7 @@ class _GridButtonState extends State<GridButton> {
                                 //                 ))
                                 //             .toList())
                                 //     : Container(),
-
+                                //
                                 /// 선택한 바운더리 위젯
                                 taskAdd != true
                                     ? Container()
@@ -2061,33 +2155,52 @@ class _GridButtonState extends State<GridButton> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              buildShortCutCard(context,16),
+              SizedBox(
+                height: 100,
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
-    Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(80)),
-               color: Colors.white54,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(width: 50,),
-                    IconButton(
-                      icon: Icon(CommunityMaterialIcons.search_web),
-                      iconSize: 48,
-                      tooltip: '검색',
-                      onPressed: () {
-                        Get.defaultDialog(title: '도면검색', content: SearchDialog(drawings));
-                      },),
-                    IconButton(
-                      icon: Icon(CommunityMaterialIcons.star),
-                      iconSize: 48,
-                      tooltip: '즐겨찾기',
-                      onPressed: () {
-                        Get.defaultDialog(
-                            title: '즐겨찾기',
-                            content: Wrap(
-                              children: context
-                                  .read<Current>()
-                                  .favorite
-                                  .map((e) => Padding(
+  Card buildShortCutCard(BuildContext context ,double Size) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(80)),
+      color: Colors.white54,
+      child: Container(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: Size,
+            ),
+            IconButton(
+              constraints: BoxConstraints.tightFor(width: Size*2),
+              splashRadius: Size,
+              icon: Icon(CommunityMaterialIcons.search_web),
+              iconSize: Size,
+              tooltip: '검색',
+              onPressed: () {
+                Get.defaultDialog(title: '도면검색', content: SearchDialog(drawings));
+              },
+            ),
+            IconButton(
+              constraints: BoxConstraints.tightFor(width: Size*2),
+              splashRadius: Size,
+              icon: Icon(CommunityMaterialIcons.star),
+              iconSize: Size,
+              tooltip: '즐겨찾기',
+              onPressed: () {
+                Get.defaultDialog(
+                    title: '즐겨찾기',
+                    content: Wrap(
+                      children: context
+                          .read<Current>()
+                          .favorite
+                          .map((e) => Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: InkWell(
                                   onTap: () {
@@ -2101,169 +2214,127 @@ class _GridButtonState extends State<GridButton> {
                                   ),
                                 ),
                               ))
-                                  .toList(),
-                            ));
-                      },),
-                    Tooltip(
-                      message: '도면검색',
-                      child: InkWell(
-                        onLongPress: () {
-                          context.read<Current>().addFavorite(context.read<Current>().getDrawing());
-                        },
-                        onTap: () {
-                          Get.defaultDialog(title: '도면검색', content: SearchDialog(drawings));
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            context.read<Current>().getDrawing().toString(),
-                            textScaleFactor: 2,
-                          ),
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                        icon: Icon(Icons.keyboard_arrow_down),
-                        iconSize: 72,
-                        tooltip: '아래층',
-                        onPressed: () {
-                          Drawing c = context.read<Current>().getDrawing();
-                          Current temp = context.read<Current>();
-                          List<Drawing> tempcon = drawings
-                              .where((e) =>
-                          e.doc == c.doc &&
-                              e.con == c.con &&
-                              e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
-                              .toList();
-                          temp.changePath(tempcon.elementAt((tempcon.indexOf(c) - 1)));
-                        }),
-                    IconButton(
-                        icon: Icon(Icons.keyboard_arrow_up),
-                        iconSize: 72,
-                        tooltip: '위층',
-                        onPressed: () {
-                          Drawing c = context.read<Current>().getDrawing();
-                          Current temp = context.read<Current>();
-                          List<Drawing> tempcon = drawings
-                              .where((e) =>
-                          e.doc == c.doc &&
-                              e.con == c.con &&
-                              e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
-                              .toList();
-                          temp.changePath(tempcon.elementAt((tempcon.indexOf(c) + 1)));
-                        }),
-                    IconButton(
-                      icon: Icon(Icons.all_inbox_rounded),
-                      iconSize: 48,
-                      tooltip: '공정',
-                      onPressed: () {
-                          Drawing c = context.read<Current>().getDrawing();
-                          Current temp = context.read<Current>();
-                          List<Drawing> tempcon = drawings
-                              .where((e) =>
-                          e.doc == c.doc &&
-                              e.con != c.con &&
-                              e.floor == c.floor &&
-                              e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
-                              .toList();
-                          Get.defaultDialog(
-                              title: '공정이동',
-                              content: Column(
-                                children: tempcon
-                                    .map((e) => ListTile(
-                                  title: Text(e.toString()),
-                                  onTap: (){
-                                    context.read<Current>().changePath(e);
-                                    Navigator.pop(context);
-                                  },
-                                ))
-                                    .toList(),
-                              ));
-                        },),
-                    IconButton(
-                      icon: Icon(CommunityMaterialIcons.ruler),
-                      iconSize: 48,
-                      tooltip: '측정',
-                      onPressed: () {
-                        setState(() {
-                          taskAdd = !taskAdd;
-                          boundarys = [];
-                          tracking = [];
-                          measurement = [];
-                          rmeasurement = [];
-                        });
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(CommunityMaterialIcons.filter_menu),
-                      iconSize: 48,
-                      tooltip: '필터',
-                      onPressed: () {
-                        setState(() {
-                          callOutLayerOn = !callOutLayerOn;
-                        });
-                      },
-                    ),
-                    SizedBox(width: 50,),
-                  ],
+                          .toList(),
+                    ));
+              },
+            ),
+            Tooltip(
+              message: '도면검색',
+              child: InkWell(
+                onLongPress: () {
+                  context.read<Current>().addFavorite(context.read<Current>().getDrawing());
+                },
+                onTap: () {
+                  Get.defaultDialog(title: '도면검색', content: SearchDialog(drawings));
+                },
+                child: Text(
+                  context.read<Current>().getDrawing().toString(),
+                  style: TextStyle(fontSize: Size),
                 ),
               ),
-              SizedBox(height: 100,)
-            ],
-          ),
+            ),
+            IconButton(
+                constraints: BoxConstraints.tightFor(width: Size*2),
+                splashRadius: Size,
+                icon: Icon(Icons.keyboard_arrow_down),
+                iconSize: Size*1.5,
+                tooltip: '아래층',
+                onPressed: () {
+                  Drawing c = context.read<Current>().getDrawing();
+                  Current temp = context.read<Current>();
+                  List<Drawing> tempcon = drawings
+                      .where((e) =>
+                          e.doc == c.doc &&
+                          e.con == c.con &&
+                          e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
+                      .toList();
+                  temp.changePath(tempcon.elementAt((tempcon.indexOf(c) - 1)));
+                }),
+            IconButton(
+                constraints: BoxConstraints.tightFor(width: Size*2),
+                splashRadius: Size,
+                icon: Icon(Icons.keyboard_arrow_up),
+                iconSize: Size*1.5,
+                tooltip: '위층',
+                onPressed: () {
+                  Drawing c = context.read<Current>().getDrawing();
+                  Current temp = context.read<Current>();
+                  List<Drawing> tempcon = drawings
+                      .where((e) =>
+                          e.doc == c.doc &&
+                          e.con == c.con &&
+                          e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
+                      .toList();
+                  temp.changePath(tempcon.elementAt((tempcon.indexOf(c) + 1)));
+                }),
+            IconButton(
+              constraints: BoxConstraints.tightFor(width: Size*2),
+              splashRadius: Size,
+              icon: Icon(Icons.all_inbox_rounded),
+              iconSize: Size,
+              tooltip: '공정',
+              onPressed: () {
+                Drawing c = context.read<Current>().getDrawing();
+                Current temp = context.read<Current>();
+                List<Drawing> tempcon = drawings
+                    .where((e) =>
+                        e.doc == c.doc &&
+                        e.con != c.con &&
+                        e.floor == c.floor &&
+                        e.title.substring(e.title.length - 1) == c.title.substring(c.title.length - 1))
+                    .toList();
+                Get.defaultDialog(
+                    title: '공정이동',
+                    content: Column(
+                      children: tempcon
+                          .map((e) => ListTile(
+                                title: Text(e.toString()),
+                                onTap: () {
+                                  context.read<Current>().changePath(e);
+                                  Navigator.pop(context);
+                                },
+                              ))
+                          .toList(),
+                    ));
+              },
+            ),
+            IconButton(
+              constraints: BoxConstraints.tightFor(width: Size*2),
+              splashRadius: Size,
+              icon: Icon(CommunityMaterialIcons.ruler),
+              iconSize: Size,
+              tooltip: '측정',
+              onPressed: () {
+                setState(() {
+                  taskAdd = !taskAdd;
+                  boundarys = [];
+                  tracking = [];
+                  measurement = [];
+                  rmeasurement = [];
+                });
+              },
+            ),
+            IconButton(
+              constraints: BoxConstraints.tightFor(width: Size*2),
+              splashRadius: Size,
+              icon: Icon(CommunityMaterialIcons.filter_menu),
+              iconSize: Size,
+              tooltip: '필터',
+              onPressed: () {
+                setState(() {
+                  callOutLayerOn = !callOutLayerOn;
+                });
+              },
+            ),
+            SizedBox(
+              width: Size,
+            ),
+          ],
         ),
-
-      ],
-    );
-  }
-
-  Padding planerSlider() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: FlutterSlider(
-        handlerHeight: 25,
-        trackBar: FlutterSliderTrackBar(activeTrackBar: BoxDecoration(color: trackBarColor)),
-        handler:
-            FlutterSliderHandler(child: Text(DateTime.fromMillisecondsSinceEpoch(_lowerValue.toInt()).day.toString())),
-        // hatchMark: FlutterSliderHatchMark(
-        //   density: 0.142857143,
-        //   bigLine: FlutterSliderSizedBox(height: 50, width: 1,decoration:BoxDecoration(color: Colors.red) ),
-        //   smallLine: FlutterSliderSizedBox(height: 50, width: 1,decoration:BoxDecoration(color: Colors.red) ),
-        //   linesDistanceFromTrackBar: 5,
-        //   displayLines: true
-        // ),
-        values: [
-          _lowerValue,
-          // _upperValue,
-        ],
-        // minimumDistance: DateTim,
-        min: _minD,
-        max: _maxD,
-        // rangeSlider: false,
-        jump: true,
-        step: FlutterSliderStep(step: 86400000),
-        // rangeSlider: true,
-        centeredOrigin: true,
-        tooltip: FlutterSliderTooltip(custom: (value) {
-          DateTime dtValue = DateTime.fromMillisecondsSinceEpoch(value.toInt());
-          String valueInTime = dtValue.month.toString() + '.' + dtValue.day.toString();
-          return Text(valueInTime);
-        }),
-        onDragging: (handlerIndex, lowerValue, upperValue) {
-          if (lowerValue > DateTime.now().millisecondsSinceEpoch) {
-            trackBarColor = Colors.blueAccent;
-          } else {
-            trackBarColor = Colors.redAccent;
-          }
-          _lowerValue = lowerValue;
-          // _upperValue = upperValue;
-          print(DateTime.fromMillisecondsSinceEpoch(_lowerValue.toInt()));
-          print(_lowerValue);
-          setState(() {});
-        },
       ),
     );
   }
+
 
   Stack detailInfo(BuildContext context, BoxConstraints c) {
     return Stack(
@@ -2430,6 +2501,98 @@ class _GridButtonState extends State<GridButton> {
             BoxShadow(color: Colors.blue.withOpacity(0.3), spreadRadius: 0.05, blurRadius: 5, offset: Offset(0, 1))
           ],
         ),
+      ),
+    );
+  }
+}
+
+class buildDrawerNav extends StatelessWidget {
+  const buildDrawerNav({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: [
+          UserAccountsDrawerHeader(accountName: Text('정욱찬'), accountEmail: null),
+          Expanded(
+            child: ListView(
+              children: [
+                ListTile(
+                  title: Text('도면뷰어'),
+                  onTap: () => Get.to(GridButton()),
+                ),
+                ListTile(
+                  title: Text('공정관리'),
+                  onTap: () => Get.to(SimulationPage()),
+                ),
+                ListTile(
+                  title: Text('Setting'),
+                  onTap: () => Get.to(SettingPage()),
+                ),
+                ListTile(
+                  title: Text('Back Up'),
+                  onTap: () => Get.to(BackupPage()),
+                ),
+                ListTile(
+                  title: Text('시뮤레이션 테스트'),
+                  onTap: () => Get.to(PlaySimul()),
+                ),
+                ListTile(
+                  title: Text('상세도 OCR처리페이지'),
+                  onTap: () => Get.to(OcrSettingPage()),
+                ),
+                ListTile(
+                  title: Text('도면뷰어'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => TimView()),
+                    );
+                  },
+                ),
+                ListTile(
+                  title: Text('기존뷰어'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => originView()),
+                    );
+                  },
+                ),
+                ListTile(
+                  title: Text('도면뷰어기능'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Viewer()),
+                    );
+                  },
+                ),
+                ListTile(
+                  title: Text('도면문자처리'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Dmap()),
+                    );
+                  },
+                ),
+                ListTile(
+                  title: Text('공정표'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Planner()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
@@ -2607,6 +2770,11 @@ class CallOutCount extends CustomPainter {
       ..strokeWidth = 1.0 / s
       ..style = PaintingStyle.fill
       ..color = Color.fromRGBO(255, 0, 0, 0.3);
+    Paint paint7 = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 2.0 / s
+      ..style = PaintingStyle.stroke
+      ..color = Colors.blueAccent.withOpacity(0.8);
 
     Path p = Path();
     p.moveTo(tP[0].dx, tP[0].dy);
@@ -2618,6 +2786,47 @@ class CallOutCount extends CustomPainter {
 
     tP == [] ? null : canvas.drawPoints(PointMode.points, tP, paint4);
     tP == [] ? null : canvas.drawPoints(PointMode.polygon, tP, paint5);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+class TaskBoundaryPaint extends CustomPainter {
+  List<Offset> tP;
+  double s = 1;
+  bool select = false;
+
+  TaskBoundaryPaint({this.tP, this.s,this.select});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint4 = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 5.0 / s
+      ..color =Colors.blueAccent;
+    Paint paint6 = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 1.0 / s
+      ..style = PaintingStyle.fill
+      ..color = select==false?Colors.black.withOpacity(0.2):Colors.red.withOpacity(0.3);
+    Paint paint7 = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 2.0 / s
+      ..style = PaintingStyle.stroke
+      ..color = Colors.blueAccent.withOpacity(0.8);
+
+    Path p = Path();
+    p.moveTo(tP[0].dx, tP[0].dy);
+    tP.forEach((e) {
+      p.lineTo(e.dx, e.dy);
+    });
+    p.close();
+    tP == [] ? null : canvas.drawPath(p, paint6);
+    tP == [] ? null : canvas.drawPath(p, paint7);
+
+    tP == [] ? null : canvas.drawPoints(PointMode.points, tP, paint4);
   }
 
   @override
@@ -2638,6 +2847,28 @@ class CustomClipperImage extends CustomClipper<Path>{
     print(path);
     return path;
 
+    }
+
+  @override
+  bool shouldReclip( CustomClipper<Path> oldClipper) {
+    return false;
+  }
+}
+class TaskClip extends CustomClipper<Path>{
+    var path = Path();
+    List<Offset> data;
+
+    TaskClip(this.data);
+
+  @override
+  Path getClip(Size size) {
+    Path p = Path();
+    p.moveTo(data[0].dx, data[0].dy);
+    data.forEach((e) {
+      p.lineTo(e.dx, e.dy);
+    });
+    p.close();
+    return p;
     }
 
   @override
@@ -2723,4 +2954,21 @@ Widget _buildFloatingActionButton() {
 
 _onSpeedDialAction(int selectedActionIndex) {
   print('$selectedActionIndex Selected');
+}
+double computeArea(List<Offset> a) {
+  double area = 0;
+  a.sublist(1).forEach((e) {
+    var x1 = a[a.indexOf(e) - 1].dx;
+    var x2 = a[a.indexOf(e)].dx;
+    var y1 = a[a.indexOf(e) - 1].dy;
+    var y2 = a[a.indexOf(e)].dy;
+
+    area += x1 * y2;
+    area -= y1 * x2;
+  });
+  area += a.last.dx * a.first.dy;
+  area -= a.last.dy * a.first.dx;
+  area /= 2.0;
+  area = area.abs();
+  return area;
 }
