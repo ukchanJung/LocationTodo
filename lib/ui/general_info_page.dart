@@ -65,8 +65,6 @@ class _GeneralInfoState extends State<GeneralInfo> {
         return ExpansionTile(
           title: Text(a),
           onExpansionChanged: (_){
-            print(subInfo);
-            print(subInfo.length);
           },
           children: subInfo
               .map(
@@ -79,8 +77,11 @@ class _GeneralInfoState extends State<GeneralInfo> {
                                   .map((e) => e.index7)
                                   .toSet()
                                   .toList();
+                              print(c.index4);
+                              String data =c.index4!=0?c.toString():'${c.index1}.${c.conType} ${c.index2}.${c.index3}';
+                              print('[${c.index4!=0}]$data');
                   return ExpansionTile(
-                title: Text(c.toString()),
+                title: Text(data),
                 children: _temp == true
                     ? [
                         Container(

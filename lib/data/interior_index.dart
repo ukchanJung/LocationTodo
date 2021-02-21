@@ -14,23 +14,28 @@ class InteriorIndex {
   String cBackground;
   String cFin;
   String cLevel;
+  List fwDetail;
+  List cwDetail;
 
   InteriorIndex({
-      this.floor, 
-      this.category, 
-      this.roomNum, 
-      this.roomName, 
-      this.fBackground, 
-      this.fFin, 
-      this.fThk, 
-      this.bBBackground, 
-      this.bBFin, 
-      this.bBThk, 
-      this.wBackground, 
-      this.wFin, 
-      this.cBackground, 
-      this.cFin, 
-      this.cLevel});
+    this.floor,
+    this.category,
+    this.roomNum,
+    this.roomName,
+    this.fBackground,
+    this.fFin,
+    this.fThk,
+    this.bBBackground,
+    this.bBFin,
+    this.bBThk,
+    this.wBackground,
+    this.wFin,
+    this.cBackground,
+    this.cFin,
+    this.cLevel,
+    this.fwDetail,
+    this.cwDetail,
+  });
 
   InteriorIndex.fromJson(dynamic json) {
     floor = json["floor"];
@@ -48,6 +53,27 @@ class InteriorIndex {
     cBackground = json["cBackground"];
     cFin = json["cFin"];
     cLevel = json["cLevel"];
+    fwDetail = json["fwDetail"];
+    cwDetail = json["cwDetail"];
+  }
+  InteriorIndex.fromMap(Map map) {
+    floor = map["floor"];
+    category = map["category"];
+    roomNum = map["roomNum"];
+    roomName = map["roomName"];
+    fBackground = map["fBackground"];
+    fFin = map["fFin"];
+    fThk = map["fThk"];
+    bBBackground = map["bBBackground"];
+    bBFin = map["bBFin"];
+    bBThk = map["bBThk"];
+    wBackground = map["wBackground"];
+    wFin = map["wFin"];
+    cBackground = map["cBackground"];
+    cFin = map["cFin"];
+    cLevel = map["cLevel"];
+    fwDetail = map["fwDetail"];
+    cwDetail = map["cwDetail"];
   }
 
   Map<String, dynamic> toJson() {
@@ -67,6 +93,9 @@ class InteriorIndex {
     map["cBackground"] = cBackground;
     map["cFin"] = cFin;
     map["cLevel"] = cLevel;
+    map["fwDetail"] = fwDetail;
+    map["cwDetail"] = cwDetail;
+
     return map;
   }
 
