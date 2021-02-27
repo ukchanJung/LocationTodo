@@ -183,7 +183,7 @@ class _WeekCalendarState extends State<WeekCalendar> {
   ScrollController _gantContrl = ScrollController(initialScrollOffset: 400, keepScrollOffset: true);
   ScrollController gantControl = ScrollController();
   DateFormat weekfomat = DateFormat.E();
-  List<Task> tasks;
+  List<TaskData> tasks;
 
   @override
   void initState() {

@@ -54,6 +54,14 @@ dependencies:
   carousel_slider: ^2.3.1
   device_info: ^1.0.0
   flutter_speed_dial_material_design: ^2.0.0
+  firebase_auth: ^0.18.4
+  flutter_login: ^1.0.14
+  camera: ^0.7.0+2
+  image_picker: ^0.6.7+22
+  firebase_storage: ^5.2.0
+  google_sign_in: ^4.5.9
+  logger: ^0.7.0+2
+  shared_preferences: ^0.5.3+4
 
 dev_dependencies:
   flutter_test:

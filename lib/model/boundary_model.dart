@@ -10,7 +10,7 @@ class Boundary {
   String memo;
   bool ischecked = false;
   bool favorite = false;
-  List<Task> tasksList=[];
+  List<TaskData> tasksList=[];
   double x;
   double y;
   double z;

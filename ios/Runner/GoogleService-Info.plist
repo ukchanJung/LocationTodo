@@ -32,5 +32,16 @@
 	<string>1:801258913989:ios:d49bd26be75f26b70430ac</string>
 	<key>DATABASE_URL</key>
 	<string>https://locationtodo.firebaseio.com</string>
+	<key>CFBundleURLTypes</key>
+    <array>
+    	<dict>
+    		<key>CFBundleTypeRole</key>
+    		<string>Editor</string>
+    		<key>CFBundleURLSchemes</key>
+    		<array>
+    			<string>com.googleusercontent.apps.801258913989-okr5tsfguhvs4mus0ug6p7eututu1uec</string>
+    		</array>
+    	</dict>
+    </array>
 </dict>
 </plist>

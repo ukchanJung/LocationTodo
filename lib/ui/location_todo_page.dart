@@ -31,7 +31,7 @@ class LocationTodo extends StatefulWidget {
 }
 
 class _LocationTodoState extends State<LocationTodo> {
-  List<Task> tasks = [];
+  List<TaskData> tasks = [];
   TextEditingController _textEditingController = TextEditingController();
   String _searchText = '';
   DateTime now = DateTime.now();
@@ -56,20 +56,20 @@ class _LocationTodoState extends State<LocationTodo> {
         );
     setState(() {
       tasks = [
-        Task(DateTime.now(), name: '메모1'),
-        Task(DateTime.now(), name: '메모2'),
-        Task(DateTime.now(), name: '메모3'),
-        Task(DateTime.now(), name: '메모4'),
-        Task(DateTime.now(), name: '메모5'),
-        Task(DateTime.now(), name: '메모6'),
-        Task(DateTime.now(), name: '메모7'),
-        Task(DateTime.now(), name: '메모8'),
-        Task(DateTime.now(), name: '메모9'),
-        Task(DateTime.now(), name: '메모10'),
-        Task(DateTime.now(), name: '메모11'),
-        Task(DateTime.now(), name: '메모12'),
-        Task(DateTime.now(), name: '메모13'),
-        Task(DateTime.now(), name: '메모14'),
+        TaskData(DateTime.now(), name: '메모1'),
+        TaskData(DateTime.now(), name: '메모2'),
+        TaskData(DateTime.now(), name: '메모3'),
+        TaskData(DateTime.now(), name: '메모4'),
+        TaskData(DateTime.now(), name: '메모5'),
+        TaskData(DateTime.now(), name: '메모6'),
+        TaskData(DateTime.now(), name: '메모7'),
+        TaskData(DateTime.now(), name: '메모8'),
+        TaskData(DateTime.now(), name: '메모9'),
+        TaskData(DateTime.now(), name: '메모10'),
+        TaskData(DateTime.now(), name: '메모11'),
+        TaskData(DateTime.now(), name: '메모12'),
+        TaskData(DateTime.now(), name: '메모13'),
+        TaskData(DateTime.now(), name: '메모14'),
       ];
       for (int i = 0; i < tasks.length; i++) {
         tasks[i].x = Random().nextInt(400).toDouble();
@@ -451,7 +451,7 @@ class _LocationTodoState extends State<LocationTodo> {
             //메서드?를 UI에서분리해야될것 같음
             setState(() {
               var _wTime = DateTime.now();
-              tasks.add(Task(_wTime, name: _textEditingController.text));
+              tasks.add(TaskData(_wTime, name: _textEditingController.text));
               // 등록 버튼 클릭시 필드 초기화
               _textEditingController.text = '';
             });

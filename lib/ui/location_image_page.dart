@@ -6,7 +6,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 
 class LocationImage extends StatefulWidget {
-  List<Task> tasks;
+  List<TaskData> tasks;
 
   LocationImage(this.tasks);
 

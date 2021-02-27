@@ -43,7 +43,7 @@ class _GridSettingPageState extends State<GridSettingPage> {
   List<Point> rectPoint = [];
   List<Point> relativeRectPoint = [];
   List<Boundary> boundarys = [];
-  List<Task> tasks = [];
+  List<TaskData> tasks = [];
   PhotoViewController _pContrl = PhotoViewController();
   final GlobalKey _key = GlobalKey();
   final GlobalKey _key2 = GlobalKey();
@@ -78,7 +78,7 @@ class _GridSettingPageState extends State<GridSettingPage> {
     void readTasks() async {
       FirebaseFirestore _db = FirebaseFirestore.instance;
       QuerySnapshot read = await _db.collection('tasks').get();
-      tasks = read.docs.map((e) => Task.fromSnapshot(e)).toList();
+      tasks = read.docs.map((e) => TaskData.fromSnapshot(e)).toList();
     }
 
     readTasks();

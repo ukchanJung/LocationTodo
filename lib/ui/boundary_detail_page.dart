@@ -5,7 +5,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 
 class BoundayDetail extends StatefulWidget {
-  List<Task> boundaryTasks;
+  List<TaskData> boundaryTasks;
 
   BoundayDetail(this.boundaryTasks);
 

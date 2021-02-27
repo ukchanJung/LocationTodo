@@ -246,11 +246,12 @@ class _PlaySimulState extends State<PlaySimul> {
                   return Column(
                     children: [
                       Expanded(
+                        flex: 3,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Expanded(
-                              flex: 2,
+                              flex: 5,
                               child: Card(
                                 child: CarouselSlider(
                                   options: CarouselOptions(
@@ -315,7 +316,7 @@ class _PlaySimulState extends State<PlaySimul> {
                         flex: 2,
                         child: Row(
                           children: [
-                            Expanded(flex:2,child: Card(child: Column(
+                            Expanded(flex:5,child: Card(child: Column(
                               children: [
                                     Row(
                                       children: [

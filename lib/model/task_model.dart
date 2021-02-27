@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class Task {
+class TaskData {
   String name;
   DateTime start;
   DateTime end;
@@ -18,7 +18,7 @@ class Task {
   List<Rect> boundarys = [];
 
 
-  Task(
+  TaskData(
     this.writeTime, {
     this.name = '메모',
     this.start,
@@ -28,7 +28,7 @@ class Task {
     this.z,
     this.floor,
   });
-  Task.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
+  TaskData.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
     name = json["name"];
     start = json["start"].toDate();
     end = json["end"].toDate();
@@ -70,7 +70,7 @@ class Task {
     return map;
   }
 
-  Task.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
+  TaskData.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
 }
 class Task2 {
   String name;

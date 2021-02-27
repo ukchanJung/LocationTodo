@@ -58,6 +58,11 @@ class _SearchDialogState extends State<SearchDialog> {
                           context.read<Current>().changePath(e);
                           Navigator.pop(context);
                           },
+                onLongPress: (){
+                  context.read<Current>().changeLayer(e);
+                  Navigator.pop(context);
+
+                },
                       ))
                   .toList(),
             ),

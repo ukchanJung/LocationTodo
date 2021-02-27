@@ -13,7 +13,7 @@ import 'package:positioned_tap_detector/positioned_tap_detector.dart';
 import 'package:provider/provider.dart';
 
 class TodoDetail extends StatefulWidget {
-  final Task task;
+  final TaskData task;
 
   TodoDetail(this.task);
 

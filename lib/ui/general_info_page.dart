@@ -19,7 +19,6 @@ class GeneralInfo extends StatefulWidget {
 class _GeneralInfoState extends State<GeneralInfo> {
   List infodatas;
   bool a = false;
-  TextEditingController _textEditingController = TextEditingController();
   List<String> data;
   String aa;
   String search = '일반사항';
@@ -31,17 +30,8 @@ class _GeneralInfoState extends State<GeneralInfo> {
   void initState() {
     super.initState();
     category = widget.infos.map((e) => e.conType).toSet().toList();
-    // category2 = widget.infos.map((e) => e.index7).toSet().toList();
-    // category3 = widget.infos.map((e) => {'index7':e.index7,'Dif':e.toDif()}).toSet().toList();
-    // print(category3);
-    // print(category3.length);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _textEditingController.dispose();
-  }
 
   Color temp(String t) {
     if (t.contains("#")) {
@@ -56,141 +46,85 @@ class _GeneralInfoState extends State<GeneralInfo> {
 
   @override
   Widget build(BuildContext context) {
-    return Builder(
-      builder: (BuildContext ctx) {
-        return ListView(
-          children: category.map((a){
-            List<ConGInfo> subInfo = widget.infos.where((b) => b.conType == a && b.index7 == 'text').toList();
-            List<ConGInfo> Test = widget.infos.where((b) => b.conType == a ).toList();
+    return ListView.builder(
+      cacheExtent: 1000,
+      itemCount: category.length,
+      itemBuilder: (context, index) {
+        bool _temp2 = false;
+        List<ConGInfo> subInfo=widget.infos.where((b) => b.conType == category[index] && b.index7 == 'text').toList();
+        List<ConGInfo> Test=widget.infos.where((b) => b.conType == category[index]).toList();
+
         return ExpansionTile(
-          title: Text(a),
-          onExpansionChanged: (_){
+          title: Text(category[index]),
+          onExpansionChanged: (_) {
+            setState(() {
+              _temp2 = !_temp2;
+            });
           },
-          children: subInfo
-              .map(
-                (c) {
-                  bool _temp = false;
-                              List<ConGInfo> _tempG =
-                              Test.where((e) => e.toDif() == c.toDif() && e.index7 != 'text').toList();
-                              List<String> _tempL = Test
-                                  .where((e) => e.toDif() == c.toDif() && e.index7 != 'text')
-                                  .map((e) => e.index7)
-                                  .toSet()
-                                  .toList();
-                              print(c.index4);
-                              String data =c.index4!=0?c.toString():'${c.index1}.${c.conType} ${c.index2}.${c.index3}';
-                              print('[${c.index4!=0}]$data');
-                  return ExpansionTile(
-                title: Text(data),
-                children: _temp == true
-                    ? [
-                        Container(
-                          width: 300,
-                          height: 300,
-                          color: Colors.redAccent,
-                        )
-                      ]
-                    : [
-                        Container(
-                          child: Image.asset('asset/structure/${c.path}'),
-                        ),
-                        Wrap(
-                          children: _tempL.map((e) {
-                            return InkWell(
-                              onTap: () {
-                                Get.defaultDialog(
-                                    content: Container(
+            children:_temp2
+                ?[]
+                :subInfo.map(
+                  (c) {
+                bool _temp = false;
+                List<ConGInfo> _tempG = Test.where((e) => e.toDif() == c.toDif() && e.index7 != 'text').toList();
+                List<String> _tempL =
+                Test.where((e) => e.toDif() == c.toDif() && e.index7 != 'text').map((e) => e.index7).toSet().toList();
+                // print(c.index4);
+                String data = c.index4 != 0 ? c.toString() : '${c.index1}.${c.conType} ${c.index2}.${c.index3}';
+                // print('[${c.index4!=0}]$data');
+                return ExpansionTile(
+                  title: Text(data),
+                  children: _temp == true
+                      ? []
+                      : [
+                    Container(
+                      child: Image.asset('asset/structure/${c.path}'),
+                    ),
+                    Wrap(
+                      children: _tempL.map((e) {
+                        return InkWell(
+                          onTap: () {
+                            Get.defaultDialog(
+                                content: Container(
                                   height: 800,
                                   child: SingleChildScrollView(
                                     child: Wrap(
                                         children: _tempG
                                             .where((y) => y.index7 == e)
                                             .map((z) => Image.asset(
-                                                  'asset/structure/${z.path}',
-                                                  height: 270,
-                                                ))
+                                          'asset/structure/${z.path}',
+                                          height: 270,
+                                        ))
                                             .toList()),
                                   ),
                                 ));
-                              },
-                              child: Chip(
-                                label: Text(e.substring(1)),
-                                backgroundColor: temp(e),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                onExpansionChanged: (_){
-                  setState(() {
-                  _temp = !_temp;
-                  });
-                },
-              );
-            },
-          )
-              .toList(),
+                          },
+                          child: Chip(
+                            label: Text(e.substring(1)),
+                            backgroundColor: temp(e),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                  onExpansionChanged: (_) {
+                    setState(() {
+                      _temp = !_temp;
+                    });
+                  },
+                );
+              },
+            ).toList(),
         );
-      }).toList()
-          // children: category
-          //     .map((a) => ExpansionTile(
-          //           title: Text(a),
-          //           children: widget.infos.where((b) => b.conType == a && b.index7 == 'text').map((c) {
-          //             List<ConGInfo> _tempG =
-          //                 widget.infos.where((e) => e.toDif() == c.toDif() && e.index7 != 'text').toList();
-          //             List<String> _tempL = widget.infos
-          //                 .where((e) => e.toDif() == c.toDif() && e.index7 != 'text')
-          //                 .map((e) => e.index7)
-          //                 .toSet()
-          //                 .toList();
-          //             return ExpansionTile(
-          //               leading: Text('${c.page}p'),
-          //               title: Text(c.toString()),
-          //               children: [
-          //                 Container(
-          //                   child: Image.asset('asset/structure/${c.path}'),
-          //                 ),
-          //                 Wrap(
-          //                   children: _tempL.map((e) {
-          //                     return InkWell(
-          //                       onTap: () {
-          //                         Get.defaultDialog(
-          //                             content: Container(
-          //                           height: 800,
-          //                           child: SingleChildScrollView(
-          //                             child: Wrap(
-          //                                 children: _tempG
-          //                                     .where((y) => y.index7 == e)
-          //                                     .map((z) => Image.asset(
-          //                                           'asset/structure/${z.path}',
-          //                                           height: 270,
-          //                                         ))
-          //                                     .toList()),
-          //                           ),
-          //                         ));
-          //                       },
-          //                       child: Chip(
-          //                         label: Text(e.substring(1)),
-          //                         backgroundColor: temp(e),
-          //                       ),
-          //                     );
-          //                   }).toList(),
-          //                 ),
-          //               ],
-          //             );
-          //           }).toList(),
-          //         ))
-          //     .toList(),
-        );
-      }
+      },
     );
   }
 }
 
 class GeneralInfoDetailPage extends StatefulWidget {
-  List<ConGInfo> temp ;
+  List<ConGInfo> temp;
 
-  GeneralInfoDetailPage({ this.temp });
+  GeneralInfoDetailPage({this.temp});
 
   @override
   _GeneralInfoDetailPageState createState() => _GeneralInfoDetailPageState();
@@ -206,7 +140,8 @@ class _GeneralInfoDetailPageState extends State<GeneralInfoDetailPage> {
               (e) => ExpansionTile(
                 title: Text(e.toString()),
               ),
-            ).toList(),
+            )
+            .toList(),
       ),
     );
   }
