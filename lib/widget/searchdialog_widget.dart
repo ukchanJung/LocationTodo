@@ -55,11 +55,11 @@ class _SearchDialogState extends State<SearchDialog> {
                   .map((e) => ListTile(
                         title: Text(e.toString()),
                     onTap: (){
-                          context.read<Current>().changePath(e);
+                          context.read<CP>().changePath(e);
                           Navigator.pop(context);
                           },
                 onLongPress: (){
-                  context.read<Current>().changeLayer(e);
+                  context.read<CP>().changeLayer(e);
                   Navigator.pop(context);
 
                 },

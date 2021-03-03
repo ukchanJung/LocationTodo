@@ -120,11 +120,11 @@ class _TimViewState extends State<TimView> {
                               title: Text(e.title),
                               onTap: () {
                                 setState(() async {
-                                  context.read<Current>().changePath(e);
-                                  String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+                                  context.read<CP>().changePath(e);
+                                  String tempRoot = 'asset/photos/${context.read<CP>().getDrawing().localPath}';
                                   ByteData bytes = await rootBundle.load(tempRoot);
                                   String tempPath = (await getTemporaryDirectory()).path;
-                                  String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+                                  String tempName = '$tempPath/${context.read<CP>().getDrawing().drawingNum}.png';
                                   File file = File(tempName);
                                   await file
                                       .writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
@@ -269,8 +269,8 @@ class _TimViewState extends State<TimView> {
               heroTag: null,
               onPressed: () {
                 context
-                    .read<Current>()
-                    .changePath(drawings.elementAt(drawings.indexOf(context.read<Current>().getDrawing()) - 1));
+                    .read<CP>()
+                    .changePath(drawings.elementAt(drawings.indexOf(context.read<CP>().getDrawing()) - 1));
               },
               child: Text('이전'),
             ),
@@ -281,8 +281,8 @@ class _TimViewState extends State<TimView> {
               heroTag: null,
               onPressed: () {
                 context
-                    .read<Current>()
-                    .changePath(drawings.elementAt(drawings.indexOf(context.read<Current>().getDrawing()) + 1));
+                    .read<CP>()
+                    .changePath(drawings.elementAt(drawings.indexOf(context.read<CP>().getDrawing()) + 1));
               },
               child: Text('다음'),
             ),
@@ -319,7 +319,7 @@ class _TimViewState extends State<TimView> {
                       .toList();
                   FirebaseFirestore.instance
                       .collection('ocrData')
-                      .doc(context.read<Current>().getDrawing().drawingNum)
+                      .doc(context.read<CP>().getDrawing().drawingNum)
                       .set({'dataList': tempList});
                   print('등록성공');
                 });
@@ -366,7 +366,7 @@ class _TimViewState extends State<TimView> {
               label: "도면을 선택해주세요",
               onChanged: (e) {
                 setState(() async {
-                  context.read<Current>().changePath(e);
+                  context.read<CP>().changePath(e);
                   await currentOcr(context);
                 });
               },
@@ -402,12 +402,12 @@ class _TimViewState extends State<TimView> {
                           () {
                             _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
                             debugX = (((m.relative.dx / _pContrl.scale) / width -
-                                        context.read<Current>().getDrawing().originX) *
-                                    context.read<Current>().getcordiX())
+                                        context.read<CP>().getDrawing().originX) *
+                                    context.read<CP>().getcordiX())
                                 .round();
                             debugY = (((m.relative.dy / _pContrl.scale) / heigh -
-                                        context.read<Current>().getDrawing().originY) *
-                                    context.read<Current>().getcordiY())
+                                        context.read<CP>().getDrawing().originY) *
+                                    context.read<CP>().getcordiY())
                                 .round();
                             print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
                             print(' 선택한점은 절대좌표 X: $sLeft,  Y: $sTop');
@@ -422,24 +422,24 @@ class _TimViewState extends State<TimView> {
                             sLeft = m.relative.dx / _pContrl.scale;
                             sTop = m.relative.dy / _pContrl.scale;
                             rLeft = (((m.relative.dx / _pContrl.scale) / width -
-                                        context.read<Current>().getDrawing().originX) *
-                                    context.read<Current>().getcordiX())
+                                        context.read<CP>().getDrawing().originX) *
+                                    context.read<CP>().getcordiX())
                                 .round();
                             rTop = (((m.relative.dy / _pContrl.scale) / heigh -
-                                        context.read<Current>().getDrawing().originY) *
-                                    context.read<Current>().getcordiY())
+                                        context.read<CP>().getDrawing().originY) *
+                                    context.read<CP>().getcordiY())
                                 .round();
                             sCheck = true;
                           } else {
                             sRight = m.relative.dx / _pContrl.scale;
                             sBottom = m.relative.dy / _pContrl.scale;
                             rRight = (((m.relative.dx / _pContrl.scale) / width -
-                                        context.read<Current>().getDrawing().originX) *
-                                    context.read<Current>().getcordiX())
+                                        context.read<CP>().getDrawing().originX) *
+                                    context.read<CP>().getcordiX())
                                 .round();
                             rBottom = (((m.relative.dy / _pContrl.scale) / heigh -
-                                        context.read<Current>().getDrawing().originY) *
-                                    context.read<Current>().getcordiY())
+                                        context.read<CP>().getDrawing().originY) *
+                                    context.read<CP>().getcordiY())
                                 .round();
                             sCheck = false;
                           }
@@ -447,7 +447,7 @@ class _TimViewState extends State<TimView> {
                       },
                       child: Stack(
                         children: [
-                          Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                          Image.asset('asset/photos/${context.watch<CP>().getDrawing().localPath}'),
                           CustomPaint(
                             painter: CallOutBoundary(
                               setPoint: _origin,
@@ -457,11 +457,11 @@ class _TimViewState extends State<TimView> {
                               bottom: sBottom,
                             ),
                           ),
-                          context.watch<Current>().getDrawing().roomMap == [] || visionText == null
+                          context.watch<CP>().getDrawing().roomMap == [] || visionText == null
                               ? Container()
                               : Stack(
                                   children: context
-                                      .watch<Current>()
+                                      .watch<CP>()
                                       .getDrawing()
                                       .roomMap
                                       .map((e) => Positioned.fromRect(
@@ -476,11 +476,11 @@ class _TimViewState extends State<TimView> {
                                           )))
                                       .toList(),
                                 ),
-                          context.watch<Current>().getDrawing().callOutMap == [] || visionText == null
+                          context.watch<CP>().getDrawing().callOutMap == [] || visionText == null
                               ? Container()
                               : Stack(
                                   children: context
-                                      .watch<Current>()
+                                      .watch<CP>()
                                       .getDrawing()
                                       .callOutMap
                                       .map((e) => Positioned.fromRect(
@@ -498,11 +498,11 @@ class _TimViewState extends State<TimView> {
                                           )))
                                       .toList(),
                                 ),
-                          context.watch<Current>().getDrawing().detailInfoMap == [] || visionText == null
+                          context.watch<CP>().getDrawing().detailInfoMap == [] || visionText == null
                               ? Container()
                               : Stack(
                                   children: context
-                                      .watch<Current>()
+                                      .watch<CP>()
                                       .getDrawing()
                                       .detailInfoMap
                                       .map((e) => Positioned.fromRect(
@@ -548,14 +548,14 @@ class _TimViewState extends State<TimView> {
                                                               title: Text(e.title),
                                                               onTap: () {
                                                                 setState(() async {
-                                                                  context.read<Current>().changePath(e);
+                                                                  context.read<CP>().changePath(e);
                                                                   String tempRoot =
-                                                                      'asset/photos/${context.read<Current>().getDrawing().localPath}';
+                                                                      'asset/photos/${context.read<CP>().getDrawing().localPath}';
                                                                   ByteData bytes = await rootBundle.load(tempRoot);
                                                                   String tempPath =
                                                                       (await getTemporaryDirectory()).path;
                                                                   String tempName =
-                                                                      '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+                                                                      '$tempPath/${context.read<CP>().getDrawing().drawingNum}.png';
                                                                   File file = File(tempName);
                                                                   await file.writeAsBytes(bytes.buffer.asUint8List(
                                                                       bytes.offsetInBytes, bytes.lengthInBytes));
@@ -638,10 +638,10 @@ class _TimViewState extends State<TimView> {
   }
 
   Future currentOcr(BuildContext context) async {
-    String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+    String tempRoot = 'asset/photos/${context.read<CP>().getDrawing().localPath}';
     ByteData bytes = await rootBundle.load(tempRoot);
     String tempPath = (await getTemporaryDirectory()).path;
-    String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+    String tempName = '$tempPath/${context.read<CP>().getDrawing().drawingNum}.png';
     File file = File(tempName);
     await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
     FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
@@ -689,7 +689,7 @@ class _TimViewState extends State<TimView> {
               onPressed: () {
                 setState(() {
                   Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                  context.read<Current>().getDrawing().detailInfoMap.add(<String, dynamic>{
+                  context.read<CP>().getDrawing().detailInfoMap.add(<String, dynamic>{
                     'name': field0.text,
                     'category': field1.text,
                     'left': _selBox.left,
@@ -698,13 +698,13 @@ class _TimViewState extends State<TimView> {
                     'bottom': _selBox.bottom,
                     'x': debugX,
                     'y': debugY,
-                    'z': context.read<Current>().getDrawing().floor,
+                    'z': context.read<CP>().getDrawing().floor,
                   });
-                  context.read<Current>().getDrawing().detailInfoMap.toSet().toList();
+                  context.read<CP>().getDrawing().detailInfoMap.toSet().toList();
                   FirebaseFirestore.instance
                       .collection('drawing')
-                      .doc(context.read<Current>().getDrawing().drawingNum)
-                      .update(context.read<Current>().getDrawing().toJson());
+                      .doc(context.read<CP>().getDrawing().drawingNum)
+                      .update(context.read<CP>().getDrawing().toJson());
                   ocrFinList = List.filled(visionText.blocks.length, false);
                 });
               },
@@ -759,7 +759,7 @@ class _TimViewState extends State<TimView> {
               onPressed: () {
                 setState(() {
                   Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                  context.read<Current>().getDrawing().callOutMap.add(<String, dynamic>{
+                  context.read<CP>().getDrawing().callOutMap.add(<String, dynamic>{
                     'name': field0.text,
                     'id': field1.text,
                     'category': field2.text,
@@ -773,13 +773,13 @@ class _TimViewState extends State<TimView> {
                     'bBottom': rBottom,
                     'x': debugX,
                     'y': debugY,
-                    'z': context.read<Current>().getDrawing().floor,
+                    'z': context.read<CP>().getDrawing().floor,
                   });
-                  context.read<Current>().getDrawing().callOutMap.toSet().toList();
+                  context.read<CP>().getDrawing().callOutMap.toSet().toList();
                   FirebaseFirestore.instance
                       .collection('drawing')
-                      .doc(context.read<Current>().getDrawing().drawingNum)
-                      .update(context.read<Current>().getDrawing().toJson());
+                      .doc(context.read<CP>().getDrawing().drawingNum)
+                      .update(context.read<CP>().getDrawing().toJson());
                   ocrFinList = List.filled(visionText.blocks.length, false);
                 });
               },
@@ -834,7 +834,7 @@ class _TimViewState extends State<TimView> {
               onPressed: () {
                 setState(() {
                   Rect _selBox = visionText.blocks[ocrFinList.indexWhere((bool) => bool == true)].boundingBox;
-                  context.read<Current>().getDrawing().roomMap.add(<String, dynamic>{
+                  context.read<CP>().getDrawing().roomMap.add(<String, dynamic>{
                     'name': field0.text,
                     'id': field1.text,
                     'left': _selBox.left,
@@ -847,14 +847,14 @@ class _TimViewState extends State<TimView> {
                     'bBottom': rBottom,
                     'x': debugX,
                     'y': debugY,
-                    'z': context.read<Current>().getDrawing().floor.toDouble(),
+                    'z': context.read<CP>().getDrawing().floor.toDouble(),
                     'sealL': int.parse(field2.text),
                   });
-                  context.read<Current>().getDrawing().roomMap.toSet().toList();
+                  context.read<CP>().getDrawing().roomMap.toSet().toList();
                   FirebaseFirestore.instance
                       .collection('drawing')
-                      .doc(context.read<Current>().getDrawing().drawingNum)
-                      .update(context.read<Current>().getDrawing().toJson());
+                      .doc(context.read<CP>().getDrawing().drawingNum)
+                      .update(context.read<CP>().getDrawing().toJson());
                   ocrFinList = List.filled(visionText.blocks.length, false);
                 });
               },

@@ -60,9 +60,9 @@ class _TodoDetailState extends State<TodoDetail> {
 
   Future<VisionText> ocr()async{
 
-    ByteData bytes = await rootBundle.load(Provider.of<Current>(context, listen: false).getPath());
+    ByteData bytes = await rootBundle.load(Provider.of<CP>(context, listen: false).getPath());
     String tempPath = (await getTemporaryDirectory()).path;
-    file = File('$tempPath/${Provider.of<Current>(context, listen: false).getName()}.png');
+    file = File('$tempPath/${Provider.of<CP>(context, listen: false).getName()}.png');
     await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
 
     FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
@@ -109,7 +109,7 @@ class _TodoDetailState extends State<TodoDetail> {
                   },
                   child: Stack(
                     children: [
-                      Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                      Image.asset('asset/photos/${context.watch<CP>().getDrawing().localPath}'),
                       StreamBuilder<PhotoViewControllerValue>(
                           stream: _photoViewController.outputStateStream,
                           builder: (context, snapshot) {

@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/model/drawing_model.dart';
 
-class Current with ChangeNotifier {
+class CP with ChangeNotifier {
   String _path = 'S01-001.png';
   String _name = 'S01-001.png';
   List<Drawing> pattern =[];
@@ -59,9 +59,10 @@ class Current with ChangeNotifier {
     notifyListeners();
 }
 }
-class MemoDialog with ChangeNotifier{
+class OnOff with ChangeNotifier{
   bool memoOn =false;
-  void onOff(){
+
+  void memoOnOff(){
     memoOn =!memoOn;
   }
 }

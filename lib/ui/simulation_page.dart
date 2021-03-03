@@ -337,7 +337,7 @@ class _DViewState extends State<DView> {
                     },
                     child: Stack(
                       children: [
-                        Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                        Image.asset('asset/photos/${context.watch<CP>().getDrawing().localPath}'),
                         CustomPaint(
                           painter: TaskBoundary(tP: [
                             ...temp,

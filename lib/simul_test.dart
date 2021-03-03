@@ -24,7 +24,7 @@ class _PlaySimulState extends State<PlaySimul> {
   PhotoViewController _pContrl = PhotoViewController();
   List<Task2> tasks2 = [];
   Drawing c ;
-  Current tempList ;
+  CP tempList ;
   List<Drawing> tempcon ;
   DateTime day ;
   CarouselController _carouselController = CarouselController();
@@ -44,8 +44,8 @@ class _PlaySimulState extends State<PlaySimul> {
     watch.then((v) {
       drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
       setState(() {
-       c = context.read<Current>().getDrawing();
-      tempList = context.read<Current>();
+       c = context.read<CP>().getDrawing();
+      tempList = context.read<CP>();
       tempcon = drawings
           .where((e) =>
       e.doc == c.doc &&
@@ -58,8 +58,8 @@ class _PlaySimulState extends State<PlaySimul> {
       FirebaseFirestore _db = FirebaseFirestore.instance;
       QuerySnapshot read = await _db.collection('drawing').get();
       drawings = read.docs.map((e) => Drawing.fromSnapshot(e)).toList();
-      c = context.read<Current>().getDrawing();
-      tempList = context.read<Current>();
+      c = context.read<CP>().getDrawing();
+      tempList = context.read<CP>();
       tempcon = drawings
           .where((e) =>
       e.doc == c.doc &&
@@ -162,7 +162,7 @@ class _PlaySimulState extends State<PlaySimul> {
                                   child: Stack(
                                     children: [
                                       Image.asset('asset/photos/${e.localPath}'),
-                                      context.watch<Current>().getDrawing().scale != '1'
+                                      context.watch<CP>().getDrawing().scale != '1'
                                       ? TaskBoundaryRead(
                                           tasks2: tasks2,
                                           width: width,
@@ -197,7 +197,7 @@ class _PlaySimulState extends State<PlaySimul> {
         .toList():null;
     return Scaffold(
       appBar: AppBar(
-        title: Text('${DateFormat('yy.MM.dd').format(day)} ${context.watch<Current>().getDrawing().floor}층 작업사항'),
+        title: Text('${DateFormat('yy.MM.dd').format(day)} ${context.watch<CP>().getDrawing().floor}층 작업사항'),
         actions: [
           IconButton(icon: Icon(Icons.arrow_back_ios), onPressed: (){
             setState(() {
@@ -524,7 +524,7 @@ class _PlaySimulState extends State<PlaySimul> {
         child: Scrollbar(
           child: SingleChildScrollView(
             child: Column(
-              children: tasks2.where((t) => t.floor == context.watch<Current>().getDrawing().floor).map((e) {
+              children: tasks2.where((t) => t.floor == context.watch<CP>().getDrawing().floor).map((e) {
                 return Container(
                   // decoration: BoxDecoration(border: Border(bottom: BorderSide())),
                   child: Column(
@@ -624,9 +624,9 @@ class _TaskBoundaryReadState extends State<TaskBoundaryRead> {
             .where((d) {
               return widget.day.isAfter(d.start) && widget.day.isBefore(d.end.add(Duration(days: 1)));
             })
-            .where((t) => t.floor == context.watch<Current>().getDrawing().floor).toList()
+            .where((t) => t.floor == context.watch<CP>().getDrawing().floor).toList()
         .map((e) {
-      var watch = context.watch<Current>();
+      var watch = context.watch<CP>();
       List<Offset> data = e.boundarys;
       List<Offset> parse = data
           .map((e) => Offset(

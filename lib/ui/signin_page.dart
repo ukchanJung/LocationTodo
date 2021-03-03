@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/provider/firebase_provider.dart';
+import 'package:flutter_app_location_todo/ui/account_page.dart';
 import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
 import 'package:flutter_app_location_todo/ui/signup_page.dart';
 import 'package:get/get.dart';
@@ -227,7 +228,7 @@ class SignInPageState extends State<SignInPage> {
     _scaffoldKey.currentState.hideCurrentSnackBar();
     print('3');
     // print(result);
-    if (result == false) showLastFBMessage();else if (result) Get.to(GridButton());
+    if (result == false) showLastFBMessage();else if (result) Get.offAll(AccountPage());
 
   }
 
@@ -246,7 +247,7 @@ class SignInPageState extends State<SignInPage> {
     bool result = await fp.signInWithGoogleAccount();
     _scaffoldKey.currentState.hideCurrentSnackBar();
     print(result);
-    if (result == false) showLastFBMessage();else if (result) Get.to(GridButton());
+    if (result == false) showLastFBMessage();else if (result) Get.offAll(AccountPage());
   }
 
   getRememberInfo() async {

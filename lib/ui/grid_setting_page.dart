@@ -86,7 +86,7 @@ class _GridSettingPageState extends State<GridSettingPage> {
     Future<QuerySnapshot> watch = FirebaseFirestore.instance.collection('drawing').get();
     watch.then((v) {
       drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
-      context.read<Current>().changePath(drawings.singleWhere((d) => d.drawingNum == 'A31-003'));
+      context.read<CP>().changePath(drawings.singleWhere((d) => d.drawingNum == 'A31-003'));
       setState(() {});
     });
   }
@@ -160,14 +160,14 @@ class _GridSettingPageState extends State<GridSettingPage> {
                                         onLongPress: (m) {
                                           ///TODO 원점 재지정 좌표 메서드
                                           setState(() {
-                                            context.read<Current>().getDrawing().originX =
+                                            context.read<CP>().getDrawing().originX =
                                                 (m.relative.dx / (c.maxWidth * _pContrl.scale)) -
-                                                    (realIntersect.dx / context.read<Current>().getcordiX());
-                                            context.read<Current>().getDrawing().originY =
+                                                    (realIntersect.dx / context.read<CP>().getcordiX());
+                                            context.read<CP>().getDrawing().originY =
                                                 (m.relative.dy / ((c.maxWidth / (420 / 297)) * _pContrl.scale)) -
-                                                    (realIntersect.dy / context.read<Current>().getcordiY());
+                                                    (realIntersect.dy / context.read<CP>().getcordiY());
                                             print(
-                                                '${context.read<Current>().getDrawing().originX}, ${context.read<Current>().getDrawing().originY}');
+                                                '${context.read<CP>().getDrawing().originX}, ${context.read<CP>().getDrawing().originY}');
                                           });
                                         },
                                         child: Listener(
@@ -181,7 +181,7 @@ class _GridSettingPageState extends State<GridSettingPage> {
                                             key: _key2,
                                             children: [
                                               Image.asset(
-                                                  'asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                                                  'asset/photos/${context.watch<CP>().getDrawing().localPath}'),
                                               hover==Offset.zero?Container():CustomPaint(
                                                 painter: CrossHairPaint(hover,s: _pContrl.scale),
                                               ),
@@ -261,7 +261,7 @@ class _GridSettingPageState extends State<GridSettingPage> {
                                   autofocus: true,
                                   onPressed: () {
                                     setState(() {
-                                      Drawing tempModel = context.read<Current>().getDrawing();
+                                      Drawing tempModel = context.read<CP>().getDrawing();
                                       FirebaseFirestore.instance
                                           .collection('drawing')
                                           .doc(tempModel.drawingNum)
@@ -274,11 +274,11 @@ class _GridSettingPageState extends State<GridSettingPage> {
                             ),
                           ],
                         ),
-                        Card(child: ListTile(title: Text('${context.watch<Current>().getDrawing().toString()}'))),
+                        Card(child: ListTile(title: Text('${context.watch<CP>().getDrawing().toString()}'))),
                         Card(child: ListTile(title: Text('선택한 그리드 교점 : $selectIntersect'))),
                         Card(child: ListTile(title: Text('지정한 원점 : $realIntersect'))),
-                        Card(child: ListTile(title: Text('원점 X : ${context.watch<Current>().getDrawing().originX}'))),
-                        Card(child: ListTile(title: Text('원점 Y : ${context.watch<Current>().getDrawing().originY}'))),
+                        Card(child: ListTile(title: Text('원점 X : ${context.watch<CP>().getDrawing().originX}'))),
+                        Card(child: ListTile(title: Text('원점 Y : ${context.watch<CP>().getDrawing().originY}'))),
                       ],
                     ),
                   ),
@@ -290,10 +290,10 @@ class _GridSettingPageState extends State<GridSettingPage> {
   }
 
   void reaSelectIntersect(width) {
-    context.read<Current>().getDrawing().scale = _scaleEditor.text;
-    context.read<Current>().getDrawing().witdh = 420;
-    context.read<Current>().getDrawing().height = 297;
-    double _scale = double.parse(context.read<Current>().getDrawing().scale) * 420.0;
+    context.read<CP>().getDrawing().scale = _scaleEditor.text;
+    context.read<CP>().getDrawing().witdh = 420;
+    context.read<CP>().getDrawing().height = 297;
+    double _scale = double.parse(context.read<CP>().getDrawing().scale) * 420.0;
     testgrids.where((e) => e.name == _gridX.text || e.name == _gridY.text).forEach((element) {
       print(element.name);
     });
@@ -307,7 +307,7 @@ class _GridSettingPageState extends State<GridSettingPage> {
   }
 
   void recaculate() {
-    double _scale = double.parse(context.read<Current>().getDrawing().scale) * 420.0;
+    double _scale = double.parse(context.read<CP>().getDrawing().scale) * 420.0;
     List<Line> lines = testgrids
         .map((e) => Line(Offset(e.startX.toDouble(), -e.startY.toDouble()) / _scale,
         Offset(e.endX.toDouble(), -e.endY.toDouble()) / _scale))

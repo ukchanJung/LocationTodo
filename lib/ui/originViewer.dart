@@ -124,7 +124,7 @@ class _originViewState extends State<originView> {
                               title: Text(e.toString()),
                               onTap: () {
                                 setState(() async {
-                                  context.read<Current>().changePath(e);
+                                  context.read<CP>().changePath(e);
                                   iS = decodeImage.width / _keyA.currentContext.size.width;
                                   tracking = [];
                                   count = [];
@@ -188,7 +188,7 @@ class _originViewState extends State<originView> {
                       },
                       child: Stack(
                         children: [
-                          Image.asset('asset/photos/${context.watch<Current>().getDrawing().localPath}'),
+                          Image.asset('asset/photos/${context.watch<CP>().getDrawing().localPath}'),
                           StreamBuilder<PhotoViewControllerValue>(
                             stream: _pContrl.outputStateStream,
                             builder: (context, snapshot) {
@@ -376,7 +376,7 @@ class _originViewState extends State<originView> {
                                       count = [];
                                       tracking = [];
                                     setState(() async {
-                                      context.read<Current>().changePath(e);
+                                      context.read<CP>().changePath(e);
                                       iS = decodeImage.width / _keyA.currentContext.size.width;
                                     });
                                   })))

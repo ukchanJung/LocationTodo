@@ -42,7 +42,7 @@ class _LocationTodoState extends State<LocationTodo> {
   @override
   void initState() {
     super.initState();
-    context.read<Current>().changePath(
+    context.read<CP>().changePath(
           Drawing(
             drawingNum: 'A31-003',
             title: '1층 평면도',

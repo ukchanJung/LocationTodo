@@ -54,7 +54,7 @@ class _MemoPageState extends State<MemoPage> {
           children: [
             TextButton(
                 onPressed: () {
-                  context.read<MemoDialog>().onOff();
+                  context.read<OnOff>().memoOnOff();
                 },
                 child: Text(
                   '취소',
@@ -228,12 +228,12 @@ class _MemoPageState extends State<MemoPage> {
             subTitle: _textEditingController2.text,
             imagePath: _profileImageURL,
             writeTime: DateTime.now(),
-            origin: context.read<Current>().getOrigin(),
+            origin: context.read<CP>().getOrigin(),
             check: false,
           );
           widget.memoList.add(_memo);
           memo.add(_memo.toJson());
-          context.read<MemoDialog>().onOff();
+          context.read<OnOff>().memoOnOff();
         });
       });
     } else {
@@ -244,12 +244,12 @@ class _MemoPageState extends State<MemoPage> {
         subTitle: _textEditingController2.text,
         imagePath: _profileImageURL,
         writeTime: DateTime.now(),
-        origin: context.read<Current>().getOrigin(),
+        origin: context.read<CP>().getOrigin(),
         check: false,
       );
       widget.memoList.add(_memo);
       memo.add(_memo.toJson());
-      context.read<MemoDialog>().onOff();
+      context.read<OnOff>().memoOnOff();
     }
   }
 }

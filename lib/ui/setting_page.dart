@@ -498,13 +498,13 @@ class _SettingPageState extends State<SettingPage> {
             onPressed: () {
               FirebaseFirestore.instance
                   .collection('ocrData')
-                  .doc(context.read<Current>().getDrawing().drawingNum)
+                  .doc(context.read<CP>().getDrawing().drawingNum)
                   .get()
                   .then((e) {
                 ocrGet = OcrData.fromSnapshot(e);
                 ocrFinList = List.filled(ocrGet.dataList.length, false);
               });
-              print(context.read<Current>().getDrawing().callOutMap.toString());
+              print(context.read<CP>().getDrawing().callOutMap.toString());
               print(ocrGet.dataList.length);
               print(iS);
               setState(() {});
@@ -541,11 +541,11 @@ class _SettingPageState extends State<SettingPage> {
                       label: "도면을 선택해주세요",
                       onChanged: (e) {
                         setState(() async {
-                          context.read<Current>().changePath(e);
-                          String tempRoot = 'asset/photos/${context.read<Current>().getDrawing().localPath}';
+                          context.read<CP>().changePath(e);
+                          String tempRoot = 'asset/photos/${context.read<CP>().getDrawing().localPath}';
                           ByteData bytes = await rootBundle.load(tempRoot);
                           String tempPath = (await getTemporaryDirectory()).path;
-                          String tempName = '$tempPath/${context.read<Current>().getDrawing().drawingNum}.png';
+                          String tempName = '$tempPath/${context.read<CP>().getDrawing().drawingNum}.png';
                           File file = File(tempName);
                           await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
                           decodeImage = await decodeImageFromList(file.readAsBytesSync());
@@ -617,7 +617,7 @@ class _SettingPageState extends State<SettingPage> {
       case OcrCategory.CallOut:
         return ListView(
             children: context
-                .watch<Current>()
+                .watch<CP>()
                 .getDrawing()
                 .callOutMap
                 .reversed
@@ -630,7 +630,7 @@ class _SettingPageState extends State<SettingPage> {
       case OcrCategory.DetailInfo:
         return ListView(
             children: context
-                .watch<Current>()
+                .watch<CP>()
                 .getDrawing()
                 .detailInfoMap
                 .reversed
@@ -643,7 +643,7 @@ class _SettingPageState extends State<SettingPage> {
       case OcrCategory.Room:
         return ListView(
             children: context
-                .watch<Current>()
+                .watch<CP>()
                 .getDrawing()
                 .roomMap
                 .reversed
@@ -656,7 +656,7 @@ class _SettingPageState extends State<SettingPage> {
       case OcrCategory.Elevation:
         return ListView(
             children: context
-                .watch<Current>()
+                .watch<CP>()
                 .getDrawing()
                 .roomMap
                 .reversed
@@ -669,7 +669,7 @@ class _SettingPageState extends State<SettingPage> {
       case OcrCategory.Section:
         return ListView(
             children: context
-                .watch<Current>()
+                .watch<CP>()
                 .getDrawing()
                 .roomMap
                 .reversed
@@ -724,7 +724,7 @@ class _SettingPageState extends State<SettingPage> {
               onPressed: () {
                 setState(() {
                   Map _selBox = ocrGet.dataList[ocrFinList.indexWhere((bool) => bool == true)]['rect'];
-                  context.read<Current>().getDrawing().detailInfoMap.add(<String, dynamic>{
+                  context.read<CP>().getDrawing().detailInfoMap.add(<String, dynamic>{
                     'name': field0.text,
                     'category': field1.text,
                     'left': _selBox['left'],
@@ -733,13 +733,13 @@ class _SettingPageState extends State<SettingPage> {
                     'bottom': _selBox['bottom'],
                     'x': debugX,
                     'y': debugY,
-                    'z': context.read<Current>().getDrawing().floor,
+                    'z': context.read<CP>().getDrawing().floor,
                   });
-                  context.read<Current>().getDrawing().detailInfoMap.toSet().toList();
+                  context.read<CP>().getDrawing().detailInfoMap.toSet().toList();
                   FirebaseFirestore.instance
                       .collection('drawing')
-                      .doc(context.read<Current>().getDrawing().drawingNum)
-                      .update(context.read<Current>().getDrawing().toJson());
+                      .doc(context.read<CP>().getDrawing().drawingNum)
+                      .update(context.read<CP>().getDrawing().toJson());
                   ocrFinList = List.filled(ocrGet.dataList.length, false);
                 });
               },
@@ -806,7 +806,7 @@ class _SettingPageState extends State<SettingPage> {
                 setState(() {
                   Map _selBox = ocrGet.dataList[ocrFinList.indexWhere((bool) => bool == true)]['rect'];
                   Rect tempRect = Rect.fromPoints(s1, s2);
-                  context.read<Current>().getDrawing().callOutMap.add(<String, dynamic>{
+                  context.read<CP>().getDrawing().callOutMap.add(<String, dynamic>{
                     'name': field0.text,
                     'id': field1.text,
                     'category': field2.text,
@@ -820,13 +820,13 @@ class _SettingPageState extends State<SettingPage> {
                     'bBottom': tempRect.bottom,
                     'x': debugX,
                     'y': debugY,
-                    'z': context.read<Current>().getDrawing().floor,
+                    'z': context.read<CP>().getDrawing().floor,
                   });
-                  context.read<Current>().getDrawing().callOutMap.toSet().toList();
+                  context.read<CP>().getDrawing().callOutMap.toSet().toList();
                   FirebaseFirestore.instance
                       .collection('drawing')
-                      .doc(context.read<Current>().getDrawing().drawingNum)
-                      .update(context.read<Current>().getDrawing().toJson());
+                      .doc(context.read<CP>().getDrawing().drawingNum)
+                      .update(context.read<CP>().getDrawing().toJson());
                   ocrFinList = List.filled(ocrGet.dataList.length, false);
                 });
               },
@@ -893,7 +893,7 @@ class _SettingPageState extends State<SettingPage> {
                 setState(() {
                   Map _selBox = ocrGet.dataList[ocrFinList.indexWhere((bool) => bool == true)]['rect'];
                   Rect tempRect = Rect.fromPoints(s1, s2);
-                  context.read<Current>().getDrawing().roomMap.add(<String, dynamic>{
+                  context.read<CP>().getDrawing().roomMap.add(<String, dynamic>{
                     'name': field0.text,
                     'id': field1.text,
                     'left': _selBox['left'],
@@ -906,14 +906,14 @@ class _SettingPageState extends State<SettingPage> {
                     'bBottom': tempRect.bottom,
                     'x': debugX,
                     'y': debugY,
-                    'z': context.read<Current>().getDrawing().floor.toDouble(),
+                    'z': context.read<CP>().getDrawing().floor.toDouble(),
                     'sealL': int.parse(field2.text),
                   });
-                  context.read<Current>().getDrawing().roomMap.toSet().toList();
+                  context.read<CP>().getDrawing().roomMap.toSet().toList();
                   FirebaseFirestore.instance
                       .collection('drawing')
-                      .doc(context.read<Current>().getDrawing().drawingNum)
-                      .update(context.read<Current>().getDrawing().toJson());
+                      .doc(context.read<CP>().getDrawing().drawingNum)
+                      .update(context.read<CP>().getDrawing().toJson());
                   ocrFinList = List.filled(ocrGet.dataList.length, false);
                 });
               },
@@ -1263,7 +1263,7 @@ class _InfoCategoryState extends State<InfoCategory> {
                                     });
                                   },
                                   leading: InkWell(
-                                    onTap: ()=>context.read<Current>().changePath(e),
+                                    onTap: ()=>context.read<CP>().changePath(e),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [

@@ -70,7 +70,7 @@ class TimViewer extends StatelessWidget {
           minScale: 1.0,
           maxScale: 5.0,
           backgroundDecoration: BoxDecoration(color: Colors.transparent),
-          child: Image.asset(context.watch<Current>().getDrawing().localPath),
+          child: Image.asset(context.watch<CP>().getDrawing().localPath),
         ),
       ),
     );
