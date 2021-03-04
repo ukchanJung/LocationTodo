@@ -447,18 +447,35 @@ class _GridButtonState extends State<GridButton> {
         resizeToAvoidBottomInset: false,
         drawer: buildDrawerNav(),
         appBar: AppBar(
-          title: TextButton(
-            onLongPress: (){
-              addFavoriteMethod(context);
-            },
-            onPressed: (){
-              searchDrawingMethod();
-            },
-            child: AutoSizeText(
-              context.watch<CP>().getDrawing().toString(),
-              maxLines: 1,
-              style: TextStyle(color: Colors.black),
-            ),
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              IconButton(
+                constraints: BoxConstraints.tightFor(width: 30),
+                icon: context.watch<CP>().favorite.contains(context.watch<CP>().getDrawing())
+                    ? Icon(Icons.star)
+                    : Icon(Icons.star_border),
+                // icon: Icon(CommunityMaterialIcons.star),
+                tooltip: '즐겨찾기',
+                onPressed: () {
+                  favoriteDialogMethod(context);
+                },
+              ),
+              TextButton(
+                onLongPress: (){
+                  addFavoriteMethod(context);
+                },
+                onPressed: (){
+                  searchDrawingMethod();
+                },
+                child: AutoSizeText(
+                  context.watch<CP>().getDrawing().title,
+                  maxLines: 1,
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
           ),
           backgroundColor: Colors.orange,
           actions: [
@@ -597,7 +614,7 @@ class _GridButtonState extends State<GridButton> {
                               child: buildMainDrawBox(),
                             ),
                     ),
-                    bnb == 3 ? Expanded(child: ListView()) : Container(),
+                    bnb == 3 ? Expanded(child: MemoPage(memoList: memoList)) : Container(),
                   ],
                 );
               }),
@@ -1687,10 +1704,13 @@ class _GridButtonState extends State<GridButton> {
                     // ),
                     layerOn && moving ==false
                         ? Positioned(
+                            // top: 0,
+                            // left: 0,
                             top: ((pW.getDrawing().originY - pW.getLayer().originY) * height) /
-                                    (double.parse(pW.getDrawing().scale) / double.parse(pW.getLayer().scale)+1) ,
+                                    (double.parse(pW.getDrawing().scale) / double.parse(pW.getLayer().scale))+0.4 ,
                             left: ((pW.getDrawing().originX - pW.getLayer().originX) * width) /
                                 (double.parse(pW.getDrawing().scale) / double.parse(pW.getLayer().scale)),
+
                             child: Opacity(
                               opacity: 1,
                               child: ColorFiltered(
@@ -2137,28 +2157,7 @@ class _GridButtonState extends State<GridButton> {
               iconSize: Size,
               tooltip: '즐겨찾기',
               onPressed: () {
-                Get.defaultDialog(
-                    title: '즐겨찾기',
-                    content: Wrap(
-                      children: context
-                          .read<CP>()
-                          .favorite
-                          .map((e) => Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      context.read<CP>().changePath(e);
-                                    });
-                                  },
-                                  child: Chip(
-                                    avatar: CircleAvatar(child: Text(e.drawingNum[0])),
-                                    label: Text(e.title),
-                                  ),
-                                ),
-                              ))
-                          .toList(),
-                    ));
+                favoriteDialogMethod(context);
               },
             ),
             Tooltip(
@@ -2243,6 +2242,31 @@ class _GridButtonState extends State<GridButton> {
         ),
       ),
     );
+  }
+
+  void favoriteDialogMethod(BuildContext context) {
+    Get.defaultDialog(
+        title: '즐겨찾기',
+        content: Wrap(
+          children: context
+              .read<CP>()
+              .favorite
+              .map((e) => Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          context.read<CP>().changePath(e);
+                        });
+                      },
+                      child: Chip(
+                        avatar: CircleAvatar(child: Text(e.drawingNum[0])),
+                        label: Text(e.title),
+                      ),
+                    ),
+                  ))
+              .toList(),
+        ));
   }
 
   void addFavoriteMethod(BuildContext context) => context.read<CP>().addFavorite(context.read<CP>().getDrawing());
