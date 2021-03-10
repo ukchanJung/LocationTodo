@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/method/method.dart';
 import 'package:flutter_app_location_todo/model/site_model.dart';
 import 'package:flutter_app_location_todo/provider/firebase_provider.dart';
+import 'package:flutter_app_location_todo/ui/confirmpage.dart';
 import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:get/get.dart';
@@ -60,7 +61,13 @@ class _AccountPageState extends State<AccountPage> {
             ),
             ListTile(
               title: Text('계정설정'),
-            )
+            ),
+            ListTile(
+              title: Text('주요시공확인서'),
+              onTap: (){
+                Get.to(ConfirmPage());
+              },
+            ),
           ],
         ),
       ),

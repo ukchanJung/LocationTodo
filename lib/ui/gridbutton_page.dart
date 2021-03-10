@@ -1098,6 +1098,7 @@ class _GridButtonState extends State<GridButton> {
           ;
         },
         child: Stack(
+          overflow: Overflow.visible,
           children: [
             buildViewer(context, c, width: c.maxWidth, height: c.maxWidth / a3),
             // buildViewer(context, c, width: c.maxWidth, height: c.maxHeight),

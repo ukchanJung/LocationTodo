@@ -21,8 +21,8 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => CP()),
         ChangeNotifierProvider(create: (context) => OnOff()),
-        ChangeNotifierProvider(create: (context) =>DivideCounter()),
-        ChangeNotifierProvider(create: (context) =>FirebaseProvider()),
+        ChangeNotifierProvider(create: (context) => DivideCounter()),
+        ChangeNotifierProvider(create: (context) => FirebaseProvider()),
       ],
       child: MyApp(),
     ),
@@ -37,6 +37,10 @@ class MyApp extends StatelessWidget {
       title: 'TIMWORK',
       theme: ThemeData(
         primarySwatch: Colors.deepOrange,
+        appBarTheme: AppBarTheme(
+            iconTheme: IconThemeData(color: Colors.black),
+            color: Color.fromRGBO(255, 176, 0, 1),
+            textTheme: TextTheme(headline6: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w700))),
       ),
       home: SignInPage(),
       // home: LoginScreen(),
