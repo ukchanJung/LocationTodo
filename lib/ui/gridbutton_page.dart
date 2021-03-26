@@ -672,7 +672,7 @@ class _GridButtonState extends State<GridButton> {
           ),
         ),
       );
-    } else if (shortestSide > 800 && shortestSide < 1100) {
+    } else if (shortestSide > 800 && shortestSide < 1030) {
       if (MediaQuery.of(context).orientation == Orientation.portrait) {
         return Scaffold(
           resizeToAvoidBottomInset: false,

@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/provider/firebase_provider.dart';
 import 'package:flutter_app_location_todo/ui/account_page.dart';
@@ -24,11 +25,13 @@ class SignInPageState extends State<SignInPage> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   FirebaseProvider fp;
+  FirebaseMessaging messaging = FirebaseMessaging();
 
   @override
   void initState() {
     super.initState();
     getRememberInfo();
+
   }
 
   @override

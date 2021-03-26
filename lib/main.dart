@@ -11,11 +11,13 @@ import 'package:flutter_app_location_todo/ui/planner_page.dart';
 import 'package:flutter_app_location_todo/ui/signin_page.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
   runApp(
     MultiProvider(
       providers: [
