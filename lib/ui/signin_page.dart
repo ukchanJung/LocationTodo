@@ -25,7 +25,7 @@ class SignInPageState extends State<SignInPage> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   FirebaseProvider fp;
-  FirebaseMessaging messaging = FirebaseMessaging();
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   @override
   void initState() {
