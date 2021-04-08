@@ -254,7 +254,7 @@ class _AccountPageState extends State<AccountPage> {
                       title: Text(e.name),
                       subtitle: Text('${_format.format(e.start)}-${_format.format(e.end)}'),
                       onTap: () {
-                        Get.offAll(GridButton());
+                        Get.to(GridButton());
                       },
                     ),
                   )

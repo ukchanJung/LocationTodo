@@ -40,4 +40,6 @@ class TWIcons {
   static const IconData filter = IconData(0xe80d, fontFamily: _kFontFam);
   static const IconData fullscreen = IconData(0xe80e, fontFamily: _kFontFam);
   static const IconData downarrow = IconData(0xe80f, fontFamily: _kFontFam);
+  static const IconData setting = IconData(0xe810, fontFamily: _kFontFam);
+
 }

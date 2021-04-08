@@ -81,6 +81,7 @@ class GridButton extends StatefulWidget {
 }
 
 class _GridButtonState extends State<GridButton> {
+  Color mainColor = Color.fromRGBO(255, 176, 0, 1);
   List<Grid> grids = [];
   List<Gridtestmodel> testgrids = [];
   Offset _origin = Offset(0, 0);
@@ -173,7 +174,7 @@ class _GridButtonState extends State<GridButton> {
   AnimationController _animationController;
   bool FABShow = false;
   double animatedOpacity = 0;
-
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   void _prepareService() {
     _user = _firebaseAuth.currentUser;
   }
@@ -742,40 +743,106 @@ class _GridButtonState extends State<GridButton> {
         );
       } else {
         return Scaffold(
+          key:_scaffoldKey,
           resizeToAvoidBottomInset: false,
           drawer: buildDrawerNav(),
           endDrawer: Drawer(
             child: buildTIMWORK(context),
           ),
-          body: LayoutBuilder(builder: (context, rowC) {
-            return Container(
-              width: rowC.maxWidth,
-              // width: (rowC.maxHeight-58) * (420 / 297),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ClipRect(
-                      child: buildMainDrawBox(shortCard: true, windowDialogSet: true),
-                    ),
-                  ),
-                  Container(
-                    height: 58,
-                    child: ListTile(
-                        leading: TextButton(
-                            onPressed: () {
+          body: Padding(
+            padding: const EdgeInsets.fromLTRB(16,24,16,16),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      width: 70,
+                      decoration: BoxDecoration(color: mainColor),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top:20),
+                            child: Image.asset('asset/inAppIcon.png'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:20.0),
+                            child: IconButton(icon: Icon(TWIcons.backarrow),iconSize: 26, onPressed:Get.back),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:8.0),
+                            child: IconButton(icon: Icon(TWIcons.zoomicon),iconSize: 26, onPressed:searchDrawingMethod ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:8.0),
+                            child: IconButton(icon: Icon(TWIcons.setting),iconSize: 26, onPressed:(){
+                              _scaffoldKey.currentState.openDrawer();
+                            }),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:78.0),
+                            child: IconButton(icon: Icon(TWIcons.star),iconSize: 26, onPressed:(){
+                              favoriteDialogMethod(context);
+                            } ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:8.0),
+                            child: IconButton(icon: Icon(TWIcons.doc_text),iconSize: 26, onPressed:(){
+                                setState(() {
+                                  toggle[4] = !toggle[4];
+                                  detailPop = !detailPop;
+                                });
+                            } ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:8.0),
+                            child: IconButton(icon: Icon(TWIcons.layout),iconSize: 26, onPressed:(){
+                              setState(() {
+                                toggle[0] = !toggle[0];
+                                detailPop = !detailPop;
+                              });
+                            } ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:8.0),
+                            child: IconButton(icon: Icon(TWIcons.grid),iconSize: 26, onPressed:(){
+                              setState(() {
+                                toggle[1] = !toggle[1];
+                                detailPop = !detailPop;
+                              });
+                            } ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:8.0),
+                            child: IconButton(icon: Icon(TWIcons.note),iconSize: 26, onPressed:(){
+                              setState(() {
+                                toggle[2] = !toggle[2];
+                                detailPop = !detailPop;
+                              });
+                            } ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:8.0),
+                            child: IconButton(icon: Icon(TWIcons.count_doc),iconSize: 26, onPressed:(){
+                              setState(() {
+                                toggle[3] = !toggle[3];
+                                detailPop = !detailPop;
+                              });
+                            } ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:8.0),
+                            child: IconButton(icon: Icon(TWIcons.pointer),iconSize: 26, onPressed:(){
                               setState(() {
                                 pointer = !pointer;
                                 layerOn = !layerOn;
                               });
-                            },
-                            child: Text(
-                              'P',
-                              style: TextStyle(color: pointer == true ? Colors.redAccent : Colors.black),
-                            )),
-                        title: Container(
-                          width: 500,
-                          child: TextButton(
-                            onPressed: () {
+                            } ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top:8.0),
+                            child: IconButton(icon: Icon(CommunityMaterialIcons.calendar),iconSize: 26, onPressed:(){
                               setState(() {
                                 showDateRangePicker(
                                   context: context,
@@ -790,17 +857,70 @@ class _GridButtonState extends State<GridButton> {
                                   setState(() {});
                                 });
                               });
-                            },
-                            child: Text(
-                                '${DateFormat('yy.MM.dd').format(rangeS)}~${DateFormat('yy.MM.dd').format(rangeE)}'),
+                            } ),
                           ),
-                        ),
-                        trailing: buildBottomToggle()),
+                          Padding(
+                            padding: const EdgeInsets.only(top:165.0),
+                            child: IconButton(icon: Icon(TWIcons.help),iconSize: 26, onPressed:(){} ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            );
-          }),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ClipRect(
+                          child: buildMainDrawBox(shortCard: true, windowDialogSet: true),
+                        ),
+                      ),
+                      Container(
+                        height: 58,
+                        child: ListTile(
+                            leading: TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    pointer = !pointer;
+                                    layerOn = !layerOn;
+                                  });
+                                },
+                                child: Text(
+                                  'P',
+                                  style: TextStyle(color: pointer == true ? Colors.redAccent : Colors.black),
+                                )),
+                            title: Container(
+                              width: 500,
+                              child: TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    showDateRangePicker(
+                                      context: context,
+                                      firstDate: DateTime(2020),
+                                      lastDate: DateTime(2022),
+                                      builder: (context, Widget child) {
+                                        return Theme(data: ThemeData.fallback(), child: child);
+                                      },
+                                    ).then((value) {
+                                      rangeS = value.start.add(Duration(hours: 9));
+                                      rangeE = value.end.add(Duration(hours: 9));
+                                      setState(() {});
+                                    });
+                                  });
+                                },
+                                child: Text(
+                                    '${DateFormat('yy.MM.dd').format(rangeS)}~${DateFormat('yy.MM.dd').format(rangeE)}'),
+                              ),
+                            ),
+                            trailing: buildBottomToggle()),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       }
     } else {
@@ -1099,7 +1219,7 @@ class _GridButtonState extends State<GridButton> {
           ;
         },
         child: Stack(
-          overflow: Overflow.visible,
+          clipBehavior: Clip.none,
           children: [
             buildViewer(context, c, width: c.maxWidth, height: c.maxWidth / a3),
             // buildViewer(context, c, width: c.maxWidth, height: c.maxHeight),
