@@ -1,3 +1,4 @@
+import 'package:flutter_app_location_todo/icon/twicons.dart';
 import 'dart:io';
 import 'dart:ui' as ui show Codec, FrameInfo, Image, Path, Rect, TextDirection, Canvas;
 import 'dart:math';
@@ -2143,7 +2144,8 @@ class _GridButtonState extends State<GridButton> {
             IconButton(
               constraints: BoxConstraints.tightFor(width: Size * 2),
               splashRadius: Size,
-              icon: Icon(CommunityMaterialIcons.search_web),
+              icon: Icon(TWIcons.zoomicon),
+              // icon: Icon(CommunityMaterialIcons.search_web),
               iconSize: Size,
               tooltip: '검색',
               onPressed: () {

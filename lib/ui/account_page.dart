@@ -45,12 +45,14 @@ class _AccountPageState extends State<AccountPage> {
       });
     });
     FirebaseMessaging.instance.getAPNSToken().then((value) => print('@@@apnToken $value'));
-    FirebaseMessaging.instance.getToken().then((value) => print('@@@token $value'));
+    FirebaseMessaging.instance.getToken(
+      vapidKey: 'BIBjA2A7TXQ8RSFvZbfFIX8PyFm_FkCMJrFjC_ED8kqahPB-eVyx1SQbIGtb7TBA3Snka01gXztuo0tyfLCmue8'
+    ).then((value) => print('@@@token $value'));
 
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage message) {
-    });
+    // FirebaseMessaging.instance
+    //     .getInitialMessage()
+    //     .then((RemoteMessage message) {
+    // });
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       RemoteNotification notification = message.notification;
@@ -99,95 +101,97 @@ class _AccountPageState extends State<AccountPage> {
       provisional: true,
     ).then((_){
       FirebaseMessaging.instance.getAPNSToken().then((value) => print('@@@apnToken $value'));
-      FirebaseMessaging.instance.getToken().then((value) => print('@@@token $value'));
+      FirebaseMessaging.instance.getToken(
+        vapidKey: 'BIBjA2A7TXQ8RSFvZbfFIX8PyFm_FkCMJrFjC_ED8kqahPB-eVyx1SQbIGtb7TBA3Snka01gXztuo0tyfLCmue8'
+      ).then((value) => print('@@@token $value'));
     });
 
 
-    // if (_token == null) {
-    //   print('Unable to send FCM message, no token exists.');
-    //   return;
-    // }
+    if (_token == null) {
+      print('Unable to send FCM message, no token exists.');
+      return;
+    }
 
-    // try {
-    //   await http.post(
-    //     Uri.parse('https://api.rnfirebase.io/messaging/send'),
-    //     headers: <String, String>{
-    //       'Content-Type': 'application/json; charset=UTF-8',
-    //     },
-    //     body: constructFCMPayload(_token),
-    //   );
-    //   print('FCM request for device sent!');
-    // } catch (e) {
-    //   print(e);
-    // }
-  }
-
-
-
-  Future<void> onActionSelected(String value) async {
-    switch (value) {
-      case 'subscribe':
-        {
-          print(
-              'FlutterFire Messaging Example: Subscribing to topic "fcm_test".');
-          await FirebaseMessaging.instance.subscribeToTopic('fcm_test');
-          print(
-              'FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.');
-        }
-        break;
-      case 'unsubscribe':
-        {
-          print(
-              'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test".');
-          await FirebaseMessaging.instance.unsubscribeFromTopic('fcm_test');
-          print(
-              'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test" successful.');
-        }
-        break;
-      case 'get_apns_token':
-        {
-          if (defaultTargetPlatform == TargetPlatform.iOS ||
-              defaultTargetPlatform == TargetPlatform.macOS) {
-            print('FlutterFire Messaging Example: Getting APNs token...');
-            String token = await FirebaseMessaging.instance.getAPNSToken();
-            print('FlutterFire Messaging Example: Got APNs token: $token');
-          } else {
-            print(
-                'FlutterFire Messaging Example: Getting an APNs token is only supported on iOS and macOS platforms.');
-          }
-        }
-        break;
-      default:
-        break;
+    try {
+      await http.post(
+        Uri.parse('https://api.rnfirebase.io/messaging/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: constructFCMPayload(_token),
+      );
+      print('FCM request for device sent!');
+    } catch (e) {
+      print(e);
     }
   }
+
+
+
+  // Future<void> onActionSelected(String value) async {
+  //   switch (value) {
+  //     case 'subscribe':
+  //       {
+  //         print(
+  //             'FlutterFire Messaging Example: Subscribing to topic "fcm_test".');
+  //         await FirebaseMessaging.instance.subscribeToTopic('fcm_test');
+  //         print(
+  //             'FlutterFire Messaging Example: Subscribing to topic "fcm_test" successful.');
+  //       }
+  //       break;
+  //     case 'unsubscribe':
+  //       {
+  //         print(
+  //             'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test".');
+  //         await FirebaseMessaging.instance.unsubscribeFromTopic('fcm_test');
+  //         print(
+  //             'FlutterFire Messaging Example: Unsubscribing from topic "fcm_test" successful.');
+  //       }
+  //       break;
+  //     case 'get_apns_token':
+  //       {
+  //         if (defaultTargetPlatform == TargetPlatform.iOS ||
+  //             defaultTargetPlatform == TargetPlatform.macOS) {
+  //           print('FlutterFire Messaging Example: Getting APNs token...');
+  //           String token = await FirebaseMessaging.instance.getAPNSToken();
+  //           print('FlutterFire Messaging Example: Got APNs token: $token');
+  //         } else {
+  //           print(
+  //               'FlutterFire Messaging Example: Getting an APNs token is only supported on iOS and macOS platforms.');
+  //         }
+  //       }
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('개인페이지'),
-        actions: <Widget>[
-          PopupMenuButton(
-            onSelected: onActionSelected,
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem(
-                  value: 'subscribe',
-                  child: Text('Subscribe to topic'),
-                ),
-                const PopupMenuItem(
-                  value: 'unsubscribe',
-                  child: Text('Unsubscribe to topic'),
-                ),
-                const PopupMenuItem(
-                  value: 'get_apns_token',
-                  child: Text('Get APNs token (Apple only)'),
-                ),
-              ];
-            },
-          ),
-        ],
+        // actions: <Widget>[
+        //   PopupMenuButton(
+        //     onSelected: onActionSelected,
+        //     itemBuilder: (BuildContext context) {
+        //       return [
+        //         const PopupMenuItem(
+        //           value: 'subscribe',
+        //           child: Text('Subscribe to topic'),
+        //         ),
+        //         const PopupMenuItem(
+        //           value: 'unsubscribe',
+        //           child: Text('Unsubscribe to topic'),
+        //         ),
+        //         const PopupMenuItem(
+        //           value: 'get_apns_token',
+        //           child: Text('Get APNs token (Apple only)'),
+        //         ),
+        //       ];
+        //     },
+        //   ),
+        // ],
       ),
       floatingActionButton: Builder(
         builder: (context) => FloatingActionButton(
@@ -241,21 +245,21 @@ class _AccountPageState extends State<AccountPage> {
       //     MetaCard('Message Stream', MessageList()),
       //   ]),
       // ),
-      // body: _siteList == null
-      //     ? Center(child: CircularProgressIndicator())
-      //     : Column(
-      //         children: _siteList
-      //             .map(
-      //               (e) => ListTile(
-      //                 title: Text(e.name),
-      //                 subtitle: Text('${_format.format(e.start)}-${_format.format(e.end)}'),
-      //                 onTap: () {
-      //                   Get.offAll(GridButton());
-      //                 },
-      //               ),
-      //             )
-      //             .toList(),
-      //       ),
+      body: _siteList == null
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              children: _siteList
+                  .map(
+                    (e) => ListTile(
+                      title: Text(e.name),
+                      subtitle: Text('${_format.format(e.start)}-${_format.format(e.end)}'),
+                      onTap: () {
+                        Get.offAll(GridButton());
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
     );
   }
 }
