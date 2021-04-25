@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:flutter_app_location_todo/model/quality_check_image_model.dart';
@@ -12,7 +11,9 @@ class CheckList {
   String guid;
   bool check = false;
   DateTime checkDate;
-  List<QuailtyCheckImage> qualityCheckImages=[];
+  List<QuailtyCheckImage> qualityCheckImages = [];
+  List<Map> checkListDetail = [];
+
   CheckList({
     this.type1,
     this.type2,
@@ -23,6 +24,7 @@ class CheckList {
     this.check,
     this.checkDate,
     this.qualityCheckImages,
+    this.checkListDetail,
   });
 
   CheckList copyWith({
@@ -57,11 +59,25 @@ class CheckList {
       'guid': guid,
       'check': check,
       'checkDate': checkDate?.millisecondsSinceEpoch,
+      'checkListDetail': checkListDetail,
     };
   }
 
   factory CheckList.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
+    if (map == null) {
+      return null;
+    } else if (map['checkListDetail'] != null) {
+      CheckList(
+        type1: map['type1'],
+        type2: map['type2'],
+        timing: map['timing'],
+        checkList: map['checkList'],
+        guid: map['guid'],
+        qualityCheckImages: [],
+        checkListDetail: map['checkListDetail'],
+        check: false,
+      );
+    }
 
     return CheckList(
       type1: map['type1'],
@@ -69,7 +85,8 @@ class CheckList {
       timing: map['timing'],
       checkList: map['checkList'],
       guid: map['guid'],
-      qualityCheckImages : [],
+      qualityCheckImages: [],
+      checkListDetail: map['checkListDetail'],
       // boundaryName: map['boundaryName'],
       check: false,
       // checkDate: DateTime.fromMillisecondsSinceEpoch(map['checkDate']),
@@ -80,9 +97,10 @@ class CheckList {
 
   factory CheckList.fromJson(String source) => CheckList.fromMap(json.decode(source));
 
+
   @override
   String toString() {
-    return '$timing';
+    return 'CheckList{type1: $type1, type2: $type2, timing: $timing, checkList: $checkList, guid: $guid}';
   }
 
   @override

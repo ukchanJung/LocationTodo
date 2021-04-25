@@ -31,7 +31,6 @@ class SignInPageState extends State<SignInPage> {
   void initState() {
     super.initState();
     getRememberInfo();
-
   }
 
   @override
@@ -65,10 +64,7 @@ class SignInPageState extends State<SignInPage> {
                   child: Center(
                     child: Text(
                       "Sign In to Your Account",
-                      style: TextStyle(
-                          color: Colors.blueGrey,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.blueGrey, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -97,8 +93,7 @@ class SignInPageState extends State<SignInPage> {
                       ),
                     ].map((c) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 10),
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                         child: c,
                       );
                     }).toList(),
@@ -192,16 +187,14 @@ class SignInPageState extends State<SignInPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Need an account?",
-                    style: TextStyle(color: Colors.blueGrey)),
+                Text("Need an account?", style: TextStyle(color: Colors.blueGrey)),
                 FlatButton(
                   child: Text(
                     "Sign Up",
                     style: TextStyle(color: Colors.blue, fontSize: 16),
                   ),
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => SignUpPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpPage()));
                   },
                 )
               ],
@@ -213,15 +206,12 @@ class SignInPageState extends State<SignInPage> {
   }
 
   void _signIn() async {
-    _scaffoldKey.currentState
+    var scaffoldState = _scaffoldKey.currentState
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
         duration: Duration(seconds: 10),
         content: Row(
-          children: <Widget>[
-            CircularProgressIndicator(),
-            Text("   Signing-In...")
-          ],
+          children: <Widget>[CircularProgressIndicator(), Text("   Signing-In...")],
         ),
       ));
     print('1');
@@ -231,8 +221,9 @@ class SignInPageState extends State<SignInPage> {
     _scaffoldKey.currentState.hideCurrentSnackBar();
     print('3');
     // print(result);
-    if (result == false) showLastFBMessage();else if (result) Get.offAll(AccountPage());
-
+    if (result == false)
+      showLastFBMessage();
+    else if (result) Get.offAll(AccountPage());
   }
 
   void _signInWithGoogle() async {
@@ -241,16 +232,15 @@ class SignInPageState extends State<SignInPage> {
       ..showSnackBar(SnackBar(
         duration: Duration(seconds: 10),
         content: Row(
-          children: <Widget>[
-            CircularProgressIndicator(),
-            Text("   Signing-In...")
-          ],
+          children: <Widget>[CircularProgressIndicator(), Text("   Signing-In...")],
         ),
       ));
     bool result = await fp.signInWithGoogleAccount();
     _scaffoldKey.currentState.hideCurrentSnackBar();
     print(result);
-    if (result == false) showLastFBMessage();else if (result) Get.offAll(AccountPage());
+    if (result == false)
+      showLastFBMessage();
+    else if (result) Get.offAll(AccountPage());
   }
 
   getRememberInfo() async {

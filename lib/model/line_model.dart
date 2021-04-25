@@ -22,7 +22,17 @@ class Line {
     double _degree;
     double x = p2.dx - p1.dx;
     double y = p2.dy - p1.dy;
-    _degree = atan2(y, x) * (180 / pi);
+    _degree = -atan2(y, x) * (180 / pi);
+    // print(_degree);
+    return _degree;
+  }
+
+  double degree2() {
+    double _degree;
+    double x = p2.dx - p1.dx;
+    double y = p2.dy - p1.dy;
+    _degree = -atan2(y, x);
+    // print(_degree);
     return _degree;
   }
 

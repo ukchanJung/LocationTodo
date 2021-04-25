@@ -10,6 +10,7 @@ import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_location_todo/data/lhchecklistdoc.dart';
 import 'package:flutter_app_location_todo/data/standard_detail_list.dart';
 import 'package:flutter_app_location_todo/data/structureJson.dart';
 import 'package:flutter_app_location_todo/model/IntersectionPoint.dart';
@@ -188,6 +189,45 @@ class _TimViewState extends State<TimView> {
             child: FloatingActionButton(
               heroTag: null,
               onPressed: () async {
+                lhCheckListDocData.forEach((e) async {
+                  String tempRoot = 'asset/lhchecklist/$e.png';
+                  ByteData bytes = await rootBundle.load(tempRoot);
+                  String tempPath = (await getTemporaryDirectory()).path;
+                  String tempName = '$tempPath/$e.png';
+                  File file = File(tempName);
+                  await file.writeAsBytes(bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes));
+                  FirebaseVisionImage vIa = FirebaseVisionImage.fromFilePath(tempName);
+                  // FirebaseVisionImage vIa = FirebaseVisionImage.fromFile(file);
+                  final TextRecognizer textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+                  visionText = await textRecognizer.processImage(vIa);
+                  List<Map> tempList = visionText.blocks
+                      .map((v) => {
+                            'text': v.text,
+                            'rect': {
+                              'left': v.boundingBox.left,
+                              'top': v.boundingBox.top,
+                              'right': v.boundingBox.right,
+                              'bottom': v.boundingBox.bottom,
+                            }
+                          })
+                      .toList();
+                  FirebaseFirestore.instance
+                      .collection('lhchecklist')
+                      .doc(e)
+                      .set({'path': e, 'dataList': tempList, 'fulltext': visionText.text});
+                  print('등록성공');
+                  print(tempList);
+                });
+                print('전체등록성공');
+              },
+              child: Text('체크리스트 등록'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton(
+              heroTag: null,
+              onPressed: () async {
                 standarddetail.forEach((e) async {
                   String tempRoot = 'asset/standarddetail/${e['path']}';
                   ByteData bytes = await rootBundle.load(tempRoot);
@@ -213,11 +253,10 @@ class _TimViewState extends State<TimView> {
                   FirebaseFirestore.instance
                       .collection('standarddetail')
                       .doc(e['path'])
-                      .set({'path': e['path'], 'dataList': tempList,'fulltext':visionText.text});
+                      .set({'path': e['path'], 'dataList': tempList, 'fulltext': visionText.text});
                   print('등록성공');
                   print(tempList);
-                }
-                );
+                });
                 print('전체등록성공');
               },
               child: Text('상세도등록'),
@@ -253,11 +292,10 @@ class _TimViewState extends State<TimView> {
                   FirebaseFirestore.instance
                       .collection('generalInfo')
                       .doc(e['path'])
-                      .set({'path': e['path'], 'dataList': tempList,'fulltext':visionText.text});
+                      .set({'path': e['path'], 'dataList': tempList, 'fulltext': visionText.text});
                   print('등록성공');
                   print(tempList);
-                }
-                );
+                });
                 print('전체등록성공');
               },
               child: Text('시방서등록'),
@@ -401,14 +439,14 @@ class _TimViewState extends State<TimView> {
                         setState(
                           () {
                             _origin = Offset(m.relative.dx, m.relative.dy) / _pContrl.scale;
-                            debugX = (((m.relative.dx / _pContrl.scale) / width -
-                                        context.read<CP>().getDrawing().originX) *
-                                    context.read<CP>().getcordiX())
-                                .round();
-                            debugY = (((m.relative.dy / _pContrl.scale) / heigh -
-                                        context.read<CP>().getDrawing().originY) *
-                                    context.read<CP>().getcordiY())
-                                .round();
+                            debugX =
+                                (((m.relative.dx / _pContrl.scale) / width - context.read<CP>().getDrawing().originX) *
+                                        context.read<CP>().getcordiX())
+                                    .round();
+                            debugY =
+                                (((m.relative.dy / _pContrl.scale) / heigh - context.read<CP>().getDrawing().originY) *
+                                        context.read<CP>().getcordiY())
+                                    .round();
                             print(' 선택한점은 절대좌표 X: $debugX, Y: $debugY');
                             print(' 선택한점은 절대좌표 X: $sLeft,  Y: $sTop');
                             print(' 선택한점은 절대좌표 X: $sRight, Y: $sBottom');
@@ -421,26 +459,26 @@ class _TimViewState extends State<TimView> {
                           if (sCheck == false) {
                             sLeft = m.relative.dx / _pContrl.scale;
                             sTop = m.relative.dy / _pContrl.scale;
-                            rLeft = (((m.relative.dx / _pContrl.scale) / width -
-                                        context.read<CP>().getDrawing().originX) *
-                                    context.read<CP>().getcordiX())
-                                .round();
-                            rTop = (((m.relative.dy / _pContrl.scale) / heigh -
-                                        context.read<CP>().getDrawing().originY) *
-                                    context.read<CP>().getcordiY())
-                                .round();
+                            rLeft =
+                                (((m.relative.dx / _pContrl.scale) / width - context.read<CP>().getDrawing().originX) *
+                                        context.read<CP>().getcordiX())
+                                    .round();
+                            rTop =
+                                (((m.relative.dy / _pContrl.scale) / heigh - context.read<CP>().getDrawing().originY) *
+                                        context.read<CP>().getcordiY())
+                                    .round();
                             sCheck = true;
                           } else {
                             sRight = m.relative.dx / _pContrl.scale;
                             sBottom = m.relative.dy / _pContrl.scale;
-                            rRight = (((m.relative.dx / _pContrl.scale) / width -
-                                        context.read<CP>().getDrawing().originX) *
-                                    context.read<CP>().getcordiX())
-                                .round();
-                            rBottom = (((m.relative.dy / _pContrl.scale) / heigh -
-                                        context.read<CP>().getDrawing().originY) *
-                                    context.read<CP>().getcordiY())
-                                .round();
+                            rRight =
+                                (((m.relative.dx / _pContrl.scale) / width - context.read<CP>().getDrawing().originX) *
+                                        context.read<CP>().getcordiX())
+                                    .round();
+                            rBottom =
+                                (((m.relative.dy / _pContrl.scale) / heigh - context.read<CP>().getDrawing().originY) *
+                                        context.read<CP>().getcordiY())
+                                    .round();
                             sCheck = false;
                           }
                         });

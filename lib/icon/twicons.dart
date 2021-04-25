@@ -11,7 +11,7 @@
 ///      fonts:
 ///       - asset: fonts/TWIcons.ttf
 ///
-/// 
+///
 /// * Entypo, Copyright (C) 2012 by Daniel Bruce
 ///         Author:    Daniel Bruce
 ///         License:   SIL (http://scripts.sil.org/OFL)
@@ -41,5 +41,6 @@ class TWIcons {
   static const IconData fullscreen = IconData(0xe80e, fontFamily: _kFontFam);
   static const IconData downarrow = IconData(0xe80f, fontFamily: _kFontFam);
   static const IconData setting = IconData(0xe810, fontFamily: _kFontFam);
-
+  static const IconData map = IconData(0xe811, fontFamily: _kFontFam);
+  static const IconData account = IconData(0xe812, fontFamily: _kFontFam);
 }

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app_location_todo/model/counter_model.dart';
 import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/provider/firebase_provider.dart';
+import 'package:flutter_app_location_todo/provider/setting_drawing.dart';
 import 'package:flutter_app_location_todo/ui/account_page.dart';
 import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
 import 'package:flutter_app_location_todo/ui/location_todo_page.dart';
@@ -81,6 +82,7 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => CP()),
+        ChangeNotifierProvider(create: (context) => SD()),
         ChangeNotifierProvider(create: (context) => OnOff()),
         ChangeNotifierProvider(create: (context) => DivideCounter()),
         ChangeNotifierProvider(create: (context) => FirebaseProvider()),

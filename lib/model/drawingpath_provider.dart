@@ -24,6 +24,14 @@ class CP with ChangeNotifier {
     originX: 0.7373979439768359,
     originY: 0.23113260932198965,
   );
+  Drawing _settingD = Drawing(
+    drawingNum: 'A31-003',
+    title: '1층 평면도',
+    scale: '500',
+    localPath: 'A31-003.png',
+    originX: 0.7373979439768359,
+    originY: 0.23113260932198965,
+  );
   Offset origin= Offset.zero;
 
   String getPath() => _path;
@@ -31,6 +39,7 @@ class CP with ChangeNotifier {
   String getcordi() => '${_drawing.toString()}${_drawing.originX}, ${_drawing.originY}, ${_drawing.scale}';
   Drawing getDrawing() => _drawing;
   Drawing getLayer() => _layerD;
+  Drawing getSettingD() => _settingD;
   double getcordiX() => double.parse(_drawing.scale) * _drawing.witdh;
   double getcordiY() => double.parse(_drawing.scale) * _drawing.height;
   Offset getOffset() => Offset(_drawing.witdh.toDouble(), _drawing.height.toDouble());
@@ -47,6 +56,10 @@ class CP with ChangeNotifier {
   }
   void changeLayer(drawing) {
     _layerD = drawing;
+    notifyListeners();
+  }
+  void changeSettingDrawing(drawing) {
+    _settingD = drawing;
     notifyListeners();
   }
   void addFavorite(drawing){

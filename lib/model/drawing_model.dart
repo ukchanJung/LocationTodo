@@ -9,7 +9,7 @@ class Drawing {
   String listCategory;
   String listSubNum;
   String scale;
-  int orient;
+  double orient;
   bool ocr;
   bool checked = false;
   List<String> infoCategory;
@@ -37,6 +37,9 @@ class Drawing {
   List<Map> callOutMap = [];
   List<Map> sectionMap = [];
   List<Map> detailInfoMap = [];
+  Offset docOrigin = Offset.zero;
+  double docOriginX =0;
+  double docOriginY =0;
 
   Drawing({
     this.localPath,
@@ -58,6 +61,9 @@ class Drawing {
     this.height,
     this.createdAt,
     this.avatar,
+    this.docOrigin,
+    this.docOriginX,
+    this.docOriginY,
   });
 
   factory Drawing.fromJsonSearch(Map<String, dynamic> json, {DocumentReference reference}) {
@@ -102,7 +108,9 @@ class Drawing {
     listCategory = json['listCategory'];
     listSubNum = json['listSubNum'];
     scale = json['scale'];
-    orient = json['Orient'];
+    if(json['Orient']!=null){
+    orient = json['Orient'].toDouble();
+    }
     ocr = json['ocr'];
     infoCategory = json['infoCategory'].cast<String>();
     pointX = json['pointX'].cast<double>();
@@ -116,22 +124,16 @@ class Drawing {
     con = json["con"];
     doc = json["doc"];
     axis = json["axis"];
+    // if (json["docOrigin"] != null) {
+    //   docOrigin = Offset(json["docOrigin"]['dx'], json["docOrigin"]['dy']);
+    // }
+    if (json["docOriginX"] != null) {
+      docOriginX = json["docOriginX"];
+    }
+    if (json["docOriginY"] != null) {
+      docOriginY = json["docOriginY"];
+    }
 
-
-    ///OCR데이터 Read
-    // Iterable jsonOcrRect = json["ocrData"];
-    // ocrData = jsonOcrRect
-    //     .map(
-    //       (e) => {
-    //         'text': e['name'],
-    //         'rect': {
-    //           'left': e['L'],
-    //           'top': e['T'],
-    //           'right': e['R'],
-    //           'bottom': e['B'],
-    //         },
-    //       },
-    //     ).toList();
     ///Room데이터 Read
     Iterable jsonRooms = json['roomMap'];
     if (jsonRooms != null) {
@@ -212,35 +214,6 @@ class Drawing {
               })
           .toList();
     }
-    // if (jsonRooms != null) {
-    //   rooms = jsonRooms.map((e) {
-    //     var t = e['rect'];
-    //     double _left = t['left'].toDouble();
-    //     double _top = t['top'].toDouble();
-    //     double _right = t['right'].toDouble();
-    //     double _bottom = t['bottom'].toDouble();
-    //     // print('${_left.runtimeType}, ${_top.runtimeType}, ${_right.runtimeType}, ${_bottom.runtimeType}');
-    //     // print('${_left}, ${_top}, ${_right}, ${_bottom}');
-    //     Room(
-    //       name: e['name'],
-    //       id: e['id'],
-    //       left: _left,
-    //       top: _top,
-    //       right: _right,
-    //       bottom: _bottom,
-    //       // rect:Rect.fromLTRB(100.0, 100.0, 100.0, 100.0),
-    //       // rect: Rect.fromPoints(
-    //       //   Offset(_left.toDouble(),_top.toDouble()),Offset(_right.toDouble(),_bottom.toDouble())
-    //       // ),
-    //       // rect: _tempRect,
-    //       x: e['x'],
-    //       y: e['y'],
-    //       z: e['z'],
-    //       sealL: e['sealL'],
-    //     );
-    //   }).toList();
-    // }
-    // print('$drawingNum$title');
   }
 
   Drawing.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
@@ -267,6 +240,12 @@ class Drawing {
     data["con"] = this.con;
     data["doc"] = this.doc;
     data["axis"] = this.axis;
+    data["docOrigin"] = {
+      "dx": this.docOrigin.dx,
+      "dy": this.docOrigin.dy,
+    };
+    data["docOriginX"] = this.docOriginX;
+    data["docOriginY"] = this.docOriginY;
     // List<Map>roomsMap = this.roomMap.map((e) =>
     // {
     //   'name': e.name,

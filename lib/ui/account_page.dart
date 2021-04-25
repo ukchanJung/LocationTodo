@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/main.dart';
 import 'package:flutter_app_location_todo/method/method.dart';
 import 'package:flutter_app_location_todo/model/site_model.dart';
+import 'package:flutter_app_location_todo/model/user_model.dart';
 import 'package:flutter_app_location_todo/provider/firebase_provider.dart';
+import 'package:flutter_app_location_todo/ui/account_setting_page.dart';
 import 'package:flutter_app_location_todo/ui/confirmpage.dart';
 import 'package:flutter_app_location_todo/ui/gridbutton_page.dart';
 import 'package:flutter_app_location_todo/ui/qualitycheck_page.dart';
@@ -31,23 +33,35 @@ class _AccountPageState extends State<AccountPage> {
   ];
   int selectNumber = 0;
   User _user;
+  TWUser _twUser;
   List<Site> _siteList;
   DateFormat _format = DateFormat('yyyy.MM.dd');
+  List<TWUser>_userList= [];
 
   String _token;
   @override
   void initState() {
     super.initState();
     _user = context.read<FirebaseProvider>().getUser();
-    readSiteMethod(col: 'workSpace', list: _siteList).then((value){
+
+    readUser(col: 'userData', list: _userList).then((value){
+      print('@@@@@@@@@@${value.length}');
+      setState(() {
+        _userList =value;
+      });
+      if(!_userList.map((e) => e.uid).toList().contains(_user.uid)){
+        Get.to(UserPage());
+      }
+    });
+    readSiteMethod(col: 'workSpace', list: _siteList).then((value) {
       setState(() {
         _siteList = value;
       });
     });
     FirebaseMessaging.instance.getAPNSToken().then((value) => print('@@@apnToken $value'));
-    FirebaseMessaging.instance.getToken(
-      vapidKey: 'BIBjA2A7TXQ8RSFvZbfFIX8PyFm_FkCMJrFjC_ED8kqahPB-eVyx1SQbIGtb7TBA3Snka01gXztuo0tyfLCmue8'
-    ).then((value) => print('@@@token $value'));
+    FirebaseMessaging.instance
+        .getToken(vapidKey: 'BIBjA2A7TXQ8RSFvZbfFIX8PyFm_FkCMJrFjC_ED8kqahPB-eVyx1SQbIGtb7TBA3Snka01gXztuo0tyfLCmue8')
+        .then((value) => print('@@@token $value'));
 
     // FirebaseMessaging.instance
     //     .getInitialMessage()
@@ -75,11 +89,11 @@ class _AccountPageState extends State<AccountPage> {
       }
     });
 
-
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print('A new onMessageOpenedApp event was published!');
     });
   }
+
   Future<void> sendPushMessage() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
@@ -94,18 +108,19 @@ class _AccountPageState extends State<AccountPage> {
     );
 
     print('User granted permission: ${settings.authorizationStatus}');
-    await FirebaseMessaging.instance.requestPermission(
+    await FirebaseMessaging.instance
+        .requestPermission(
       alert: true,
       badge: true,
       sound: true,
       provisional: true,
-    ).then((_){
+    )
+        .then((_) {
       FirebaseMessaging.instance.getAPNSToken().then((value) => print('@@@apnToken $value'));
-      FirebaseMessaging.instance.getToken(
-        vapidKey: 'BIBjA2A7TXQ8RSFvZbfFIX8PyFm_FkCMJrFjC_ED8kqahPB-eVyx1SQbIGtb7TBA3Snka01gXztuo0tyfLCmue8'
-      ).then((value) => print('@@@token $value'));
+      FirebaseMessaging.instance
+          .getToken(vapidKey: 'BIBjA2A7TXQ8RSFvZbfFIX8PyFm_FkCMJrFjC_ED8kqahPB-eVyx1SQbIGtb7TBA3Snka01gXztuo0tyfLCmue8')
+          .then((value) => print('@@@token $value'));
     });
-
 
     if (_token == null) {
       print('Unable to send FCM message, no token exists.');
@@ -125,8 +140,6 @@ class _AccountPageState extends State<AccountPage> {
       print(e);
     }
   }
-
-
 
   // Future<void> onActionSelected(String value) async {
   //   switch (value) {
@@ -208,17 +221,23 @@ class _AccountPageState extends State<AccountPage> {
               accountEmail: Text(_user.email),
             ),
             ListTile(
+              title: Text(_user.uid),
+            ),
+            ListTile(
               title: Text('계정설정'),
+              onTap: () {
+                Get.to(UserPage());
+              },
             ),
             ListTile(
               title: Text('주요시공확인서 작성'),
-              onTap: (){
+              onTap: () {
                 Get.to(ConfirmPage());
               },
             ),
             ListTile(
               title: Text('시공확인서 확인'),
-              onTap: (){
+              onTap: () {
                 Get.to(QualityCheckPage());
               },
             ),
@@ -337,6 +356,7 @@ class AccountPage2 extends StatelessWidget {
     );
   }
 }
+
 class MetaCard extends StatelessWidget {
   final String _title;
   final Widget _children;
@@ -355,8 +375,7 @@ class MetaCard extends StatelessWidget {
                 child: Column(children: [
                   Container(
                       margin: const EdgeInsets.only(bottom: 16),
-                      child:
-                      Text(_title, style: const TextStyle(fontSize: 18))),
+                      child: Text(_title, style: const TextStyle(fontSize: 18))),
                   _children,
                 ]))));
   }

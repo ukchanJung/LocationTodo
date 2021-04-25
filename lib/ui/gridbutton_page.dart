@@ -1,3 +1,4 @@
+import 'package:flutter_app_location_todo/customPainter/custom_painter.dart';
 import 'package:flutter_app_location_todo/icon/twicons.dart';
 import 'dart:io';
 import 'dart:ui' as ui show Codec, FrameInfo, Image, Path, Rect, TextDirection, Canvas;
@@ -38,6 +39,7 @@ import 'package:flutter_app_location_todo/model/task_model.dart';
 import 'package:flutter_app_location_todo/provider/current_rxget.dart';
 import 'package:flutter_app_location_todo/provider/firebase_provider.dart';
 import 'package:flutter_app_location_todo/simul_test.dart';
+import 'package:flutter_app_location_todo/styles/timwork_styles.dart';
 import 'package:flutter_app_location_todo/ui/backup.dart';
 import 'package:flutter_app_location_todo/ui/boundary_detail_page.dart';
 import 'package:flutter_app_location_todo/ui/cost_info_page.dart';
@@ -48,6 +50,7 @@ import 'package:flutter_app_location_todo/ui/general_info_page.dart';
 import 'package:flutter_app_location_todo/ui/map_page.dart';
 import 'package:flutter_app_location_todo/ui/ocr_setting_page.dart';
 import 'package:flutter_app_location_todo/ui/originViewer.dart';
+import 'package:flutter_app_location_todo/ui/origin_setting_page.dart';
 import 'package:flutter_app_location_todo/ui/planner_page.dart';
 import 'package:flutter_app_location_todo/ui/setting_page.dart';
 import 'package:flutter_app_location_todo/ui/simulation_page.dart';
@@ -75,13 +78,11 @@ class CordinatePoint {
 }
 
 class GridButton extends StatefulWidget {
-
   @override
   _GridButtonState createState() => _GridButtonState();
 }
 
 class _GridButtonState extends State<GridButton> {
-  Color mainColor = Color.fromRGBO(255, 176, 0, 1);
   List<Grid> grids = [];
   List<Gridtestmodel> testgrids = [];
   Offset _origin = Offset(0, 0);
@@ -175,6 +176,8 @@ class _GridButtonState extends State<GridButton> {
   bool FABShow = false;
   double animatedOpacity = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool isSidebar = false;
+  bool isNotebar = false;
   void _prepareService() {
     _user = _firebaseAuth.currentUser;
   }
@@ -395,8 +398,8 @@ class _GridButtonState extends State<GridButton> {
     readStandardDetail();
     readTasks();
     readingGrid();
-    print(tasks.length);
-    print(testgrids.length);
+    // print(tasks.length);
+    // print(testgrids.length);
     Future<QuerySnapshot> watch = FirebaseFirestore.instance.collection('drawing').get();
     watch.then((v) {
       drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
@@ -413,7 +416,7 @@ class _GridButtonState extends State<GridButton> {
       pathList.forEach((e) {
         path.lineTo(e[0] / 1024 + 800, -e[1] / (1024 / (420 / 297)) + 200);
       });
-      print(path);
+      // print(path);
     }
 
     // getClip();
@@ -465,10 +468,10 @@ class _GridButtonState extends State<GridButton> {
                 },
               ),
               TextButton(
-                onLongPress: (){
+                onLongPress: () {
                   addFavoriteMethod(context);
                 },
-                onPressed: (){
+                onPressed: () {
                   searchDrawingMethod();
                 },
                 child: AutoSizeText(
@@ -498,22 +501,28 @@ class _GridButtonState extends State<GridButton> {
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         floatingActionButton: FloatingActionButton(
           child: AnimatedCrossFade(
-            firstChild: Text('+',textScaleFactor: 1.7,),
-            secondChild: Text('-',textScaleFactor: 1.7,),
-            crossFadeState: FABShow==false ? CrossFadeState.showFirst:CrossFadeState.showSecond,
+            firstChild: Text(
+              '+',
+              textScaleFactor: 1.7,
+            ),
+            secondChild: Text(
+              '-',
+              textScaleFactor: 1.7,
+            ),
+            crossFadeState: FABShow == false ? CrossFadeState.showFirst : CrossFadeState.showSecond,
             duration: Duration(milliseconds: 500),
           ),
           onPressed: () {
             setState(() {
               FABShow = !FABShow;
-              if(FABShow){
+              if (FABShow) {
                 Future.delayed(Duration(milliseconds: 50))
                   ..then((value) {
                     setState(() {
-                    animatedOpacity = 1.0;
+                      animatedOpacity = 1.0;
                     });
                   });
-              }else {
+              } else {
                 animatedOpacity = 0;
               }
             });
@@ -620,56 +629,70 @@ class _GridButtonState extends State<GridButton> {
                   ],
                 );
               }),
-              if (FABShow) AnimatedOpacity(
-                opacity: animatedOpacity,
-                duration: Duration(milliseconds: 300),
-                child: Align(
-                    alignment: Alignment(0.9, 0.8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        FabChild(
-                          onTap: () {
-                          },
-                          icon: Icon(
-                            CommunityMaterialIcons.pencil_box,
-                            color: Colors.deepOrange,
+              if (FABShow)
+                AnimatedOpacity(
+                  opacity: animatedOpacity,
+                  duration: Duration(milliseconds: 300),
+                  child: Align(
+                      alignment: Alignment(0.9, 0.8),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FabChild(
+                            onTap: () {},
+                            icon: Icon(
+                              CommunityMaterialIcons.pencil_box,
+                              color: Colors.deepOrange,
+                            ),
+                            title: Text(
+                              '메모',
+                              style: TextStyle(color: Colors.black, fontSize: 9),
+                            ),
                           ),
-                          title: Text('메모',style: TextStyle(color: Colors.black,fontSize: 9 ),),
-                        ),
-                        FabChild(
-                          onTap: () {
-                            mesureOnMethod();
-                          },
-                          icon: Icon(
-                            CommunityMaterialIcons.ruler_square,
-                            color: Colors.deepOrange,
+                          FabChild(
+                            onTap: () {
+                              mesureOnMethod();
+                            },
+                            icon: Icon(
+                              CommunityMaterialIcons.ruler_square,
+                              color: Colors.deepOrange,
+                            ),
+                            title: Text(
+                              '측정',
+                              style: TextStyle(color: Colors.black, fontSize: 9),
+                            ),
                           ),
-                          title: Text('측정',style: TextStyle(color: Colors.black,fontSize: 9),),
-                        ),
-                        FabChild(
-                          onTap: () {
-                            filterOnMethod();
-                          },
-                          icon: Icon(
-                            CommunityMaterialIcons.filter_menu,
-                            color: Colors.deepOrange,
+                          FabChild(
+                            onTap: () {
+                              filterOnMethod();
+                            },
+                            icon: Icon(
+                              CommunityMaterialIcons.filter_menu,
+                              color: Colors.deepOrange,
+                            ),
+                            title: Text(
+                              '필터',
+                              style: TextStyle(color: Colors.black, fontSize: 9),
+                            ),
                           ),
-                          title: Text('필터',style: TextStyle(color: Colors.black,fontSize: 9),),
-                        ),
-                        FabChild(
-                          onTap: () {
+                          FabChild(
+                            onTap: () {
                               changeDocCategoryMethod(context);
                             },
-                          icon: Icon(
-                            CommunityMaterialIcons.box_shadow,
-                            color: Colors.deepOrange,
+                            icon: Icon(
+                              CommunityMaterialIcons.box_shadow,
+                              color: Colors.deepOrange,
+                            ),
+                            title: Text(
+                              '공정선택',
+                              style: TextStyle(color: Colors.black, fontSize: 9),
+                            ),
                           ),
-                          title: Text('공정선택',style: TextStyle(color: Colors.black,fontSize: 9 ),),
-                        ),
-                      ],
-                    )),
-              ) else Container()
+                        ],
+                      )),
+                )
+              else
+                Container()
             ],
           ),
         ),
@@ -743,182 +766,33 @@ class _GridButtonState extends State<GridButton> {
         );
       } else {
         return Scaffold(
-          key:_scaffoldKey,
+          key: _scaffoldKey,
           resizeToAvoidBottomInset: false,
           drawer: buildDrawerNav(),
           endDrawer: Drawer(
             child: buildTIMWORK(context),
           ),
-          body: Padding(
-            padding: const EdgeInsets.fromLTRB(16,24,16,16),
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      width: 70,
-                      decoration: BoxDecoration(color: mainColor),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top:20),
-                            child: Image.asset('asset/inAppIcon.png'),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:20.0),
-                            child: IconButton(icon: Icon(TWIcons.backarrow),iconSize: 26, onPressed:Get.back),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:8.0),
-                            child: IconButton(icon: Icon(TWIcons.zoomicon),iconSize: 26, onPressed:searchDrawingMethod ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:8.0),
-                            child: IconButton(icon: Icon(TWIcons.setting),iconSize: 26, onPressed:(){
-                              _scaffoldKey.currentState.openDrawer();
-                            }),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:78.0),
-                            child: IconButton(icon: Icon(TWIcons.star),iconSize: 26, onPressed:(){
-                              favoriteDialogMethod(context);
-                            } ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:8.0),
-                            child: IconButton(icon: Icon(TWIcons.doc_text),iconSize: 26, onPressed:(){
-                                setState(() {
-                                  toggle[4] = !toggle[4];
-                                  detailPop = !detailPop;
-                                });
-                            } ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:8.0),
-                            child: IconButton(icon: Icon(TWIcons.layout),iconSize: 26, onPressed:(){
-                              setState(() {
-                                toggle[0] = !toggle[0];
-                                detailPop = !detailPop;
-                              });
-                            } ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:8.0),
-                            child: IconButton(icon: Icon(TWIcons.grid),iconSize: 26, onPressed:(){
-                              setState(() {
-                                toggle[1] = !toggle[1];
-                                detailPop = !detailPop;
-                              });
-                            } ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:8.0),
-                            child: IconButton(icon: Icon(TWIcons.note),iconSize: 26, onPressed:(){
-                              setState(() {
-                                toggle[2] = !toggle[2];
-                                detailPop = !detailPop;
-                              });
-                            } ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:8.0),
-                            child: IconButton(icon: Icon(TWIcons.count_doc),iconSize: 26, onPressed:(){
-                              setState(() {
-                                toggle[3] = !toggle[3];
-                                detailPop = !detailPop;
-                              });
-                            } ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:8.0),
-                            child: IconButton(icon: Icon(TWIcons.pointer),iconSize: 26, onPressed:(){
-                              setState(() {
-                                pointer = !pointer;
-                                layerOn = !layerOn;
-                              });
-                            } ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:8.0),
-                            child: IconButton(icon: Icon(CommunityMaterialIcons.calendar),iconSize: 26, onPressed:(){
-                              setState(() {
-                                showDateRangePicker(
-                                  context: context,
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime(2022),
-                                  builder: (context, Widget child) {
-                                    return Theme(data: ThemeData.fallback(), child: child);
-                                  },
-                                ).then((value) {
-                                  rangeS = value.start.add(Duration(hours: 9));
-                                  rangeE = value.end.add(Duration(hours: 9));
-                                  setState(() {});
-                                });
-                              });
-                            } ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:165.0),
-                            child: IconButton(icon: Icon(TWIcons.help),iconSize: 26, onPressed:(){} ),
-                          ),
-                        ],
+          body: Container(
+            color: Color.fromRGBO(246, 246, 246, 1),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+              child: Row(
+                children: [
+                  TWMenuBar(),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: ClipRect(
+                          child: buildMainDrawBox(shortCard: true, windowDialogSet: true, shortCardSize: 16),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: ClipRect(
-                          child: buildMainDrawBox(shortCard: true, windowDialogSet: true),
-                        ),
-                      ),
-                      Container(
-                        height: 58,
-                        child: ListTile(
-                            leading: TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    pointer = !pointer;
-                                    layerOn = !layerOn;
-                                  });
-                                },
-                                child: Text(
-                                  'P',
-                                  style: TextStyle(color: pointer == true ? Colors.redAccent : Colors.black),
-                                )),
-                            title: Container(
-                              width: 500,
-                              child: TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    showDateRangePicker(
-                                      context: context,
-                                      firstDate: DateTime(2020),
-                                      lastDate: DateTime(2022),
-                                      builder: (context, Widget child) {
-                                        return Theme(data: ThemeData.fallback(), child: child);
-                                      },
-                                    ).then((value) {
-                                      rangeS = value.start.add(Duration(hours: 9));
-                                      rangeE = value.end.add(Duration(hours: 9));
-                                      setState(() {});
-                                    });
-                                  });
-                                },
-                                child: Text(
-                                    '${DateFormat('yy.MM.dd').format(rangeS)}~${DateFormat('yy.MM.dd').format(rangeE)}'),
-                              ),
-                            ),
-                            trailing: buildBottomToggle()),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                  isNotebar ? SideNoteView() : Container(),
+                ],
+              ),
             ),
           ),
         );
@@ -1767,7 +1641,7 @@ class _GridButtonState extends State<GridButton> {
       backgroundDecoration: BoxDecoration(color: Colors.transparent),
       childSize: Size(width, width / a3),
       child: LayoutBuilder(builder: (context, k) {
-        print('height : $height widget/a3 : ${width/a3}');
+        // print('height : $height widget/a3 : ${width / a3}');
         CP pW = context.watch<CP>();
         Drawing pWD = pW.getDrawing();
         return Stack(
@@ -1786,6 +1660,7 @@ class _GridButtonState extends State<GridButton> {
                   measurement.add(_origin);
                   rmeasurement.add(Offset(debugX.toDouble(), debugY.toDouble()));
                   pR.changeOrigin(debugX.toDouble(), debugY.toDouble());
+                  // print('$debugX, $debugY');
                 });
               },
               onLongPress: (m) {
@@ -1793,8 +1668,23 @@ class _GridButtonState extends State<GridButton> {
                 Drawing pD = pR.getDrawing();
                 int debugX = (((m.relative.dx / _pContrl.scale) / width - pD.originX) * pR.getcordiX()).round();
                 int debugY = (((m.relative.dy / _pContrl.scale) / height - pD.originY) * pR.getcordiY()).round();
+
+                double tempx = (0.652916667 - pD.originX) * pR.getcordiX();
+                double tempy = (0.303619529 - pD.originY) * pR.getcordiY();
+
+                Line sLine = Line(Offset(debugX.toDouble(), debugY.toDouble()), Offset(tempx, tempy));
+                double sAngle = -pi / (180 / (sLine.degree() - 90));
+
+                ///-90 이 부분 중요
+                Offset fOffset = Offset(cos(sAngle) * sLine.length(), sin(sAngle) * sLine.length());
+
+                // pR.changeOrigin(tempx + fOffset.dx, tempy + fOffset.dy);
                 pR.changeOrigin(debugX.toDouble(), debugY.toDouble());
                 context.read<OnOff>().memoOn = true;
+
+                ///선택한점은 절대좌표 X: -7930.0, Y: 18382.0
+                ///
+                ///선택한점은 절대좌표 X: -12953.0, Y: 14565.0
               },
               child: Listener(
                 onPointerHover: (h) {
@@ -1824,26 +1714,30 @@ class _GridButtonState extends State<GridButton> {
                     //     ),
                     //   ),
                     // ),
-                    layerOn && moving ==false
+                    ///
+                    layerOn && moving == false
                         ? Positioned(
                             // top: 0,
                             // left: 0,
                             top: ((pW.getDrawing().originY - pW.getLayer().originY) * height) /
-                                    (double.parse(pW.getDrawing().scale) / double.parse(pW.getLayer().scale))+0.4 ,
+                                    (double.parse(pW.getDrawing().scale) / double.parse(pW.getLayer().scale)) +
+                                0.4,
                             left: ((pW.getDrawing().originX - pW.getLayer().originX) * width) /
                                 (double.parse(pW.getDrawing().scale) / double.parse(pW.getLayer().scale)),
 
                             child: Opacity(
                               opacity: 1,
-                              child: ColorFiltered(
-                                colorFilter: ColorFilter.mode(Colors.red, BlendMode.lighten),
-                                child: Transform.scale(
-                                  alignment: Alignment.topLeft,
-                                  origin: Offset(pW.getDrawing().originX * width, pW.getDrawing().originY * height),
-                                  scale: double.parse(pW.getLayer().scale) / double.parse(pW.getDrawing().scale),
-                                  child: Image.asset(
-                                    'asset/photos/${pW.getLayer().localPath}',
-                                    width: width,
+                              child: Transform.scale(
+                                alignment: Alignment.topLeft,
+                                origin: Offset(pW.getDrawing().originX * width, pW.getDrawing().originY * height),
+                                scale: double.parse(pW.getLayer().scale) / double.parse(pW.getDrawing().scale),
+                                child: ClipRect(
+                                  child: ColorFiltered(
+                                    colorFilter: ColorFilter.mode(Colors.red, BlendMode.lighten),
+                                    child: Image.asset(
+                                      'asset/photos/${pW.getLayer().localPath}',
+                                      width: width,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1921,7 +1815,7 @@ class _GridButtonState extends State<GridButton> {
                                           left: hover.dx,
                                           top: hover.dy,
                                           child: Text(
-                                            '${(computeArea(rmeasurement) / 1000000).toStringAsFixed(0)}m3',
+                                            '${(computeArea(rmeasurement) / 1000000).toStringAsFixed(0)}m2',
                                           ),
                                         )
                                       : Container(),
@@ -1938,7 +1832,7 @@ class _GridButtonState extends State<GridButton> {
                                                       height: 100),
                                                   child: Center(
                                                       child: Transform.rotate(
-                                                    angle: pi /
+                                                    angle: -pi /
                                                         (180 /
                                                             Line(measurement[measurement.indexOf(e) - 1],
                                                                     measurement[measurement.indexOf(e)])
@@ -2018,43 +1912,58 @@ class _GridButtonState extends State<GridButton> {
                     //       return snapshot.data.scale < 12 ? planInfo(context) : detailInfo(context);
                     //     }),
                     ///Memo 구현
-                   taskAdd != '1'&&
-                    caculon != true?
-                    StreamBuilder<PhotoViewControllerValue>(
-                        stream: _pContrl.outputStateStream,
-                        initialData: PhotoViewControllerValue(
-                          position: _pContrl.position,
-                          rotation: 0,
-                          rotationFocusPoint: null,
-                          scale: _pContrl.scale,
-                        ),
-                        builder: (context, snapshot) {
-                          return Stack(
-                            children: memoList.map((e) {
-                              double rx = e.origin.dx / pW.getcordiX() * width;
-                              double ry = e.origin.dy / pW.getcordiX() * width;
-                              double x = pW.getcordiOffset(width, height).dx;
-                              double y = pW.getcordiOffset(width, height).dy;
-                              Offset rOffset = Offset(rx + x, ry + y);
-                              return Positioned.fromRect(
-                                  rect: Rect.fromCenter(center: rOffset, width: 100, height: 100),
-                                  child: Transform.scale(
-                                      scale: 1 / snapshot.data.scale,
-                                      child: IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            Get.defaultDialog(title: e.title, content: Image.network(e.imagePath));
-                                          });
-                                        },
-                                        icon: Icon(
-                                          CommunityMaterialIcons.checkbox_marked_circle_outline,
-                                          color: e.check ? Colors.red : Colors.black,
-                                          size: 32,
-                                        ),
-                                      )));
-                            }).toList(),
-                          );
-                        }):Container(),
+                    taskAdd != '1' && caculon != true
+                        ? StreamBuilder<PhotoViewControllerValue>(
+                            stream: _pContrl.outputStateStream,
+                            initialData: PhotoViewControllerValue(
+                              position: _pContrl.position,
+                              rotation: 0,
+                              rotationFocusPoint: null,
+                              scale: _pContrl.scale,
+                            ),
+                            builder: (context, snapshot) {
+                              return Stack(
+                                children: memoList.map((e) {
+                                  ///세팅도면 기준점
+                                  double tempx = 0.652916667 * width;
+                                  double tempy = 0.303619529 * height;
+
+                                  ///좌표
+                                  double rx = e.origin.dx / pW.getcordiX() * width;
+                                  double ry = e.origin.dy / pW.getcordiY() * height;
+
+                                  ///원점보정
+                                  double x = pW.getcordiOffset(width, height).dx;
+                                  double y = pW.getcordiOffset(width, height).dy;
+                                  Offset rOffset = Offset(rx + x, ry + y);
+                                  Offset sOffset = Offset(tempx, tempy);
+                                  Line sLine = Line(rOffset, sOffset);
+                                  double sAngle = -pi / (180 / (sLine.degree() + 90));
+
+                                  /// 메모 각도적용부분
+                                  Offset fOffset = Offset(cos(sAngle) * sLine.length(), sin(sAngle) * sLine.length());
+                                  return Positioned.fromRect(
+                                      // rect: Rect.fromCenter(center: sOffset + fOffset, width: 100, height: 100),
+                                      rect: Rect.fromCenter(center: rOffset, width: 100, height: 100),
+                                      child: Transform.scale(
+                                          scale: 1 / snapshot.data.scale,
+                                          child: IconButton(
+                                            tooltip: e.title,
+                                            onPressed: () {
+                                              setState(() {
+                                                Get.defaultDialog(title: e.title, content: Image.network(e.imagePath));
+                                              });
+                                            },
+                                            icon: Icon(
+                                              CommunityMaterialIcons.checkbox_marked_circle_outline,
+                                              color: e.check ? Colors.red : Colors.black,
+                                              size: 32,
+                                            ),
+                                          )));
+                                }).toList(),
+                              );
+                            })
+                        : Container(),
 
                     ///CallOut 바운더리 구현
                     callOutLayerOn == true
@@ -2253,8 +2162,9 @@ class _GridButtonState extends State<GridButton> {
     CP pW = context.watch<CP>();
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(80)),
-      color: Colors.white54,
+      color: Colors.white,
       child: Container(
+        height: 57,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2264,44 +2174,38 @@ class _GridButtonState extends State<GridButton> {
             IconButton(
               constraints: BoxConstraints.tightFor(width: Size * 2),
               splashRadius: Size,
-              icon: Icon(TWIcons.zoomicon),
-              // icon: Icon(CommunityMaterialIcons.search_web),
-              iconSize: Size,
-              tooltip: '검색',
-              onPressed: () {
-                searchDrawingMethod();
-              },
-            ),
-            IconButton(
-              constraints: BoxConstraints.tightFor(width: Size * 2),
-              splashRadius: Size,
               color: pW.favorite.contains(context.read<CP>().getDrawing()) ? Colors.deepOrange : Colors.black,
-              icon: Icon(CommunityMaterialIcons.star),
+              icon: Icon(TWIcons.star),
               iconSize: Size,
               tooltip: '즐겨찾기',
               onPressed: () {
                 favoriteDialogMethod(context);
               },
             ),
-            Tooltip(
-              message: '도면검색',
-              child: InkWell(
-                onLongPress: () {
-                  addFavoriteMethod(context);
-                },
-                onTap: () {
-                  searchDrawingMethod();
-                },
-                child: Text(
-                  context.read<CP>().getDrawing().toString(),
-                  style: TextStyle(fontSize: Size),
+            Container(
+              width: 220,
+              child: Tooltip(
+                message: '도면검색',
+                child: InkWell(
+                  onLongPress: () {
+                    addFavoriteMethod(context);
+                  },
+                  onTap: () {
+                    searchDrawingMethod();
+                  },
+                  child: AutoSizeText(
+                    context.read<CP>().getDrawing().toString(),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: TextStyle(fontSize: Size),
+                  ),
                 ),
               ),
             ),
             IconButton(
                 constraints: BoxConstraints.tightFor(width: Size * 2),
                 splashRadius: Size,
-                icon: Icon(Icons.keyboard_arrow_down),
+                icon: Icon(TWIcons.down),
                 iconSize: Size * 1.5,
                 tooltip: '아래층',
                 onPressed: () {
@@ -2310,7 +2214,7 @@ class _GridButtonState extends State<GridButton> {
             IconButton(
                 constraints: BoxConstraints.tightFor(width: Size * 2),
                 splashRadius: Size,
-                icon: Icon(Icons.keyboard_arrow_up),
+                icon: Icon(TWIcons.downarrow),
                 iconSize: Size * 1.5,
                 tooltip: '위층',
                 onPressed: () {
@@ -2319,7 +2223,7 @@ class _GridButtonState extends State<GridButton> {
             IconButton(
               constraints: BoxConstraints.tightFor(width: Size * 2),
               splashRadius: Size,
-              icon: Icon(Icons.all_inbox_rounded),
+              icon: Icon(TWIcons.layer),
               iconSize: Size,
               tooltip: '공정',
               onPressed: () {
@@ -2330,32 +2234,44 @@ class _GridButtonState extends State<GridButton> {
               constraints: BoxConstraints.tightFor(width: Size * 2),
               splashRadius: Size,
               color: caculon ? Colors.deepOrange : Colors.black,
-              icon: Icon(CommunityMaterialIcons.ruler),
+              icon: Icon(TWIcons.ruler),
               iconSize: Size,
               tooltip: '측정',
               onPressed: () {
                 mesureOnMethod();
               },
             ),
+
+            ///TODO 작업영역그리기 버튼 숨김
+            // IconButton(
+            //   constraints: BoxConstraints.tightFor(width: Size * 2),
+            //   splashRadius: Size,
+            //   icon: Icon(CommunityMaterialIcons.draw),
+            //   color: taskAdd ? Colors.deepOrange : Colors.black,
+            //   iconSize: Size,
+            //   tooltip: '작업영역추가',
+            //   onPressed: () {
+            //     taskBoundaryAddMethod();
+            //   },
+            // ),
             IconButton(
               constraints: BoxConstraints.tightFor(width: Size * 2),
               splashRadius: Size,
-              icon: Icon(CommunityMaterialIcons.draw),
-              color: taskAdd ? Colors.deepOrange : Colors.black,
+              icon: Icon(TWIcons.filter),
               iconSize: Size,
-              tooltip: '작업영역추가',
+              tooltip: '필터',
               onPressed: () {
-                taskBoundaryAddMethod();
+                filterOnMethod();
               },
             ),
             IconButton(
               constraints: BoxConstraints.tightFor(width: Size * 2),
               splashRadius: Size,
-              icon: Icon(CommunityMaterialIcons.filter_menu),
+              icon: Icon(TWIcons.fullscreen),
               iconSize: Size,
-              tooltip: '필터',
+              tooltip: '풀스크린',
               onPressed: () {
-                filterOnMethod();
+                fullScreenMethod();
               },
             ),
             SizedBox(
@@ -2365,6 +2281,12 @@ class _GridButtonState extends State<GridButton> {
         ),
       ),
     );
+  }
+
+  void fullScreenMethod() {
+    setState(() {
+      isNotebar = !isNotebar;
+    });
   }
 
   void favoriteDialogMethod(BuildContext context) {
@@ -2595,6 +2517,215 @@ class _GridButtonState extends State<GridButton> {
     });
     return bb;
   }
+
+  Widget SideButton1() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 20.0),
+          child: IconButton(icon: Icon(TWIcons.backarrow), iconSize: 26, onPressed: Get.back),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: IconButton(icon: Icon(TWIcons.zoomicon), iconSize: 26, onPressed: searchDrawingMethod),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: IconButton(
+              icon: Icon(TWIcons.setting),
+              iconSize: 26,
+              onPressed: () {
+                _scaffoldKey.currentState.openDrawer();
+              }),
+        ),
+      ],
+    );
+  }
+
+  Widget SideButton2() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 78.0),
+          child: IconButton(
+              icon: Icon(TWIcons.star),
+              iconSize: 26,
+              onPressed: () {
+                setState(() {
+                  favoriteDialogMethod(context);
+                });
+              }),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: IconButton(
+              icon: Icon(TWIcons.doc_text),
+              iconSize: 26,
+              onPressed: () {
+                setState(() {
+                  toggle[4] = !toggle[4];
+                  detailPop = !detailPop;
+                });
+              }),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: IconButton(
+              icon: Icon(TWIcons.layout),
+              iconSize: 26,
+              color: isSidebar ? Colors.white : Colors.black,
+              onPressed: () {
+                setState(() {
+                  // toggle[0] = !toggle[0];
+                  // detailPop = !detailPop;
+                  isSidebar = !isSidebar;
+                  isNotebar = !isSidebar;
+                });
+              }),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: IconButton(
+              icon: Icon(TWIcons.grid),
+              iconSize: 26,
+              onPressed: () {
+                setState(() {
+                  toggle[1] = !toggle[1];
+                  detailPop = !detailPop;
+                });
+              }),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: IconButton(
+              icon: Icon(TWIcons.note),
+              iconSize: 26,
+              onPressed: () {
+                setState(() {
+                  toggle[2] = !toggle[2];
+                  detailPop = !detailPop;
+                });
+              }),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: IconButton(
+              icon: Icon(TWIcons.count_doc),
+              iconSize: 26,
+              onPressed: () {
+                setState(() {
+                  toggle[3] = !toggle[3];
+                  detailPop = !detailPop;
+                });
+              }),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: IconButton(
+              icon: Icon(TWIcons.pointer),
+              iconSize: 26,
+              onPressed: () {
+                setState(() {
+                  pointer = !pointer;
+                  layerOn = !layerOn;
+                });
+              }),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: IconButton(
+              icon: Icon(CommunityMaterialIcons.calendar),
+              iconSize: 26,
+              onPressed: () {
+                setState(() {
+                  showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2022),
+                    builder: (context, Widget child) {
+                      return Theme(data: ThemeData.fallback(), child: child);
+                    },
+                  ).then((value) {
+                    rangeS = value.start.add(Duration(hours: 9));
+                    rangeE = value.end.add(Duration(hours: 9));
+                    setState(() {});
+                  });
+                });
+              }),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 165.0),
+          child: IconButton(icon: Icon(TWIcons.help), iconSize: 26, onPressed: () {}),
+        ),
+      ],
+    );
+  }
+
+  Widget TWMenuBar() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Container(
+        foregroundDecoration:
+            BoxDecoration(borderRadius: BorderRadius.circular(20), border: Border.all(color: mainColor, width: 1.5)),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+        clipBehavior: Clip.antiAlias,
+        child: Row(
+          children: [
+            Container(
+              width: 70,
+              decoration: BoxDecoration(color: mainColor),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Image.asset('asset/inAppIcon.png'),
+                  ),
+                  SideButton1(),
+                  SideButton2(),
+                ],
+              ),
+            ),
+            isSidebar ? Container(width: 320, color: Colors.white, child: DetiailResult(selectRoom)) : Container(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget SideNoteView() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: SingleChildScrollView(
+        child: Container(
+          width: 280,
+          height: 2000,
+          child: Transform.scale(
+            scale: 280 / 128,
+            alignment: Alignment.topLeft,
+            child: ClipPath(
+              clipper: SubDrawingArea(x: 125, y: 900),
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: -40,
+                    left: -1230,
+                    child: SizedBox(
+                      height: 984,
+                      child: Image(
+                        image: AssetImage('asset/photos/${context.watch<CP>().getDrawing().localPath}'),
+                        fit: BoxFit.fitHeight,
+                        alignment: Alignment.topLeft,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class FabChild extends StatelessWidget {
@@ -2602,12 +2733,12 @@ class FabChild extends StatelessWidget {
   Icon icon;
   Text title;
 
-  FabChild({ this.onTap, this.icon,this.title});
+  FabChild({this.onTap, this.icon, this.title});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom:8.0),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Material(
         type: MaterialType.transparency,
         elevation: 5,
@@ -2615,19 +2746,21 @@ class FabChild extends StatelessWidget {
         child: InkWell(
           splashColor: Colors.red,
           borderRadius: BorderRadius.circular(50),
-          onTap:onTap,
+          onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(50),
               color: Colors.white,
-              boxShadow: [BoxShadow(offset: Offset(0, 3), blurRadius: 5, spreadRadius: 0,color: Colors.grey)],
+              boxShadow: [BoxShadow(offset: Offset(0, 3), blurRadius: 5, spreadRadius: 0, color: Colors.grey)],
             ),
             width: 55,
             height: 55,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(height: 10,),
+                SizedBox(
+                  height: 10,
+                ),
                 // title==null?Transform.scale(scale: 0.8,child: Opacity(opacity: 0.1,child: title)):Container(),
                 icon,
                 title
@@ -2642,17 +2775,21 @@ class FabChild extends StatelessWidget {
 }
 
 class buildDrawerNav extends StatelessWidget {
-    User _user = FirebaseAuth.instance.currentUser;
+  User _user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Column(
         children: [
-          UserAccountsDrawerHeader(accountName: Text('${ _user.displayName }'), accountEmail: Text(_user.email)),
+          UserAccountsDrawerHeader(accountName: Text('${_user.displayName}'), accountEmail: Text(_user.email)),
           Expanded(
             child: ListView(
               children: [
+                ListTile(
+                  title: Text('원점세팅'),
+                  onTap: () => Get.to(OriginSettingPage()),
+                ),
                 ListTile(
                   title: Text('도면뷰어'),
                   onTap: () => Get.to(GridButton()),
@@ -2984,6 +3121,49 @@ class CustomClipperImage extends CustomClipper<Path> {
       path.lineTo(e[0] / 205 + 755, -e[1] / (205 / (420 / 297)) + 158);
     });
     print(path);
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return false;
+  }
+}
+
+class mainDrawingArea extends CustomClipper<Path> {
+  var path = Path();
+
+  @override
+  Path getClip(Size size) {
+    // List<List> pathList = Hatch[0];
+    // path.moveTo(pathList[0][0] / 205 + 755, -pathList[0][1] / (205 / (420 / 297)) + 158);
+    // pathList.forEach((e) {
+    //   path.lineTo(e[0] / 205 + 755, -e[1] / (205 / (420 / 297)) + 158);
+    // });
+    path.addRect(Rect.fromPoints(Offset(30, 30), Offset(1110, 960)));
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return false;
+  }
+}
+
+class SubDrawingArea extends CustomClipper<Path> {
+  var path = Path();
+  double x = 100;
+  double y = 200;
+  SubDrawingArea({this.x, this.y});
+
+  @override
+  Path getClip(Size size) {
+    // List<List> pathList = Hatch[0];
+    // path.moveTo(pathList[0][0] / 205 + 755, -pathList[0][1] / (205 / (420 / 297)) + 158);
+    // pathList.forEach((e) {
+    //   path.lineTo(e[0] / 205 + 755, -e[1] / (205 / (420 / 297)) + 158);
+    // });
+    path.addRect(Rect.fromPoints(Offset.zero, Offset(x, y)));
     return path;
   }
 
