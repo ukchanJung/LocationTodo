@@ -11,6 +11,7 @@ import 'package:flutter_app_location_todo/provider/firebase_provider.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class MemoPage extends StatefulWidget {
   List<Memo> memoList;
@@ -223,7 +224,9 @@ class _MemoPageState extends State<MemoPage> {
           _profileImageURL = downloadURL;
           FirebaseFirestore _db = FirebaseFirestore.instance;
           CollectionReference memo = _db.collection('memo');
+          String uuid = Uuid().v1();
           Memo _memo = Memo(
+            uId: uuid,
             title: _textEditingController.text,
             subTitle: _textEditingController2.text,
             imagePath: _profileImageURL,
@@ -232,14 +235,16 @@ class _MemoPageState extends State<MemoPage> {
             check: false,
           );
           widget.memoList.add(_memo);
-          memo.add(_memo.toJson());
+          memo.doc(uuid).set(_memo.toJson());
           context.read<OnOff>().memoOnOff();
         });
       });
     } else {
       FirebaseFirestore _db = FirebaseFirestore.instance;
       CollectionReference memo = _db.collection('memo');
+      String uuid = Uuid().v1();
       Memo _memo = Memo(
+        uId: uuid,
         title: _textEditingController.text,
         subTitle: _textEditingController2.text,
         imagePath: _profileImageURL,
@@ -248,7 +253,7 @@ class _MemoPageState extends State<MemoPage> {
         check: false,
       );
       widget.memoList.add(_memo);
-      memo.add(_memo.toJson());
+      memo.doc(uuid).set(_memo.toJson());
       context.read<OnOff>().memoOnOff();
     }
   }

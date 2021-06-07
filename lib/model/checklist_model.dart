@@ -8,11 +8,12 @@ class CheckList {
   String timing;
   String checkList;
   String boundaryName;
+  int index;
   String guid;
   bool check = false;
   DateTime checkDate;
   List<QuailtyCheckImage> qualityCheckImages = [];
-  List<Map> checkListDetail = [];
+  List checkListDetail = [];
 
   CheckList({
     this.type1,
@@ -20,6 +21,7 @@ class CheckList {
     this.timing,
     this.checkList,
     this.boundaryName,
+    this.index,
     this.guid,
     this.check,
     this.checkDate,
@@ -33,6 +35,7 @@ class CheckList {
     String timing,
     String checkList,
     String boundaryName,
+    int index,
     String guid,
     bool check,
     DateTime checkDate,
@@ -44,6 +47,7 @@ class CheckList {
       checkList: checkList ?? this.checkList,
       boundaryName: boundaryName ?? this.boundaryName,
       guid: guid ?? this.guid,
+      index: index ?? this.index,
       check: check ?? this.check,
       checkDate: checkDate ?? this.checkDate,
     );
@@ -56,6 +60,7 @@ class CheckList {
       'timing': timing,
       'checkList': checkList,
       'boundaryName': boundaryName,
+      'index':index,
       'guid': guid,
       'check': check,
       'checkDate': checkDate?.millisecondsSinceEpoch,
@@ -72,6 +77,7 @@ class CheckList {
         type2: map['type2'],
         timing: map['timing'],
         checkList: map['checkList'],
+        index: map['index'],
         guid: map['guid'],
         qualityCheckImages: [],
         checkListDetail: map['checkListDetail'],
@@ -83,8 +89,9 @@ class CheckList {
       type1: map['type1'],
       type2: map['type2'],
       timing: map['timing'],
-      checkList: map['checkList'],
-      guid: map['guid'],
+      // checkList: map['checkList'],
+      index: map['index'],
+      // guid: map['guid'],
       qualityCheckImages: [],
       checkListDetail: map['checkListDetail'],
       // boundaryName: map['boundaryName'],
@@ -100,7 +107,7 @@ class CheckList {
 
   @override
   String toString() {
-    return 'CheckList{type1: $type1, type2: $type2, timing: $timing, checkList: $checkList, guid: $guid}';
+    return '$index CheckList{type1: $type1, type2: $type2, timing: $timing, checkList: $checkList, guid: $guid}';
   }
 
   @override

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-class Memo{
+class Memo {
+  String uId;
   String title;
   String subTitle;
   DateTime writeTime;
@@ -11,21 +11,22 @@ class Memo{
   int category = 0;
   Offset origin = Offset.zero;
 
-
-  Memo({this.title, this.subTitle, this.writeTime, this.imagePath, this.check, this.category, this.origin});
+  Memo({this.uId, this.title, this.subTitle, this.writeTime, this.imagePath, this.check, this.category, this.origin});
 
   Memo.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
+    uId = json["uId"];
     title = json["title"];
     subTitle = json['subTitle'];
     writeTime = json['writeTime'].toDate();
     imagePath = json['imagePath'];
     check = json['check'];
     category = json['category'];
-    origin = Offset(json['dx'].toDouble(),json['dy'].toDouble());
+    origin = Offset(json['dx'].toDouble(), json['dy'].toDouble());
   }
 
   Map<String, dynamic> toJson() {
     var map = <String, dynamic>{};
+    map["uId"] = uId;
     map["title"] = title;
     map["subTitle"] = subTitle;
     map["writeTime"] = writeTime;
@@ -38,5 +39,4 @@ class Memo{
   }
 
   Memo.fromSnapshot(DocumentSnapshot snapshot) : this.fromJson(snapshot.data(), reference: snapshot.reference);
-
 }

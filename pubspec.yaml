@@ -75,6 +75,7 @@ dependencies:
   firebase_messaging: ^8.0.0-dev.11
   flutter_local_notifications: ^4.0.1+2
   firebase_analytics: ^6.3.0
+  string_similarity: ^1.1.0
   # flutter_form_builder: ^3.1.4
 #  local_auth: ^1.1.0
 #  http: ^0.13.0

@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_location_todo/main.dart';
 import 'package:flutter_app_location_todo/method/method.dart';
+import 'package:flutter_app_location_todo/model/drawing_model.dart';
+import 'package:flutter_app_location_todo/model/drawingpath_provider.dart';
 import 'package:flutter_app_location_todo/model/site_model.dart';
 import 'package:flutter_app_location_todo/model/user_model.dart';
 import 'package:flutter_app_location_todo/provider/firebase_provider.dart';
@@ -36,7 +38,7 @@ class _AccountPageState extends State<AccountPage> {
   TWUser _twUser;
   List<Site> _siteList;
   DateFormat _format = DateFormat('yyyy.MM.dd');
-  List<TWUser>_userList= [];
+  List<TWUser> _userList = [];
 
   String _token;
   @override
@@ -44,12 +46,12 @@ class _AccountPageState extends State<AccountPage> {
     super.initState();
     _user = context.read<FirebaseProvider>().getUser();
 
-    readUser(col: 'userData', list: _userList).then((value){
+    readUser(col: 'userData', list: _userList).then((value) {
       print('@@@@@@@@@@${value.length}');
       setState(() {
-        _userList =value;
+        _userList = value;
       });
-      if(!_userList.map((e) => e.uid).toList().contains(_user.uid)){
+      if (!_userList.map((e) => e.uid).toList().contains(_user.uid)) {
         Get.to(UserPage());
       }
     });
@@ -272,8 +274,19 @@ class _AccountPageState extends State<AccountPage> {
                     (e) => ListTile(
                       title: Text(e.name),
                       subtitle: Text('${_format.format(e.start)}-${_format.format(e.end)}'),
+                      onLongPress: () {
+                        print(e.data);
+                      },
                       onTap: () {
-                        Get.to(GridButton());
+                        Future<QuerySnapshot> watch =
+                            FirebaseFirestore.instance.collection('workSpace').doc(e.name).collection('drawings').get();
+                        List<Drawing> selDrawingList;
+                        watch.then((v) {
+                          print('1');
+                          selDrawingList = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
+                          context.read<CP>().changePath(selDrawingList.singleWhere((d) => d.drawingNum == 'A31-003'));
+                          Get.to(GridButton(), arguments: selDrawingList);
+                        });
                       },
                     ),
                   )

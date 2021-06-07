@@ -38,8 +38,9 @@ class Drawing {
   List<Map> sectionMap = [];
   List<Map> detailInfoMap = [];
   Offset docOrigin = Offset.zero;
-  double docOriginX =0;
-  double docOriginY =0;
+  double docOriginX = 0;
+  double docOriginY = 0;
+  List<String> category = [];
 
   Drawing({
     this.localPath,
@@ -102,20 +103,21 @@ class Drawing {
   }
 
   Drawing.fromJson(Map<String, dynamic> json, {DocumentReference reference}) {
+    print(json['drawingNum']);
     localPath = json['localPath'];
     drawingNum = json['drawingNum'];
     title = json['title'];
     listCategory = json['listCategory'];
     listSubNum = json['listSubNum'];
     scale = json['scale'];
-    if(json['Orient']!=null){
-    orient = json['Orient'].toDouble();
+    if (json['Orient'] != null) {
+      orient = json['Orient'].toDouble();
     }
     ocr = json['ocr'];
     infoCategory = json['infoCategory'].cast<String>();
-    pointX = json['pointX'].cast<double>();
-    pointY = json['pointY'].cast<double>();
-    pointName = json['pointName'].cast<String>();
+    // pointX = json['pointX'].cast<double>();
+    // pointY = json['pointY'].cast<double>();
+    // pointName = json['pointName'].cast<String>();
     originX = json["originX"].toDouble();
     originY = json["originY"].toDouble();
     floor = json["floor"];

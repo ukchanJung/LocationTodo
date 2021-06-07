@@ -65,6 +65,9 @@ class _ConfirmPageState extends State<ConfirmPage> {
   TextEditingController _textEditingController2 = TextEditingController();
   String dMemo='';
   String cMemo='';
+  List<String> category1 = ['토목공사', '건축분야', '기계분야', '전기분야', '통신분야', '조경분야'];
+  List<QueryDocumentSnapshot> data2 = [];
+
 
   checkBio() async {
     var isLocalAuth;
@@ -80,6 +83,13 @@ class _ConfirmPageState extends State<ConfirmPage> {
     _user = context.read<FirebaseProvider>().getUser();
     checkLists = qualityCheckList.map((e) => CheckList.fromMap(e)).toList();
     // checkBio();
+    void read2() async {
+      QuerySnapshot read = await FirebaseFirestore.instance.collection('lhCheckListDocFin').get();
+      data2 = read.docs.map((e) => e).toList();
+      setState(() {});
+    }
+    read2();
+
     if(Get.arguments == null){
       doc = ConstructConfirm(
         checkListsId: [],
@@ -1158,6 +1168,119 @@ class _ConfirmPageState extends State<ConfirmPage> {
                     .toList(),
               ))
               : Container()
+              // ? Expanded(
+              // child: ListView(
+              //   children: doc.checkListsId
+              //       .map(
+              //         (e) =>
+              //         Slidable(
+              //           actionPane: SlidableDrawerActionPane(),
+              //           actionExtentRatio: 0.25,
+              //           child: ExpansionTile(
+              //             title: Text(e.checkList),
+              //             subtitle: Text(e.timing),
+              //             leading: Checkbox(
+              //               value: e.check,
+              //               onChanged: (value) {
+              //                 setState(() {
+              //                   e.check = !e.check;
+              //                 });
+              //               },
+              //             ),
+              //             trailing: IconButton(
+              //                 icon: Icon(Icons.add_photo_alternate),
+              //                 onPressed: () async {
+              //                   FilePickerResult result = await FilePicker.platform.pickFiles(allowMultiple: true);
+              //                   print(result.names);
+              //                   if (result != null) {
+              //                     setState(() {
+              //                       pickFiles = result.files;
+              //                       if (!kIsWeb) {
+              //                         e.qualityCheckImages.addAll(pickFiles
+              //                             .map((e) =>
+              //                             QuailtyCheckImage(
+              //                               title: '테스트',
+              //                               image: Image.file(
+              //                                 File(e.path),
+              //                                 fit: BoxFit.scaleDown,
+              //                               ),
+              //                               location: '테스트 위치',
+              //                               createTime: DateTime.now(),
+              //                               localPath: e.path,
+              //                               uint8list: e.bytes,
+              //                               fileName: e.name,
+              //                             ))
+              //                             .toList());
+              //                       } else if (kIsWeb) {
+              //                         e.qualityCheckImages.addAll(pickFiles
+              //                             .map((e) =>
+              //                             QuailtyCheckImage(
+              //                               title: '테스트',
+              //                               image: Image.memory(e.bytes),
+              //                               location: '테스트 위치',
+              //                               createTime: DateTime.now(),
+              //                               uint8list: e.bytes,
+              //                               fileName: e.name,
+              //                             ))
+              //                             .toList());
+              //                       }
+              //                     });
+              //                   } else {
+              //                     // User canceled the picker
+              //                   }
+              //                 }),
+              //             children: e.qualityCheckImages
+              //                 .map((e) =>
+              //                 ListTile(
+              //                   title: Text(e.title),
+              //                   // subtitle: Text(e.location),
+              //                   trailing: Text(format.format(e.createTime)),
+              //                   leading: Container(
+              //                     height: 150,
+              //                     child: e.image,
+              //                   ),
+              //                   onTap: () {
+              //                     Get.defaultDialog(title: e.title, content: e.image);
+              //                   },
+              //                 ))
+              //                 .toList(),
+              //           ),
+              //           secondaryActions: [
+              //             IconSlideAction(
+              //               caption: '삭제',
+              //               color: Colors.red,
+              //               icon:Icons.delete,
+              //               onTap: (){
+              //                 Get.defaultDialog(title: '정말 삭제하시겠습니까',
+              //                         content: ListTile(
+              //                           title: Text(e.checkList),
+              //                           subtitle: Text(e.timing),
+              //                         ),
+              //                         actions: [
+              //                     OutlinedButton(
+              //                       onPressed: () {
+              //                         doc.checkListsId.remove(e);
+              //                         Get.back();
+              //                       },
+              //                       child: Text('삭제'),
+              //                     ),
+              //                     OutlinedButton(
+              //                       onPressed: () {
+              //                         Get.back();
+              //                       },
+              //                       child: Text('취소'),
+              //                     ),
+              //                   ]).then((_){setState(() {
+              //
+              //                   });});
+              //               },
+              //             ),
+              //           ],
+              //         ),
+              //   )
+              //       .toList(),
+              // ))
+              // : Container()
         ],
       ),
     );
@@ -1530,21 +1653,99 @@ class _ConfirmPageState extends State<ConfirmPage> {
               Text(' : ', style: textStyle2),
               TextButton(
                 onPressed: () {
-                  Future<DateTime> confrimD = showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime.now().subtract(Duration(days: 365)),
-                      lastDate: DateTime.now().add(Duration(days: 365)));
-                  confrimD.then((value) {
-                    if (value != null) {
-                      setState(() {
-                        doc.confirmDate = value;
-                      });
-                    }
-                  });
+                  Get.defaultDialog(
+                    title: '시공확인시점',
+                    content: Container(
+                      width: 600,
+                      height: 800,
+                      child: ListView(
+                        children: category1.map(
+                              (e) {
+                            List l1 = data2
+                                .where((v) => v.data()['type1'] == e)
+                                .map((v) => v.data()['type2'])
+                                .toList()
+                                .toSet()
+                                .toList();
+                            return Card(
+                              child: ExpansionTile(
+                                title: Text(e),
+                                children: l1.map((e) {
+                                  List<QueryDocumentSnapshot> l2 = data2.where((v) => v.data()['type2'] == e).toList();
+                                  return Card(
+                                    child: ExpansionTile(
+                                      title: Text(e),
+                                      children: l2.map((e) {
+                                        List l3 = e.data()['checkListDetail'];
+                                        String t='';
+                                        l3.forEach((element) {
+                                          t = t+element['level1']+'\n';
+                                        });
+                                        return Card(
+                                          child: ListTile(
+                                            title: Text(e.data()['timing']),
+                                            trailing: Tooltip(message:t,child: Text('미리보기')),
+                                            onTap: (){
+                                              setState(() {
+                                                doc.checkListsId.add(CheckList.fromMap(e.data()));
+                                                Get.back();
+                                              });
+                                            },
+                                            // children: l3.map((e) {
+                                            //   String i = e['index'].toString();
+                                            //   List<String > indexParse =[];
+                                            //   if(e['index']!=null){
+                                            //     List indexData =  e['index'];
+                                            //     indexParse = indexData.map((e) {
+                                            //       String t = e['name'];
+                                            //       if(e['2']!=null)t=t+ '_'+e['2']+'.';
+                                            //       if(e['3']!=null)t=t+ e['3']+'.';
+                                            //       if(e['4']!=null)t=t+ e['4']+'.';
+                                            //       if(e['6']!=null)t=t+ e['6']+'.';
+                                            //       if(e['7']!=null)t=t+ e['7']+')';
+                                            //       // t = '${e['name']}_${e['2']}.${e['3']}.${e['4']}_${e['6']}_${e['7']}';
+                                            //       return t;
+                                            //     }).toList();
+                                            //   }
+                                            //   return ListTile(
+                                            //     title: Text(e['level1']),
+                                            //     subtitle: Text(indexParse.toString()),
+                                            //   );
+                                            // }).toList(),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            );
+                          },
+                        ).toList(),
+                      ),
+                    ),
+                  );
                 },
                 child: Text('${format.format(doc.confirmDate)}', style: textStyle2),
               ),
+              // Text(' : ', style: textStyle2),
+              // TextButton(
+              //   onPressed: () {
+              //     Future<DateTime> confrimD = showDatePicker(
+              //         context: context,
+              //         initialDate: DateTime.now(),
+              //         firstDate: DateTime.now().subtract(Duration(days: 365)),
+              //         lastDate: DateTime.now().add(Duration(days: 365)));
+              //     confrimD.then((value) {
+              //       if (value != null) {
+              //         setState(() {
+              //           doc.confirmDate = value;
+              //         });
+              //       }
+              //     });
+              //   },
+              //   child: Text('${format.format(doc.confirmDate)}', style: textStyle2),
+              // ),
             ],
           ),
         ),

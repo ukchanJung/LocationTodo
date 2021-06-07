@@ -42,11 +42,13 @@ import 'package:flutter_app_location_todo/simul_test.dart';
 import 'package:flutter_app_location_todo/styles/timwork_styles.dart';
 import 'package:flutter_app_location_todo/ui/backup.dart';
 import 'package:flutter_app_location_todo/ui/boundary_detail_page.dart';
+import 'package:flutter_app_location_todo/ui/category_page.dart';
 import 'package:flutter_app_location_todo/ui/cost_info_page.dart';
 import 'package:flutter_app_location_todo/ui/crosshair_paint.dart';
 import 'package:flutter_app_location_todo/ui/drawing_list_page.dart';
 import 'package:flutter_app_location_todo/ui/drawing_memo_page.dart';
 import 'package:flutter_app_location_todo/ui/general_info_page.dart';
+import 'package:flutter_app_location_todo/ui/index_setting_page.dart';
 import 'package:flutter_app_location_todo/ui/map_page.dart';
 import 'package:flutter_app_location_todo/ui/ocr_setting_page.dart';
 import 'package:flutter_app_location_todo/ui/originViewer.dart';
@@ -400,13 +402,19 @@ class _GridButtonState extends State<GridButton> {
     readingGrid();
     // print(tasks.length);
     // print(testgrids.length);
-    Future<QuerySnapshot> watch = FirebaseFirestore.instance.collection('drawing').get();
-    watch.then((v) {
-      drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
-      setState(() {});
-      context.read<CP>().changePath(drawings.singleWhere((d) => d.drawingNum == 'A31-003'));
-      pathDrawings.add(context.read<CP>().getDrawing());
-    });
+    //
+
+    drawings = Get.arguments;
+    print('@드로인갯수 ${drawings.length}');
+
+    // /도면로드
+    // Future<QuerySnapshot> watch = FirebaseFirestore.instance.collection('drawing').get();
+    // watch.then((v) {
+    //   drawings = v.docs.map((e) => Drawing.fromSnapshot(e)).toList();
+    //   setState(() {});
+    //   context.read<CP>().changePath(drawings.singleWhere((d) => d.drawingNum == 'A31-003'));
+    //   pathDrawings.add(context.read<CP>().getDrawing());
+    // });
     interiorList = interiorListData.map((e) => InteriorIndex.fromMap(e)).toList();
     selectRoom = [interiorList[0]];
 
@@ -701,7 +709,9 @@ class _GridButtonState extends State<GridButton> {
       if (MediaQuery.of(context).orientation == Orientation.portrait) {
         return Scaffold(
           resizeToAvoidBottomInset: false,
-          drawer: buildDrawerNav(),
+          drawer: buildDrawerNav(
+            drawing: drawings,
+          ),
           body: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -768,7 +778,9 @@ class _GridButtonState extends State<GridButton> {
         return Scaffold(
           key: _scaffoldKey,
           resizeToAvoidBottomInset: false,
-          drawer: buildDrawerNav(),
+          drawer: buildDrawerNav(
+            drawing: drawings,
+          ),
           endDrawer: Drawer(
             child: buildTIMWORK(context),
           ),
@@ -1669,17 +1681,21 @@ class _GridButtonState extends State<GridButton> {
                 int debugX = (((m.relative.dx / _pContrl.scale) / width - pD.originX) * pR.getcordiX()).round();
                 int debugY = (((m.relative.dy / _pContrl.scale) / height - pD.originY) * pR.getcordiY()).round();
 
-                double tempx = (0.652916667 - pD.originX) * pR.getcordiX();
-                double tempy = (0.303619529 - pD.originY) * pR.getcordiY();
-
-                Line sLine = Line(Offset(debugX.toDouble(), debugY.toDouble()), Offset(tempx, tempy));
-                double sAngle = -pi / (180 / (sLine.degree() - 90));
-
-                ///-90 이 부분 중요
-                Offset fOffset = Offset(cos(sAngle) * sLine.length(), sin(sAngle) * sLine.length());
-
-                // pR.changeOrigin(tempx + fOffset.dx, tempy + fOffset.dy);
-                pR.changeOrigin(debugX.toDouble(), debugY.toDouble());
+                double tempx;
+                double tempy;
+                Line sLine;
+                double sAngle;
+                Offset fOffset;
+                if (pD.orient != null && pD.docOriginX != null) {
+                  tempx = (pD.docOriginX - pD.originX) * pR.getcordiX();
+                  tempy = (pD.docOriginY - pD.originY) * pR.getcordiY();
+                  sLine = Line(Offset(debugX.toDouble(), debugY.toDouble()), Offset(tempx, tempy));
+                  sAngle = -pi / (180 / (sLine.degree() - pD.orient));
+                  fOffset = Offset(cos(sAngle) * sLine.length(), sin(sAngle) * sLine.length());
+                }
+                pD.orient != null && pD.docOriginX != null
+                    ? pR.changeOrigin(tempx + fOffset.dx, tempy + fOffset.dy)
+                    : pR.changeOrigin(debugX.toDouble(), debugY.toDouble());
                 context.read<OnOff>().memoOn = true;
 
                 ///선택한점은 절대좌표 X: -7930.0, Y: 18382.0
@@ -1924,10 +1940,6 @@ class _GridButtonState extends State<GridButton> {
                             builder: (context, snapshot) {
                               return Stack(
                                 children: memoList.map((e) {
-                                  ///세팅도면 기준점
-                                  double tempx = 0.652916667 * width;
-                                  double tempy = 0.303619529 * height;
-
                                   ///좌표
                                   double rx = e.origin.dx / pW.getcordiX() * width;
                                   double ry = e.origin.dy / pW.getcordiY() * height;
@@ -1935,23 +1947,57 @@ class _GridButtonState extends State<GridButton> {
                                   ///원점보정
                                   double x = pW.getcordiOffset(width, height).dx;
                                   double y = pW.getcordiOffset(width, height).dy;
+
                                   Offset rOffset = Offset(rx + x, ry + y);
-                                  Offset sOffset = Offset(tempx, tempy);
-                                  Line sLine = Line(rOffset, sOffset);
-                                  double sAngle = -pi / (180 / (sLine.degree() + 90));
+                                  double tempx;
+                                  double tempy;
+                                  Offset sOffset;
+                                  Line sLine;
+                                  double sAngle;
 
                                   /// 메모 각도적용부분
-                                  Offset fOffset = Offset(cos(sAngle) * sLine.length(), sin(sAngle) * sLine.length());
+                                  Offset fOffset;
+                                  if (pW.getDrawing().docOriginX != null && pW.getDrawing().orient != null) {
+                                    ///세팅도면 기준점
+                                    tempx = pW.getDrawing().docOriginX * width;
+                                    tempy = pW.getDrawing().docOriginY * height;
+                                    sOffset = Offset(tempx, tempy);
+                                    sLine = Line(rOffset, sOffset);
+                                    sAngle = -pi / (180 / (sLine.degree() + pW.getDrawing().orient));
+                                    print(sLine.degree());
+
+                                    /// 메모 각도적용부분
+                                    fOffset = Offset(cos(sAngle) * sLine.length(), sin(sAngle) * sLine.length());
+                                  }
+                                  var drawing = pW.getDrawing();
                                   return Positioned.fromRect(
-                                      // rect: Rect.fromCenter(center: sOffset + fOffset, width: 100, height: 100),
-                                      rect: Rect.fromCenter(center: rOffset, width: 100, height: 100),
+                                      rect: drawing.docOriginX != null && pW.getDrawing().orient != null
+                                          ? Rect.fromCenter(center: sOffset + fOffset, width: 100, height: 100)
+                                          : Rect.fromCenter(center: rOffset, width: 100, height: 100),
                                       child: Transform.scale(
                                           scale: 1 / snapshot.data.scale,
                                           child: IconButton(
                                             tooltip: e.title,
                                             onPressed: () {
                                               setState(() {
-                                                Get.defaultDialog(title: e.title, content: Image.network(e.imagePath));
+                                                Get.defaultDialog(
+                                                    title: e.title,
+                                                    content: Image.network(
+                                                      e.imagePath,
+                                                      height: 600,
+                                                      fit: BoxFit.fill,
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                          onPressed: () {
+                                                            memoList.remove(e);
+                                                            FirebaseFirestore _db = FirebaseFirestore.instance;
+                                                            _db.collection('memo').doc(e.uId).delete();
+                                                            Get.back();
+                                                            setState(() {});
+                                                          },
+                                                          child: Text('삭제'))
+                                                    ]);
                                               });
                                             },
                                             icon: Icon(
@@ -2776,6 +2822,8 @@ class FabChild extends StatelessWidget {
 
 class buildDrawerNav extends StatelessWidget {
   User _user = FirebaseAuth.instance.currentUser;
+  List<Drawing> drawing;
+  buildDrawerNav({this.drawing});
 
   @override
   Widget build(BuildContext context) {
@@ -2789,6 +2837,14 @@ class buildDrawerNav extends StatelessWidget {
                 ListTile(
                   title: Text('원점세팅'),
                   onTap: () => Get.to(OriginSettingPage()),
+                ),
+                ListTile(
+                  title: Text('도면분류'),
+                  onTap: () => Get.to(CategorySetting(), arguments: drawing),
+                ),
+                ListTile(
+                  title: Text('단면관리'),
+                  onTap: () => Get.to(IndexSettingPage(), arguments: drawing),
                 ),
                 ListTile(
                   title: Text('도면뷰어'),

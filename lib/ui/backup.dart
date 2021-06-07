@@ -12,8 +12,8 @@ class BackupPage extends StatefulWidget {
 
 class _BackupPageState extends State<BackupPage> {
   List<Drawing> drawings;
-  String today = 'Backup'+DateFormat('yyyyMMdd').format(DateTime.now());
-  TextEditingController _editingController ;
+  String today = 'Backup' + DateFormat('yyyyMMdd').format(DateTime.now());
+  TextEditingController _editingController;
   double loading = 0;
 
   @override
@@ -26,6 +26,7 @@ class _BackupPageState extends State<BackupPage> {
       setState(() {});
     });
   }
+
   @override
   void dispose() {
     super.dispose();
@@ -37,6 +38,18 @@ class _BackupPageState extends State<BackupPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('서버데이터 백업'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          drawings.forEach((e) {
+            FirebaseFirestore.instance
+                .collection('workSpace')
+                .doc('신세계하남')
+                .collection('drawings')
+                .doc(e.drawingNum)
+                .set(e.toJson());
+          });
+        },
       ),
       body: Center(
         child: Row(
@@ -56,10 +69,7 @@ class _BackupPageState extends State<BackupPage> {
                   int length = drawings.length;
                   int s = 0;
                   drawings.forEach((e) {
-                    FirebaseFirestore.instance
-                        .collection(_editingController.text)
-                        .doc(e.drawingNum)
-                        .set(e.toJson());
+                    FirebaseFirestore.instance.collection(_editingController.text).doc(e.drawingNum).set(e.toJson());
                     s++;
                     loading = s / length;
                     print(loading);
